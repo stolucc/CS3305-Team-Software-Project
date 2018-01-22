@@ -1,19 +1,20 @@
+"""Network API."""
 from socket import socket, gethostname, gethostbyname, AF_INET, SOCK_STREAM
 import threading
 
+
 class Connection:
-    """
-    Class the represent a TCP connection
-    """
+    """Class the represent a TCP connection."""
+
     def __init__(self, host, port, connection=None):
         """
-        Create base Connection object
+        Create base Connection object.
 
         :param host: location of other party
         :param port: port number of other party
-        :param connection: default new connection, can be passed existing tcp socket
+        :param connection: default new connection, can be passed existing tcp
         """
-        self._host = gethostbyname(host) #resolve hostnames
+        self._host = gethostbyname(host)  # resolve hostnames
         self._port = port
         if connection is None:
             self._socket = socket(AF_INET, SOCK_STREAM)
@@ -24,19 +25,19 @@ class Connection:
 
     def send(self, message, wait_response=False):
         """
-        Send message to other party over TCP
+        Send message to other party over TCP.
 
         :param message: Message (String) to be sent
-        :param wait_response: (bool) default False, set True to return message response
+        :param wait_response: (bool) default False, set True to return response
         :return: response to message else None
         """
         if self._open_status:
             try:
-                msglen = "{:16}".format(len(message)) #create padded string
-                message = msglen + message #add the message length to the begining of the message
-                self._socket.sendall(message.encode()) #send encoded message over TCP
+                msglen = "{:16}".format(len(message))  # create padded string
+                message = msglen + message  # add the message length
+                self._socket.sendall(message.encode())  # send encoded message
                 if wait_response:
-                    return self.recv() #recv message in response
+                    return self.recv()  # recv message in response
                 return None
             except Exception:
                 raise
@@ -45,17 +46,17 @@ class Connection:
 
     def recv(self):
         """
-        Send message to other party over TCP
+        Send message to other party over TCP.
 
         :return: response to message else None
         """
         if self._open_status:
             try:
-                amount_expected = int(self._socket.recv(16).decode()) #get message length
+                amount_expected = int(self._socket.recv(16).decode())
                 amount_received = 0
                 message = ""
                 while amount_received < amount_expected:
-                    data = self._socket.recv(16).decode() #get 16 bytes of message and decode
+                    data = self._socket.recv(16).decode()  # get 16 bytes
                     message += data
                     amount_received += len(data)
                 return message
@@ -65,9 +66,7 @@ class Connection:
             raise NetworkException("Connection currently closed.")
 
     def open(self):
-        """
-        Open tcp connection with other party
-        """
+        """Open tcp connection with other party."""
         if not self._open_status:
             try:
                 self._socket.connect((self._host, self._port))
@@ -78,9 +77,7 @@ class Connection:
             raise NetworkException("Connection is already open.")
 
     def close(self):
-        """
-        Close tcp connection
-        """
+        """Close tcp connection."""
         if self._open_status:
             try:
                 self._socket.close()
@@ -91,15 +88,15 @@ class Connection:
         else:
             raise NetworkException("Connection currently closed.")
 
+
 class ConnectionHandler:
-    """
-    Class to handle incoming tcp connections
-    """
+    """Class to handle incoming tcp connections."""
+
     def __init__(self, function):
         """
-        Create base ConnectionHandler
+        Create base ConnectionHandler.
 
-        :param function: callback function, called with arguments ((ip, host), Connection)
+        :param function: callback function, called with arguments (addr, Conn)
         """
         self._function = function
         self._socket = socket(AF_INET, SOCK_STREAM)
@@ -107,6 +104,11 @@ class ConnectionHandler:
         self._stop_flag = False
 
     def start(self, port):
+        """
+        Start connection handler in new thread.
+
+        :param port: port for connection handler to listen on
+        """
         self._stop_flag = False
         self._socket.bind((gethostbyname(gethostname()), port))
         self._socket.listen(10)
@@ -115,33 +117,40 @@ class ConnectionHandler:
         self._threads.append(thread)
 
     def handler(self):
+        """Handle incoming tcp connections passing to new thread."""
         while not self._stop_flag:
             try:
                 self._socket.settimeout(0.2)
                 conn, addr = self._socket.accept()
             except socket.timeout:
                 pass
-            except:
+            except Exception:
                 raise
             else:
-                client_connection = Connection(addr[0], addr[1], connection=conn)
+                client_conn = Connection(addr[0], addr[1], connection=conn)
                 thread = threading.Thread(name="worker",
                                           target=self._function,
-                                          args=(addr, client_connection))
+                                          args=(addr, client_conn))
                 thread.start()
                 self._threads.append(thread)
 
     def stop(self):
+        """Stop connection handler and join all threads."""
         self._stop_flag = True
         for thread in self._threads:
             thread.join()
         self._socket.close()
         self._socket = socket(AF_INET, SOCK_STREAM)
 
+
 class NetworkException(Exception):
+    """Custom Exception for networkapi."""
+
     pass
 
+
 def main():
+    """Test function."""
     con = Connection("127.0.1.1", 10000)
     ser = ConnectionHandler(test)
     ser.start(10000)
@@ -153,9 +162,12 @@ def main():
     con.close()
     ser.stop()
 
+
 def test(addr, connection):
+    """Test handler function."""
     print(addr)
     print(connection.recv())
+
 
 if __name__ == "__main__":
     main()
