@@ -1,6 +1,7 @@
 """Network API."""
-from socket import socket, gethostname, gethostbyname, AF_INET, SOCK_STREAM
-import threading
+from socket import socket, gethostbyname, AF_INET, SOCK_STREAM
+import ssl
+import os
 
 
 class Connection:
@@ -17,7 +18,13 @@ class Connection:
         self._host = gethostbyname(host)  # resolve hostnames
         self._port = port
         if connection is None:
-            self._socket = socket(AF_INET, SOCK_STREAM)
+            self._context = ssl.SSLContext(ssl.PROTOCOL_TLS)
+            self._context.verify_mode = ssl.CERT_REQUIRED
+            self._context.check_hostname = True
+            self._context.load_verify_locations(
+                os.path.join("..", "config", "ca-bundle.crt"))
+            self._socket = self._context.wrap_socket(
+                socket(AF_INET, SOCK_STREAM), server_hostname="Team 7")
             self._open_status = False
         else:
             self._socket = connection
@@ -82,91 +89,28 @@ class Connection:
             try:
                 self._socket.close()
                 self._open_status = False
-                self._socket = socket(AF_INET, SOCK_STREAM)
+                self._socket = self._context.wrap_socket(
+                    socket(AF_INET, SOCK_STREAM), server_hostname="Team 7")
             except Exception:
                 raise
         else:
             raise NetworkException("Connection currently closed.")
 
 
-class ConnectionHandler:
-    """Class to handle incoming tcp connections."""
-
-    def __init__(self, function):
-        """
-        Create base ConnectionHandler.
-
-        :param function: callback function, called with arguments (addr, Conn)
-        """
-        self._function = function
-        self._socket = socket(AF_INET, SOCK_STREAM)
-        self._threads = []
-        self._stop_flag = False
-
-    def start(self, port):
-        """
-        Start connection handler in new thread.
-
-        :param port: port for connection handler to listen on
-        """
-        self._stop_flag = False
-        self._socket.bind((gethostbyname(gethostname()), port))
-        self._socket.listen(10)
-        thread = threading.Thread(name="handler", target=self.handler, args=())
-        thread.start()
-        self._threads.append(thread)
-
-    def handler(self):
-        """Handle incoming tcp connections passing to new thread."""
-        while not self._stop_flag:
-            try:
-                self._socket.settimeout(0.2)
-                conn, addr = self._socket.accept()
-            except socket.timeout:
-                pass
-            except Exception:
-                raise
-            else:
-                client_conn = Connection(addr[0], addr[1], connection=conn)
-                thread = threading.Thread(name="worker",
-                                          target=self._function,
-                                          args=(addr, client_conn))
-                thread.start()
-                self._threads.append(thread)
-
-    def stop(self):
-        """Stop connection handler and join all threads."""
-        self._stop_flag = True
-        for thread in self._threads:
-            thread.join()
-        self._socket.close()
-        self._socket = socket(AF_INET, SOCK_STREAM)
-
-
 class NetworkException(Exception):
     """Custom Exception for networkapi."""
-
     pass
 
 
 def main():
     """Test function."""
     con = Connection("127.0.1.1", 10000)
-    ser = ConnectionHandler(test)
-    ser.start(10000)
     con.open()
     con.send("Can you hear me?")
     con.close()
     con.open()
     con.send("Can you hear me now?")
     con.close()
-    ser.stop()
-
-
-def test(addr, connection):
-    """Test handler function."""
-    print(addr)
-    print(connection.recv())
 
 
 if __name__ == "__main__":
