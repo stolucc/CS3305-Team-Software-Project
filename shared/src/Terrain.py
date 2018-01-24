@@ -2,13 +2,13 @@
 
 
 class Terrain:
+    """
+       A class for terrain
+    """
 
     TERRAIN_TYPE_MOVEMENT_COSTS = {"flat": 1, "hill": 2, "river": 2, "mountain": None}
     BIOME_MOVEMENT_COSTS = {"tundra": 2, "grassland": 0, "desert": 1, "jungle": 1}
 
-    """
-    A class for terrain
-    """
     def __init__(self, terrain_type, biome):
         """
         Create a new terrain object
