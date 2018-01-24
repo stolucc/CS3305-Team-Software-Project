@@ -15,7 +15,6 @@ class Terrain:
 
         :param terrain_type: the terrain type (eg. flat, hill, river, mountain, etc.)
         :param biome: the terrain biome (eg. tundra, grassland, desert, etc.)
-        and biome type
         """
 
         self._terrain_type = terrain_type
