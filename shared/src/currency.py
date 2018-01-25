@@ -1,14 +1,5 @@
 """Currency Classes."""
 
-from enum import Enum
-
-
-class ModifierType(Enum):
-    """Enum for modifier types."""
-
-    UNIT = 0
-    IMPROVMENT = 1
-
 
 class Currency:
     """Class to represent a Currency."""
@@ -20,10 +11,10 @@ class Currency:
         :param beginning_value: value currency begins at
         :param base_increase: base value increase per turn
         """
-        self._modifiers = {ModifierType.UNIT: {}, ModifierType.IMPROVMENT: {}}
+        self._modifiers = {"unit": {}, "improvement": {}}
         self._value = beginning_value
         self._base_increase = base_increase
-        self._turn_increase = 0
+        self._turn_increase = 0 #you didn't put in a value for this
         self.update()
 
     def add(self, increase):
@@ -49,55 +40,39 @@ class Currency:
     def update(self):
         """Update turn_increment."""
         modifier = 0
-        for key in self._modifiers[ModifierType.UNIT]:
-            modifier += self._modifiers[ModifierType.UNIT][key]
-        for key in self._modifiers[ModifierType.IMPROVEMENT]:
-            modifier += self._modifiers[ModifierType.IMPROVEMENT][key]
+        for key in self._modifiers["unit"]:
+            modifier += self._modifiers["unit"][key]
+        for key in self._modifiers["improvement"]:
+            modifier += self._modifiers["improvement"][key]
         self._turn_increase = self._base_increase + modifier
 
-    def add_modifier(self, modifier_type, modifier_id, modification):
+    def add_modifier(self, type, id, modification):
         """Add new / change existing modifier."""
-        self._modifiers[modifier_type][modifier_id] = modification
+        self._modifiers[type][id] = modification
 
-    def remove_modifier(self, modifier_type, modifier_id):
+    def remove_modifier(self, type, id):
         """Remove existing modifier."""
         try:
-            del self._modifiers[modifier_type][modifier_id]
+            del self._modifiers[type][id]
         except KeyError:
             raise
 
     @property
     def value(self):
-        """
-        Getter for value.
-
-        :return: the value of the currency
-        """
+        """Getter for value."""
         return self._value
 
     @property
     def turn_increase(self):
-        """
-        Getter for turn_increase.
-
-        :return: the value of turn increase
-        """
+        """Getter for turn_increase."""
         return self._turn_increase
 
     @property
     def modifiers(self):
-        """
-        Getter for modifiers.
-
-        :return: the modifiers
-        """
+        """Getter for modifiers."""
         return self._modifiers
 
     @property
     def base_increase(self):
-        """
-        Getter for base_increase.
-
-        :return: the base value increase per turn
-        """
+        """Getter for base_increase."""
         return self._base_increase
