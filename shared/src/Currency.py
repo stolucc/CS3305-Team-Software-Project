@@ -4,17 +4,17 @@
 class Currency:
     """Class to represent a Currency."""
 
-    def __init__(self, begining_value, base_increase):
+    def __init__(self, beginning_value, base_increase):
         """
         Create base currency.
 
-        :param begining_value: value currency begins at
+        :param beginning_value: value currency begins at
         :param base_increase: base value increase per turn
         """
-        self._modifiers = {"unit": {}, "improvment": {}}
-        self._value = begining_value
+        self._modifiers = {"unit": {}, "improvement": {}}
+        self._value = beginning_value
         self._base_increase = base_increase
-        self._turn_increase
+        self._turn_increase = 0 #you didn't put in a value for this
         self.update()
 
     def add(self, increase):
@@ -42,8 +42,8 @@ class Currency:
         modifier = 0
         for key in self._modifiers["unit"]:
             modifier += self._modifiers["unit"][key]
-        for key in self._modifiers["improvment"]:
-            modifier += self._modifiers["improment"][key]
+        for key in self._modifiers["improvement"]:
+            modifier += self._modifiers["improvement"][key]
         self._turn_increase = self._base_increase + modifier
 
     def add_modifier(self, type, id, modification):
