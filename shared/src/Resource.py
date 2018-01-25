@@ -4,13 +4,13 @@
 class Resource:
     """Class to represent map resources."""
 
-    def __init__(self, avalable_quantity):
+    def __init__(self, available_quantity):
         """
         Create base resource.
 
-        :param avalable_quantity: Quantity gathered if worked.
+        :param available_quantity: Quantity gathered if worked.
         """
-        self._avalable_quantity = avalable_quantity  # given per turn
+        self._available_quantity = available_quantity  # given per turn
         self._is_worked = False
 
     def work(self):
@@ -24,7 +24,7 @@ class Resource:
     @property
     def quantity(self):
         """Getter for available_quantity."""
-        return self._avalable_quantity
+        return self._available_quantity
 
     @property
     def is_worked(self):
