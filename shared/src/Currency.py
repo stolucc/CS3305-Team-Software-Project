@@ -14,7 +14,7 @@ class Currency:
         self._modifiers = {"unit": {}, "improvement": {}}
         self._value = beginning_value
         self._base_increase = base_increase
-        self._turn_increase = 0 #you didn't put in a value for this
+        self._turn_increase = 0
         self.update()
 
     def add(self, increase):
@@ -46,33 +46,49 @@ class Currency:
             modifier += self._modifiers["improvement"][key]
         self._turn_increase = self._base_increase + modifier
 
-    def add_modifier(self, type, id, modification):
+    def add_modifier(self, modifier_type, modifier_id, modification):
         """Add new / change existing modifier."""
-        self._modifiers[type][id] = modification
+        self._modifiers[modifier_type][modifier_id] = modification
 
-    def remove_modifier(self, type, id):
+    def remove_modifier(self, modifier_type, modifier_id):
         """Remove existing modifier."""
         try:
-            del self._modifiers[type][id]
+            del self._modifiers[modifier_type][modifier_id]
         except KeyError:
             raise
 
     @property
     def value(self):
-        """Getter for value."""
+        """
+        Getter for value.
+
+        :return: the value of the currency
+        """
         return self._value
 
     @property
     def turn_increase(self):
-        """Getter for turn_increase."""
+        """
+        Getter for turn_increase.
+
+        :return: the value of turn increase
+        """
         return self._turn_increase
 
     @property
     def modifiers(self):
-        """Getter for modifiers."""
+        """
+        Getter for modifiers.
+
+        :return: the modifiers
+        """
         return self._modifiers
 
     @property
     def base_increase(self):
-        """Getter for base_increase."""
+        """
+        Getter for base_increase.
+
+        :return: the base value increase per turn
+        """
         return self._base_increase
