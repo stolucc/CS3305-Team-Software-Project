@@ -84,3 +84,12 @@ class Terrain:
         else:
             string += "%d\n" % self.movement_cost
         return string
+
+
+if __name__ == '__main__':
+    terrain1 = Terrain("mountain", "tundra")
+    terrain2 = Terrain("hill", "desert",)
+    terrain3 = Terrain("flat", "grassland")
+    print(terrain1)
+    print(terrain2)
+    print(terrain3)
