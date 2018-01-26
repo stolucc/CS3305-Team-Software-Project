@@ -1,0 +1,19 @@
+plugins {
+  id "com.linkedin.python-cli" version "0.6.1"
+}
+
+buildDir = "../bin/server"
+
+repositories {
+   pyGradlePyPi()
+ }
+
+description = 'Server Build'
+
+task copy(type: Copy) {
+  from '../shared/src'
+  from 'src'
+  into '../bin/server'
+}
+
+task doBuild(dependsOn: tasks.copy){}

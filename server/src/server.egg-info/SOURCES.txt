@@ -1,0 +1,10 @@
+config.example
+setup.cfg
+lib/blank
+src/blank
+src/server.egg-info/PKG-INFO
+src/server.egg-info/SOURCES.txt
+src/server.egg-info/dependency_links.txt
+src/server.egg-info/entry_points.txt
+src/server.egg-info/top_level.txt
+test/blank

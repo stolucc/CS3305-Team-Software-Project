@@ -1,0 +1,26 @@
+plugins {
+  id "com.linkedin.python-cli" version "0.6.1"
+}
+buildDir = "../bin/client"
+python{
+  docsDir = "../documentation/client"
+  testDir = "./test"
+  srcDir = "./src"
+
+  details {
+    pythonVersion = '3.6'
+  }
+}
+repositories {
+   pyGradlePyPi()
+ }
+
+description = 'Client Build'
+
+task copy(type: Copy) {
+  from '../shared/src'
+  from 'src'
+  into '../bin/client'
+}
+
+task doBuild(dependsOn: tasks.copy){}

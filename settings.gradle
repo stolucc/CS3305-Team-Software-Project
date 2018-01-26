@@ -1,0 +1,4 @@
+rootProject.name = 'CS3305_Team_Software_Project'
+
+include 'server'
+include 'client'
