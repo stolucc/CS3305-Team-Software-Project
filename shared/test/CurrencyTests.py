@@ -1,8 +1,6 @@
 """Currency Tests."""
 
 import unittest
-import sys
-sys.path.insert(0, "/Users/alessianardotto/projects/CS3305-Team-Software-Project/shared/src")
 from Currency import Currency
 
 
