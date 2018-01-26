@@ -105,8 +105,8 @@ class CurrencyTests(unittest.TestCase):
         the right exception is thrown.
         """
         cur = Currency(5, 1)
-        cur.remove_modifier("improvement", "type2")
-        self.assertThrows(KeyError)
+        with self.assertRaises(KeyError):
+            cur.remove_modifier("improvement", "type2")
         
 
 if __name__ == '__main__':
