@@ -1,5 +1,14 @@
 """Currency Classes."""
 
+from enum import Enum
+
+
+class ModifierType(Enum):
+    """Enum for modifier types."""
+
+    UNIT = 0
+    IMPROVEMENT = 1
+
 
 class Currency:
     """Class to represent a Currency."""
@@ -11,7 +20,7 @@ class Currency:
         :param beginning_value: value currency begins at
         :param base_increase: base value increase per turn
         """
-        self._modifiers = {"unit": {}, "improvement": {}}
+        self._modifiers = {ModifierType.UNIT: {}, ModifierType.IMPROVEMENT: {}}
         self._value = beginning_value
         self._base_increase = base_increase
         self._turn_increase = 0
@@ -40,10 +49,10 @@ class Currency:
     def update(self):
         """Update turn_increment."""
         modifier = 0
-        for key in self._modifiers["unit"]:
-            modifier += self._modifiers["unit"][key]
-        for key in self._modifiers["improvement"]:
-            modifier += self._modifiers["improvement"][key]
+        for key in self._modifiers[ModifierType.UNIT]:
+            modifier += self._modifiers[ModifierType.UNIT][key]
+        for key in self._modifiers[ModifierType.IMPROVEMENT]:
+            modifier += self._modifiers[ModifierType.IMPROVEMENT][key]
         self._turn_increase = self._base_increase + modifier
 
     def add_modifier(self, modifier_type, modifier_id, modification):
