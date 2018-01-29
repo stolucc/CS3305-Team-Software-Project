@@ -1,3 +1,0 @@
-[console_scripts]
-print_test = test:print_test
-
