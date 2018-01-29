@@ -10,10 +10,30 @@ repositories {
 
 description = 'Server Build'
 
+task copyTests(type: Copy){
+  from '../shared/test'
+  from 'test'
+  from '../shared/src'
+  from 'src'
+  include '*.py'
+  into '../bin/server/test'
+}
+
+task copyConfig(type: Copy){
+  from './config'
+  exclude 'config.example'
+  into '../bin/server/config'
+}
+
 task copy(type: Copy) {
   from '../shared/src'
   from 'src'
+  include '*.py'
   into '../bin/server'
 }
 
-task doBuild(dependsOn: tasks.copy){}
+task doBuild(){
+  dependsOn copyConfig
+  dependsOn copy
+  dependsOn copyTests
+}

@@ -17,10 +17,30 @@ repositories {
 
 description = 'Client Build'
 
+task copyTests(type: Copy){
+  from '../shared/test'
+  from 'test'
+  from '../shared/src'
+  from 'src'
+  include '*.py'
+  into '../bin/client/test'
+}
+
+task copyConfig(type: Copy){
+  from './config'
+  exclude 'config.example'
+  into '../bin/client/config'
+}
+
 task copy(type: Copy) {
   from '../shared/src'
   from 'src'
+  include '*.py'
   into '../bin/client'
 }
 
-task doBuild(dependsOn: tasks.copy){}
+task doBuild(){
+  dependsOn copyConfig
+  dependsOn copy
+  dependsOn copyTests
+}
