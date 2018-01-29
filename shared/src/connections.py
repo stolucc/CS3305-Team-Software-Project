@@ -104,7 +104,7 @@ class NetworkException(Exception):
 
 def main():
     """Test function."""
-    con = Connection("127.0.1.1", 10000)
+    con = Connection("127.0.0.1", 10000)
     con.open()
     con.send("Can you hear me?")
     con.close()
