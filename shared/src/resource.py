@@ -23,10 +23,18 @@ class Resource:
 
     @property
     def quantity(self):
-        """Getter for available_quantity."""
+        """
+        Getter for available_quantity.
+
+        :return: the available quantity
+        """
         return self._available_quantity
 
     @property
     def is_worked(self):
-        """Getter for is_worked."""
+        """
+        Getter for is_worked.
+
+        :return: boolean variable for work resource
+        """
         return self._is_worked
