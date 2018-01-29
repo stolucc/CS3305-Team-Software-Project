@@ -6,7 +6,7 @@ from resource import Resource
 
 class ResourceTests(unittest.TestCase):
     """Tests for the Resource class."""
-    
+
     def test_available_quantity(self):
         """Test that available quantity matches given value"""
         res = Resource(5)
