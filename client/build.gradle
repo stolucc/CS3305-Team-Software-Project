@@ -6,10 +6,6 @@ python{
   docsDir = "../documentation/client"
   testDir = "./test"
   srcDir = "./src"
-
-  details {
-    pythonVersion = '3.6'
-  }
 }
 repositories {
    pyGradlePyPi()
