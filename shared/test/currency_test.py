@@ -1,7 +1,7 @@
 """Currency Tests."""
 
 import unittest
-from Currency import Currency
+from currency import Currency
 
 
 class CurrencyTests(unittest.TestCase):

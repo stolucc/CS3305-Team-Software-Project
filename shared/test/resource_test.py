@@ -1,7 +1,7 @@
 """Resource Tests."""
 
 import unittest
-from Resource import Resource
+from resource import Resource
 
 
 class ResourceTests(unittest.TestCase):
