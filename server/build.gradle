@@ -12,9 +12,10 @@ description = 'Server Build'
 
 task copyTests(type: Copy){
   from '../shared/test'
+  from '../shared/lib'
   from 'test'
-  from '../shared/src'
   from 'src'
+  from 'lib'
   include '*.py'
   into '../bin/server/test'
 }
@@ -27,7 +28,9 @@ task copyConfig(type: Copy){
 
 task copy(type: Copy) {
   from '../shared/src'
+  from '../shared/lib'
   from 'src'
+  from 'lib'
   include '*.py'
   into '../bin/server'
 }
