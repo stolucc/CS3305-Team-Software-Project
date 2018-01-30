@@ -1,6 +1,6 @@
 # http://docs.sqlalchemy.org/en/latest/orm/tutorial.html
-from sqlalchemy import Column, Integer, Boolean, ForeignKey, String, \
-    Sequence, create_engine, MetaData, CheckConstraint
+from sqlalchemy import Column, Integer, Boolean, ForeignKey, \
+    Sequence, create_engine, MetaData, CheckConstraint, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
@@ -46,9 +46,8 @@ class User(Base):
                         nullable=False)
     food = Column(Integer, CheckConstraint('food>=0'), nullable=False)
     science = Column(Integer, CheckConstraint('science>=0'), nullable=False)
-    
-    game = relationship("Game", primaryjoin=game_id == Game.game_id,
-                        cascade="all, delete-orphan", single_parent=True)
+
+    game = relationship("Game")
 
     def __repr__(self):
         return "<user(game_id='%s', user_id='%s', active='%s', " \
@@ -70,8 +69,7 @@ class Unit(Base):
     y = Column(Integer, nullable=False)
     z = Column(Integer, nullable=False)
 
-    user = relationship("User", primaryjoin=user_id == User.user_id,
-                        cascade="all, delete-orphan", single_parent=True)
+    user = relationship("User")
 
     def __repr__(self):
         return "<unit(user_id='%s', unit_id='%s', " \
@@ -89,7 +87,7 @@ class Technology(Base):
     technology_id = Column(Integer, primary_key=True)
 
     user = relationship("User", primaryjoin=user_id == User.user_id,
-                        cascade="all, delete-orphan", single_parent=True)
+                        single_parent=True)
 
     def __repr__(self):
         return"<technology(user_id='%s', technology_id='%s')>" % (
@@ -109,8 +107,7 @@ class Building(Base):
     y = Column(Integer, nullable=False)
     z = Column(Integer, nullable=False)
 
-    user = relationship("User", primaryjoin=user_id == User.user_id,
-                        cascade="all, delete-orphan", single_parent=True)
+    user = relationship("User")
 
     def __repr__(self):
         return "<building(user_id='%s', building_id='%s', " \
@@ -121,28 +118,24 @@ class Building(Base):
 
 Base.metadata.create_all(connection)
 
-# noinspection PyArgumentList
 test_game = Game(seed=123456789, active=True)
 session.add(test_game)
 session.commit()
-game_id = test_game.game_id
 
-test_user = User(game_id=game_id, active=True,
+test_user = User(game_id=test_game.game_id, active=True,
                  gold=0, production=0, food=0, science=0)
 session.add(test_user)
 session.commit()
 
-uid = test_user.user_id
-
-test_unit = Unit(user_id=uid, type=0, health=100, x=5, y=4, z=2)
+test_unit = Unit(user_id=test_user.user_id, type=0, health=100, x=5, y=4, z=2)
 session.add(test_unit)
 session.commit()
 
-test_technology = Technology(user_id=uid, technology_id=10)
+test_technology = Technology(user_id=test_user.user_id, technology_id=10)
 session.add(test_technology)
 session.commit()
 
-test_building = Building(user_id=uid, type=0, x=3, y=1, z=0)
+test_building = Building(user_id=test_user.user_id, type=0, x=3, y=1, z=0)
 session.add(test_building)
 session.commit()
 
