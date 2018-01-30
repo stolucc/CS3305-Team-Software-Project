@@ -1,8 +1,8 @@
 # http://docs.sqlalchemy.org/en/latest/orm/tutorial.html
 from sqlalchemy import Column, Integer, Boolean, ForeignKey, \
-    Sequence, create_engine, MetaData, CheckConstraint, Table
+    Sequence, create_engine, MetaData, CheckConstraint
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import sessionmaker, relationship, backref
 
 
 def connect(user, password, db, host="localhost", port=5432):
@@ -47,7 +47,8 @@ class User(Base):
     food = Column(Integer, CheckConstraint('food>=0'), nullable=False)
     science = Column(Integer, CheckConstraint('science>=0'), nullable=False)
 
-    game = relationship("Game")
+    game = relationship("Game",
+                        backref=backref("users", cascade="all, delete-orphan"))
 
     def __repr__(self):
         return "<user(game_id='%s', user_id='%s', active='%s', " \
@@ -69,7 +70,8 @@ class Unit(Base):
     y = Column(Integer, nullable=False)
     z = Column(Integer, nullable=False)
 
-    user = relationship("User")
+    user = relationship("User",
+                        backref=backref("units", cascade="all, delete-orphan"))
 
     def __repr__(self):
         return "<unit(user_id='%s', unit_id='%s', " \
@@ -86,8 +88,9 @@ class Technology(Base):
                                          ondelete="CASCADE"), primary_key=True)
     technology_id = Column(Integer, primary_key=True)
 
-    user = relationship("User", primaryjoin=user_id == User.user_id,
-                        single_parent=True)
+    user = relationship("User",
+                        backref=backref("technologies",
+                                        cascade="all, delete-orphan"))
 
     def __repr__(self):
         return"<technology(user_id='%s', technology_id='%s')>" % (
@@ -107,7 +110,9 @@ class Building(Base):
     y = Column(Integer, nullable=False)
     z = Column(Integer, nullable=False)
 
-    user = relationship("User")
+    user = relationship("User",
+                        backref=backref("buildings",
+                                        cascade="all, delete-orphan"))
 
     def __repr__(self):
         return "<building(user_id='%s', building_id='%s', " \
@@ -141,3 +146,15 @@ session.commit()
 
 session.delete(test_game)
 session.commit()
+
+for user in test_game.users:
+    print(user)
+
+for technology in test_user.technologies:
+    print(technology)
+
+for building in test_user.buildings:
+    print(building)
+
+for unit in test_user.units:
+    print(unit)
