@@ -1,20 +1,21 @@
 import unittest
-from Terrain import Terrain
+from math import inf
+from terrain import Terrain, TerrainType, BiomeType
 
 
 class TerrainTest(unittest.TestCase):
 
-    def test_mountain_terrain_type_returns_infinity_for_movement_cost(self):
-        self.terrain = Terrain("mountain", "tundra")
-        self.assertEqual(self.terrain.movement_cost, float("inf"))
+    def test_mountain_terrain_type_movement_cost(self):
+        terrain = Terrain(TerrainType.MOUNTAIN, BiomeType.TUNDRA)
+        self.assertEqual(terrain.movement_cost, inf)
 
-    def test_ocean_terrain_type_returns_infinity_for_movement_cost(self):
-        self.terrain = Terrain("ocean", "desert")
-        self.assertEqual(self.terrain.movement_cost, float("inf"))
+    def test_ocean_terrain_type_movement_cost(self):
+        terrain = Terrain(TerrainType.OCEAN, BiomeType.DESERT)
+        self.assertEqual(terrain.movement_cost, inf)
 
-    def test_movement_cost_of_flat_grassland_equals_1(self):
-        self.terrain = Terrain("flat", "grassland")
-        self.assertEqual(self.terrain.movement_cost, 1)
+    def test_flat_grassland_movement_cost(self):
+        terrain = Terrain(TerrainType.FLAT, BiomeType.GRASSLAND)
+        self.assertEqual(terrain.movement_cost, 1)
 
 
 if __name__ == '__main__':
