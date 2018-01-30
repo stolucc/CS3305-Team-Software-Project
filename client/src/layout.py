@@ -3,7 +3,7 @@ from hexgrid import Hex, Grid
 
 
 class Point:
-    """A class for a Point"""
+    """A class for a Point."""
 
     def __init__(self, x, y):
         """
@@ -43,21 +43,22 @@ class Point:
 
 
 class Orientation:
-    """A class for the Hex orientation"""
+    """A class for the Hex orientation."""
 
     def __init__(self, f0, f1, f2, f3, b0, b1, b2, b3, start_angle):
         """
         Create a new Orientation object.
+        Can either be pointy top or flat top.
 
-        :param f0:
-        :param f1:
-        :param f2:
-        :param f3:
-        :param b0:
-        :param b1:
-        :param b2:
-        :param b3:
-        :param start_angle: the angle to start from
+        :param f0: matrix
+        :param f1: matrix
+        :param f2: matrix
+        :param f3: matrix
+        :param b0: inverse matrix
+        :param b1: inverse matrix
+        :param b2: inverse matrix
+        :param b3: inverse matrix
+        :param start_angle: the angle to start from in multiple of 60°
         """
         self._f0 = f0
         self._f1 = f1
@@ -152,7 +153,7 @@ class Orientation:
 
 
 class Layout:
-    """A class for representing a Layout"""
+    """A class for representing a Layout."""
 
     def __init__(self, size, origin):
         """
@@ -230,9 +231,11 @@ class Layout:
 
     def hex_corner_offset(self, corner):
         """
-l
-        :param corner:
-        :return:
+l       Position of the corner relative to the center of the hex.
+
+        :param corner: orientation of the corner,
+                        either 0.0 for 0° or 0.5 for 60°
+        :return: a Point object with the position of the corner
         """
         m = self.orientation
         size = self.size
@@ -241,9 +244,10 @@ l
 
     def polygon_corners(self, hexagon):
         """
+        The corners in screen locations.
 
         :param hexagon: a Hex object
-        :return:
+        :return: an array of corners
         """
         corners = []
         center = self.hex_to_pixel(hexagon)
