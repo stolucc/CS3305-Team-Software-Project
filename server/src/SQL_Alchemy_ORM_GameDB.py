@@ -1,6 +1,6 @@
 # http://docs.sqlalchemy.org/en/latest/orm/tutorial.html
-from sqlalchemy import Column, Integer, Boolean, ForeignKey, String, Sequence, create_engine,\
-    MetaData
+from sqlalchemy import Column, Integer, Boolean, ForeignKey, String, \
+    Sequence, create_engine, MetaData
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
@@ -32,6 +32,7 @@ class Game(Base):
         return "<game(game_id='%s', seed='%d', active='%s')>" % (
             self.game_id, self.seed, self.active)
 
+
 class User(Base):
     __tablename__ = 'users'
 
@@ -43,11 +44,15 @@ class User(Base):
     food = Column(Integer, nullable=False)
     science = Column(Integer, nullable=False)
     
-    game = relationship(Game, primaryjoin=game_id == Game.game_id, cascade="all, delete-orphan", single_parent=True)
+    game = relationship(Game, primaryjoin=game_id == Game.game_id,
+                        cascade="all, delete-orphan", single_parent=True)
 
     def __repr__(self):
-        return "<users(game='%s', user_id='%s', active='%s', gold='%i', production='%i', food='%i', science='%i')>" % (
-            User.game, self.user_id, self.active, self.gold, self.production, self.food, self.science)
+        return "<users(game='%s', user_id='%s', active='%s', " \
+               "gold='%i', production='%i', food='%i', science='%i')>" % (
+                User.game, self.user_id, self.active,
+                self.gold, self.production, self.food, self.science)
+
 
 class Unit(Base):
     __tablename__ = 'units'
@@ -60,11 +65,15 @@ class Unit(Base):
     y = Column(Integer, nullable=False)
     z = Column(Integer, nullable=False)
 
-    user = relationship(User, primaryjoin=user_id == User.user_id, cascade="all, delete-orphan", single_parent=True)
+    user = relationship(User, primaryjoin=user_id == User.user_id,
+                        cascade="all, delete-orphan", single_parent=True)
 
     def __repr__(self):
-        return "<units(user='%s', unit_id='%s', type='%s', health='%s', x='%s', y='%s', z='%s')>" % (
-            User.user_id, self.unit_id, self.type, self.health, self.x, self.y, self.z)
+        return "<units(user='%s', unit_id='%s', " \
+               "type='%s', health='%s', x='%s', y='%s', z='%s')>" % (
+                User.user_id, self.unit_id,
+                self.type, self.health, self.x, self.y, self.z)
+
 
 class Technology(Base):
     __tablename__ = 'technology'
@@ -72,27 +81,34 @@ class Technology(Base):
     user_id = Column(Integer, ForeignKey('users.user_id'), primary_key=True)
     technology_id = Column(Integer, primary_key=True)
 
-    user = relationship(User, primaryjoin=user_id == User.user_id, cascade="all, delete-orphan", single_parent=True)
+    user = relationship(User, primaryjoin=user_id == User.user_id,
+                        cascade="all, delete-orphan", single_parent=True)
 
     def __repr__(self):
         return"<technology(user='%s', technology_id='%s')>" % (
             User.user_id, self.technology_id)
 
+
 class Building(Base):
     __tablename__ = 'buildings'
 
     user_id = Column(Integer, ForeignKey('users.user_id'), primary_key=True)
-    building_id = Column(Integer, Sequence('units_unit_id_seq'), primary_key=True)
+    building_id = Column(Integer, Sequence('units_unit_id_seq'),
+                         primary_key=True)
     type = Column(String(100), nullable=False)
     x = Column(Integer, nullable=False)
     y = Column(Integer, nullable=False)
     z = Column(Integer, nullable=False)
 
-    user = relationship(User, primaryjoin=user_id == User.user_id, cascade="all, delete-orphan", single_parent=True)
+    user = relationship(User, primaryjoin=user_id == User.user_id,
+                        cascade="all, delete-orphan", single_parent=True)
 
     def __repr__(self):
-        return "<units(user='%s', building_id='%s', type='%s', x='%s', y='%s', z='%s')>" % (
-            User.user_id, self.building_id, self.type, self.x, self.y, self.z)
+        return "<units(user='%s', building_id='%s', " \
+               "type='%s', x='%s', y='%s', z='%s')>" % (
+                User.user_id, self.building_id,
+                self.type, self.x, self.y, self.z)
+
 
 Base.metadata.create_all(connection)
 
@@ -100,10 +116,10 @@ Base.metadata.create_all(connection)
 test_game = Game(seed=123456789, active=True)
 session.add(test_game)
 session.commit()
-id = test_game.game_id
-print(id)
+game_id = test_game.game_id
 
-test_user = User(game_id=id, active=True, gold=0, production=0, food=0, science=0)
+test_user = User(game_id=game_id, active=True,
+                 gold=0, production=0, food=0, science=0)
 session.add(test_user)
 session.commit()
 

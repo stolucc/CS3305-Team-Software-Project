@@ -57,13 +57,13 @@ for row in connection.execute(clause):
     print(row)
 
 # Execute SQL
-s = sqlalchemy.sql.text(
-    """SELECT first_name, second_name
-       FROM test_table
-       WHERE test_table.id = :id""")
-result = connection.execute(s, id=1)
-for row in result:
-    print(row)
+# s = sqlalchemy.sql.text(
+#     """SELECT first_name, second_name
+#        FROM test_table
+#        WHERE test_table.id = :id""")
+# result = connection.execute(s, id=1)
+# for row in result:
+#     print(row)
 
 # Delete data from table
-#connection.execute(test_table.delete())
+# connection.execute(test_table.delete())
