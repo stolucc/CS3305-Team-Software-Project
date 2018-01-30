@@ -16,7 +16,7 @@ def connect(user, password, db, host="localhost", port=5432):
     return c, m, s
 
 
-connection, meta, session = connect("postgres", "password", "test")
+connection, meta, session = connect("postgres", "snoopy", "test")
 session = session()
 Base = declarative_base()
 

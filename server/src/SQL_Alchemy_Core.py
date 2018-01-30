@@ -12,7 +12,7 @@ def connect(user, password, db, host="localhost", port=5432):
     return c, m
 
 
-connection, meta = connect("postgres", "password", "test")
+connection, meta = connect("postgres", "snoopy", "test")
 
 # List all tables
 for table in meta.tables:
@@ -66,4 +66,4 @@ for row in result:
     print(row)
 
 # Delete data from table
-connection.execute(test_table.delete())
+#connection.execute(test_table.delete())
