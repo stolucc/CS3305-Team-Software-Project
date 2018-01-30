@@ -146,6 +146,15 @@ class Grid:
         except KeyError:
             return self._hextiles[self.wrap_around(coordinates)]
 
+    def get_hextiles(self):
+        """
+        Get the dictionary containing all hexs.
+
+        :return: Dictionary of hex objects.
+        """
+
+        return self._hextiles
+
     def create_grid(self):
         """
         Create a grid layout.
