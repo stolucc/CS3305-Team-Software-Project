@@ -2,23 +2,62 @@ import math
 from hexgrid import Hex, Grid
 
 
+class Point:
+    """A class for a Point"""
+
+    def __init__(self, x, y):
+        """
+        Create a new Point object.
+
+        :param x: the x coordinate
+        :param y: the y coordinate
+        """
+        self._x = x
+        self._y = y
+
+    @property
+    def x(self):
+        """
+        Property for x.
+
+        :return: a x coordinate
+        """
+        return self._x
+
+    @property
+    def y(self):
+        """
+        Property for y.
+
+        :return: a y coordinate
+        """
+        return self._y
+
+    def __str__(self):
+        """
+        The object representation.
+
+        :return: a string showing a Point object.
+        """
+        return "Point: (x: %s, y: %s)" % (self._x, self._y)
+
+
 class Orientation:
-    """A class for the Hex orientation."""
+    """A class for the Hex orientation"""
 
     def __init__(self, f0, f1, f2, f3, b0, b1, b2, b3, start_angle):
         """
         Create a new Orientation object.
-        Can either be pointy top or flat top.
 
-        :param f0: matrix
-        :param f1: matrix
-        :param f2: matrix
-        :param f3: matrix
-        :param b0: inverse matrix
-        :param b1: inverse matrix
-        :param b2: inverse matrix
-        :param b3: inverse matrix
-        :param start_angle: the angle to start from in multiple of 60°
+        :param f0:
+        :param f1:
+        :param f2:
+        :param f3:
+        :param b0:
+        :param b1:
+        :param b2:
+        :param b3:
+        :param start_angle: the angle to start from
         """
         self._f0 = f0
         self._f1 = f1
@@ -29,20 +68,6 @@ class Orientation:
         self._b2 = b2
         self._b3 = b3
         self._start_angle = start_angle
-
-    def __eq__(self, other):
-        """
-        Equality between two tuples.
-
-        :param other: the other tuple to compare
-        :return: a boolean. True if the two tuples are the same,
-        False otherwise
-        """
-        return (self.f0 == other.f0 and self.f1 == other.f1 and
-                self.f2 == other.f2 and self.f3 == other.f3 and
-                self.b0 == other.b0 and self.b1 == other.b1 and
-                self.b2 == other.b2 and self.b3 == other.b3 and
-                self.start_angle == other.start_angle)
 
     @property
     def f0(self):
@@ -127,14 +152,14 @@ class Orientation:
 
 
 class Layout:
-    """A class for representing a Layout."""
+    """A class for representing a Layout"""
 
     def __init__(self, size, origin):
         """
         Create a new Layout object.
 
-        :param size: an int
-        :param origin: a tuple
+        :param size: a Point object
+        :param origin: a Point object
         """
         self._size = size
         self._origin = origin
@@ -164,15 +189,6 @@ class Layout:
         """
         return self._size
 
-    @size.setter
-    def size(self, new_size):
-        """
-        Setter for size.
-
-        :param new_size: A Point object
-        """
-        self._size = new_size
-
     @property
     def origin(self):
         """
@@ -182,73 +198,58 @@ class Layout:
         """
         return self._origin
 
-    def change_origin(self, change):
-        """
-        Change origin position.
-
-        :param change: change in origin (tuple)
-        """
-        self._origin = (self._origin[0] + change[0],
-                        self._origin[1] + change[1])
-
     def hex_to_pixel(self, hexagon):
         """
         Convert Hex coordinates to pixel coordinates.
-
         The pixel coordinate returned is the centre of the Hexagon.
 
         :param hexagon: a Hex object
-        :return: a tuple (x, y) - the centre of the Hex object
+        :return: a Point object (x, y) - the centre of the Hex object
         """
         m = self.orientation
         size = self.size
         origin = self.origin
-        x = (m.f0 * hexagon.x + m.f1 * hexagon.y) * size
-        y = (m.f2 * hexagon.x + m.f3 * hexagon.y) * size
-        return (x + origin[0], y + origin[1])
+        x = (m.f0 * hexagon.x + m.f1 * hexagon.y) * size.x
+        y = (m.f2 * hexagon.x + m.f3 * hexagon.y) * size.y
+        return Point(x + origin.x, y + origin.y)
 
     def pixel_to_hex(self, point):
         """
         Convert from hex to pixel coordinates.
 
-        :param point: a tuple (x, y)
+        :param point: a Point
         :return: a Hex object
         """
         m = self.orientation
         size = self.size
         origin = self.origin
-        pt = ((point[0] - origin[0]) / size, (point[1] - origin[1]) / size)
-        q = m.b0 * pt[0] + m.b1 * pt[1]
-        r = m.b2 * pt[0] + m.b3 * pt[1]
-        return Hex(q, r, -q - r)
-        # the Hex must be rounded with grid.hex_round((Hex.x, Hex.y, Hex.z))
-        # after calling this function
+        pt = Point((point.x - origin.x) / size.x, (point.y - origin.y) / size.y)
+        q = m.b0 * pt.x + m.b1 * pt.y
+        r = m.b2 * pt.x + m.b3 * pt.y
+        return Hex(q, r, -q-r)
 
     def hex_corner_offset(self, corner):
         """
-        Position of the corner relative to the center of the hex.
-
-        :param corner: orientation of the corner,
-                        either 0.0 for 0° or 0.5 for 60°
-        :return: a tuple with the position of the corner
+l
+        :param corner:
+        :return:
         """
         m = self.orientation
         size = self.size
         angle = 2.0 * math.pi * (m.start_angle - corner) / 6
-        return (size * math.cos(angle), size * math.sin(angle))
+        return Point(size.x * math.cos(angle), size.y * math.sin(angle))
 
     def polygon_corners(self, hexagon):
         """
-        The corners in screen locations.
 
         :param hexagon: a Hex object
-        :return: an array of corners
+        :return:
         """
         corners = []
         center = self.hex_to_pixel(hexagon)
         for i in range(0, 6):
             offset = self.hex_corner_offset(i)
-            corners.append((center[0] + offset[0], center[1] + offset[1]))
+            corners.append(Point(center.x + offset.x, center.y + offset.y))
         return corners
 
 
@@ -257,7 +258,7 @@ def main():
     hexmap = grid.create_grid()
     hexagon = grid.get_hextile((0, 1, -1))
     print(hexagon)
-    pointy = Layout((10, 10), (200, 200))
+    pointy = Layout(Point(10, 10), Point(200, 200))
     cursor = pointy.hex_to_pixel(hexagon)
     print(cursor)
     print()
