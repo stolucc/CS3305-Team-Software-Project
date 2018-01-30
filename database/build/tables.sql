@@ -6,7 +6,7 @@ CREATE SEQUENCE games_game_id_seq;
 CREATE TABLE public.games
 (
   game_id INTEGER NOT NULL DEFAULT nextval('games_game_id_seq'),
-  seed INTEGER NOT NULL,
+  seed INTEGER NOT NULL CHECK (seed >= 0),
   active BOOLEAN NOT NULL,
   CONSTRAINT game_id PRIMARY KEY (game_id)
 )
@@ -26,10 +26,10 @@ CREATE TABLE public.users
   game_id INTEGER NOT NULL REFERENCES games(game_id) ON DELETE CASCADE,
   user_id INTEGER NOT NULL DEFAULT nextval('users_user_id_seq'),
   active BOOLEAN NOT NULL,
-  gold INTEGER NOT NULL,
-  production INTEGER NOT NULL,
-  food INTEGER NOT NULL,
-  science INTEGER NOT NULL,
+  gold INTEGER NOT NULL CHECK (gold >= 0),
+  production INTEGER NOT NULL CHECK (production >= 0),
+  food INTEGER NOT NULL CHECK (food >= 0),
+  science INTEGER NOT NULL CHECK (science >= 0),
   CONSTRAINT user_id PRIMARY KEY (user_id)
 )
 WITH (
@@ -38,11 +38,11 @@ OIDS=FALSE
 ALTER TABLE public.users OWNER TO postgres;
 ALTER SEQUENCE users_user_id_seq OWNED BY users.user_id;
 
--- Table: public.technology
+-- Table: public.technologies
 
--- DROP TABLE public.technology;
+-- DROP TABLE public.technologies;
 
-CREATE TABLE public.technology
+CREATE TABLE public.technologies
 (
   user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
   technology_id INTEGER NOT NULL,
@@ -51,7 +51,7 @@ CREATE TABLE public.technology
 WITH (
 OIDS=FALSE
 );
-ALTER TABLE public.technology OWNER TO postgres;
+ALTER TABLE public.technologies OWNER TO postgres;
 
 -- Table: public.buildings
 
@@ -62,11 +62,11 @@ CREATE TABLE public.buildings
 (
   user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
   building_id INTEGER NOT NULL DEFAULT nextval('buildings_building_id_seq'),
-  type VARCHAR(100) NOT NULL,
+  type INTEGER NOT NULL CHECK (type >= 0),
   x INTEGER NOT NULL,
   y INTEGER NOT NULL,
   z INTEGER NOT NULL,
-  CONSTRAINT user_building_id PRIMARY KEY (user_id, building_id)
+  CONSTRAINT user_building_id PRIMARY KEY (building_id)
 )
 WITH (
 OIDS=FALSE
@@ -83,12 +83,12 @@ CREATE TABLE public.units
 (
   user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
   unit_id INTEGER NOT NULL DEFAULT nextval('units_unit_id_seq'),
-  type VARCHAR(100) NOT NULL,
-  health INTEGER NOT NULL,
+  type INTEGER NOT NULL CHECK (type >= 0),
+  health INTEGER NOT NULL CHECK (health >= 0),
   x INTEGER NOT NULL,
   y INTEGER NOT NULL,
   z INTEGER NOT NULL,
-  CONSTRAINT user_unit_id PRIMARY KEY (user_id, unit_id)
+  CONSTRAINT user_unit_id PRIMARY KEY (unit_id)
 )
 WITH (
 OIDS=FALSE
