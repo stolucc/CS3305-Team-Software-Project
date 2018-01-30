@@ -1,11 +1,11 @@
--- Table: public.Games
+-- Table: public.games
 
--- DROP TABLE public.Games;
+-- DROP TABLE public.games;
 
-CREATE SEQUENCE Games_game_id_seq;
-CREATE TABLE public.Games
+CREATE SEQUENCE games_game_id_seq;
+CREATE TABLE public.games
 (
-  game_id INTEGER NOT NULL DEFAULT nextval('Games_game_id_seq'),
+  game_id INTEGER NOT NULL DEFAULT nextval('games_game_id_seq'),
   seed INTEGER NOT NULL,
   active BOOLEAN NOT NULL,
   CONSTRAINT game_id PRIMARY KEY (game_id)
@@ -13,18 +13,18 @@ CREATE TABLE public.Games
 WITH (
 OIDS=FALSE
 );
-ALTER TABLE public.Games OWNER TO postgres;
-ALTER SEQUENCE Games_game_id_seq OWNED BY Games.game_id;
+ALTER TABLE public.games OWNER TO postgres;
+ALTER SEQUENCE games_game_id_seq OWNED BY games.game_id;
 
--- Table: public.Users
+-- Table: public.users
 
--- DROP TABLE public.Users;
+-- DROP TABLE public.users;
 
-CREATE SEQUENCE Users_user_id_seq;
-CREATE TABLE public.Users
+CREATE SEQUENCE users_user_id_seq;
+CREATE TABLE public.users
 (
-  game_id INTEGER NOT NULL REFERENCES Games(game_id) ON DELETE CASCADE,
-  user_id INTEGER NOT NULL DEFAULT nextval('Users_user_id_seq'),
+  game_id INTEGER NOT NULL REFERENCES games(game_id) ON DELETE CASCADE,
+  user_id INTEGER NOT NULL DEFAULT nextval('users_user_id_seq'),
   active BOOLEAN NOT NULL,
   gold INTEGER NOT NULL,
   production INTEGER NOT NULL,
@@ -35,33 +35,33 @@ CREATE TABLE public.Users
 WITH (
 OIDS=FALSE
 );
-ALTER TABLE public.Users OWNER TO postgres;
-ALTER SEQUENCE Users_user_id_seq OWNED BY Users.user_id;
+ALTER TABLE public.users OWNER TO postgres;
+ALTER SEQUENCE users_user_id_seq OWNED BY users.user_id;
 
--- Table: public.Technology
+-- Table: public.technology
 
--- DROP TABLE public.Technology;
+-- DROP TABLE public.technology;
 
-CREATE TABLE public.Technology
+CREATE TABLE public.technology
 (
-  user_id INTEGER NOT NULL REFERENCES Users(user_id) ON DELETE CASCADE,
+  user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
   technology_id INTEGER NOT NULL,
   CONSTRAINT user_technology_id PRIMARY KEY (user_id, technology_id)
 )
 WITH (
 OIDS=FALSE
 );
-ALTER TABLE public.Technology OWNER TO postgres;
+ALTER TABLE public.technology OWNER TO postgres;
 
--- Table: public.Buildings
+-- Table: public.buildings
 
--- DROP TABLE public.Buildings;
+-- DROP TABLE public.buildings;
 
-CREATE SEQUENCE Buildings_building_id_seq;
-CREATE TABLE public.Buildings
+CREATE SEQUENCE buildings_building_id_seq;
+CREATE TABLE public.buildings
 (
-  user_id INTEGER NOT NULL REFERENCES Users(user_id) ON DELETE CASCADE,
-  building_id INTEGER NOT NULL DEFAULT nextval('Buildings_building_id_seq'),
+  user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  building_id INTEGER NOT NULL DEFAULT nextval('buildings_building_id_seq'),
   type VARCHAR(100) NOT NULL,
   x INTEGER NOT NULL,
   y INTEGER NOT NULL,
@@ -71,18 +71,18 @@ CREATE TABLE public.Buildings
 WITH (
 OIDS=FALSE
 );
-ALTER TABLE public.Buildings OWNER TO postgres;
-ALTER SEQUENCE Buildings_building_id_seq OWNED BY Buildings.building_id;
+ALTER TABLE public.buildings OWNER TO postgres;
+ALTER SEQUENCE buildings_building_id_seq OWNED BY buildings.building_id;
 
--- Table: public.Units
+-- Table: public.units
 
--- DROP TABLE public.Units;
+-- DROP TABLE public.units;
 
-CREATE SEQUENCE Units_unit_id_seq;
-CREATE TABLE public.Units
+CREATE SEQUENCE units_unit_id_seq;
+CREATE TABLE public.units
 (
-  user_id INTEGER NOT NULL REFERENCES Users(user_id) ON DELETE CASCADE,
-  unit_id INTEGER NOT NULL DEFAULT nextval('Units_unit_id_seq'),
+  user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  unit_id INTEGER NOT NULL DEFAULT nextval('units_unit_id_seq'),
   type VARCHAR(100) NOT NULL,
   health INTEGER NOT NULL,
   x INTEGER NOT NULL,
@@ -93,5 +93,5 @@ CREATE TABLE public.Units
 WITH (
 OIDS=FALSE
 );
-ALTER TABLE public.Units OWNER TO postgres;
-ALTER SEQUENCE Units_unit_id_seq OWNED BY Units.unit_id;
+ALTER TABLE public.units OWNER TO postgres;
+ALTER SEQUENCE units_unit_id_seq OWNED BY units.unit_id;
