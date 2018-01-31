@@ -4,6 +4,23 @@ import math
 import sys
 from layout import Layout, Point
 from hexgrid import Grid
+from enum import Enum
+
+
+class Resolution(Enum):
+    """Enum for resolutions."""
+
+    DEFAULT = 0
+    HD = 1
+    FULLHD = 2
+
+    @staticmethod
+    def get_resolution(index):
+        """Getter for resolution."""
+        resolutions = {Resolution.DEFAULT: (1024, 576),
+                       Resolution.HD: (1280, 720),
+                       Resolution.FULLHD: (1920, 1080)}
+        return resolutions[index]
 
 
 class Game:
@@ -14,21 +31,20 @@ class Game:
         pygame.init()
         pygame.font.init()
         self._flags = (pygame.DOUBLEBUF |
-                       pygame.HWSURFACE |
-                       pygame.RESIZABLE)
+                       pygame.HWSURFACE)
         self.infoObject = pygame.display.Info()
-        self._window_size = (self.infoObject.current_w//2,
-                             self.infoObject.current_h//2)
+        self._window_size = Resolution.get_resolution(Resolution.DEFAULT)
+        self._camera_position = (self._window_size[0]/2,
+                                 self._window_size[1]/2)
         self._screen = pygame.display.set_mode(self._window_size,
                                                self._flags,
                                                0)
         self._font = 'freesansbold.ttf'
         self._font_size = 115
         self._grid_size = 51
-        self._zoom = 0.3
-        self._hex_size = (self._window_size[1] *
-                          (self._grid_size * self._zoom) //
-                          1000)
+        self._zoom = 50
+        self._hex_size = (self._window_size[0] //
+                          self._zoom)
         self._grid = Grid(self._grid_size)
         self._grid.create_grid()
         self._layout = Layout(Point(self._hex_size, self._hex_size),
@@ -42,19 +58,17 @@ class Game:
             for event in pygame.event.get():  # something happend
                 if event.type in (pygame.QUIT, pygame.KEYDOWN):
                     sys.exit()
-                elif event.type == pygame.VIDEORESIZE:  # window resized
-                    self._window_size = event.dict['size']
-                    self._screen = pygame.display.set_mode(self._window_size,
-                                                           self._flags,
-                                                           0)
-                    self._hex_size = (self._window_size[1] *
-                                      (self._grid_size * self._zoom) //
-                                      1000)
-                    self._layout = Layout(Point(self._hex_size,
-                                                self._hex_size),
-                                          Point(self._window_size[0]/2,
-                                                self._window_size[1]/2))
-                    self.draw_hex_grid()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:  # Left click
+                        pass
+                    elif event.button == 2:  # Middle click
+                        pass
+                    elif event.button == 3:  # Right click
+                        pass
+                    elif event.button == 4:  # Scrole up
+                        pass
+                    elif event.button == 5:  # Scrole down
+                        pass
             pygame.display.flip()
 
     def text_objects(self, text, font, color):
