@@ -41,6 +41,14 @@ class Point:
         """
         return "Point: (x: %s, y: %s)" % (self._x, self._y)
 
+    def __repr__(self):
+        """
+        The object representation.
+
+        :return: a string showing a Point object.
+        """
+        return "Point: (x: %s, y: %s)" % (self._x, self._y)
+
 
 class Orientation:
     """A class for the Hex orientation."""
@@ -231,7 +239,7 @@ class Layout:
 
     def hex_corner_offset(self, corner):
         """
-l       Position of the corner relative to the center of the hex.
+        Position of the corner relative to the center of the hex.
 
         :param corner: orientation of the corner,
                         either 0.0 for 0° or 0.5 for 60°
@@ -270,7 +278,6 @@ def main():
     result_tile = grid.hex_round((ph.x, ph.y, ph.z))
     r = grid.get_hextile(result_tile)
     print(r)
-
 
 if __name__ == '__main__':
     main()
