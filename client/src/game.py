@@ -1,148 +1,115 @@
 """Client game."""
 import pygame
+import math
 import sys
-import time
-from layout import Layout
-from hexgrid import Grid, Hex
-from enum import Enum
-
-
-class Resolution(Enum):
-    """Enum for resolutions."""
-
-    DEFAULT = 0
-    HD = 1
-    FULLHD = 2
-
-    @staticmethod
-    def get_resolution(index):
-        """Getter for resolution."""
-        resolutions = {Resolution.DEFAULT: (1024, 576),
-                       Resolution.HD: (1280, 720),
-                       Resolution.FULLHD: (1920, 1080)}
-        return resolutions[index]
+from layout import Layout, Point
+from hexgrid import Grid
 
 
 class Game:
     """Class to represent client-side game."""
 
     def __init__(self):
-        """Initialise display surface."""
+        """Initalize display surface."""
         pygame.init()
         pygame.font.init()
         self._flags = (pygame.DOUBLEBUF |
-                       pygame.HWSURFACE)
+                       pygame.HWSURFACE |
+                       pygame.RESIZABLE)
         self.infoObject = pygame.display.Info()
-        self._window_size = Resolution.get_resolution(Resolution.DEFAULT)
-        self._camera_position = (self._window_size[0]/2,
-                                 self._window_size[1]/2)
+        self._window_size = (self.infoObject.current_w//2,
+                             self.infoObject.current_h//2)
         self._screen = pygame.display.set_mode(self._window_size,
                                                self._flags,
                                                0)
         self._font = 'freesansbold.ttf'
         self._font_size = 115
-        self._grid_size = 25
-        self._zoom = 50
-        self._zoom_interval = 5
-        self._min_zoom = 1
-        self._max_zoom = 50
-        self.hex_size = lambda x: (self.infoObject.current_w // x)
+        self._grid_size = 51
+        self._zoom = 0.3
+        self._hex_size = (self._window_size[1] *
+                          (self._grid_size * self._zoom) //
+                          1000)
         self._grid = Grid(self._grid_size)
         self._grid.create_grid()
-        self._layout = Layout(self.hex_size(self._zoom),
-                              (self._window_size[0]/2,
-                               self._window_size[1]/2))
+        self._layout = Layout(Point(self._hex_size, self._hex_size),
+                              Point(self._window_size[0]/2,
+                                    self._window_size[1]/2))
 
     def start(self):
         """Start game."""
-        self.draw_map()
+        self.draw_hex_grid()
         while True:
             for event in pygame.event.get():  # something happend
                 if event.type in (pygame.QUIT, pygame.KEYDOWN):
                     sys.exit()
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    self.mouse_button_down(event)
+                elif event.type == pygame.VIDEORESIZE:  # window resized
+                    self._window_size = event.dict['size']
+                    self._screen = pygame.display.set_mode(self._window_size,
+                                                           self._flags,
+                                                           0)
+                    self._hex_size = (self._window_size[1] *
+                                      (self._grid_size * self._zoom) //
+                                      1000)
+                    self._layout = Layout(Point(self._hex_size,
+                                                self._hex_size),
+                                          Point(self._window_size[0]/2,
+                                                self._window_size[1]/2))
+                    self.draw_hex_grid()
             pygame.display.flip()
 
-    def mouse_button_down(self, event):
-        """Mouse down actions."""
-        if event.button == 1:  # Left click
-            self.panning()
-        elif event.button == 2:  # Middle click
-            pass
-        elif event.button == 3:  # Right click
-            pass
-        elif event.button == 4:  # Scrole up
-            self.zoom_in()
-        elif event.button == 5:  # Scrole down
-            self.zoom_out()
+    def text_objects(self, text, font, color):
+        """."""
+        textSurface = font.render(str(text), True, color)
+        return textSurface, textSurface.get_rect()
 
-    def panning(self):
-        """Move map while holding down."""
-        pygame.mouse.get_rel()
-        holding = True
-        while holding:
-            pygame.event.get()
-            change = pygame.mouse.get_rel()
-            c_hex = self._layout.pixel_to_hex(self._camera_position)
-            c_hex_coords = self._grid.hex_round((c_hex.x, c_hex.y, c_hex.z))
-            wrap = self._grid.get_hextile(c_hex_coords)
-            if (wrap.x, wrap.y, wrap.z) != c_hex_coords:
-                pix_change = self._layout.hex_to_pixel(wrap)
-                change = (self._camera_position[0] - pix_change[0],
-                          self._camera_position[1] - pix_change[1])
-            self._layout.change_origin(change)
-            self.draw_map()
-            time.sleep(0.017)
-            holding = pygame.mouse.get_pressed()[0]
+    def message_display(self, text):
+        """."""
+        large_text = pygame.font.Font(self._font, self._font_size)
+        text_surf, text_rect = self.text_objects(text,
+                                                 large_text,
+                                                 pygame.Color(0, 255, 0, 255))
+        text_rect.center = ((self._window_size[0]/2),
+                            (self._window_size[1]/2))
+        self._screen.blit(text_surf, text_rect)
+        pygame.display.flip()
 
-    def zoom_in(self):
-        """Zooming in on map."""
-        self._zoom -= self._zoom_interval
-        if self._zoom <= self._min_zoom:
-            self._zoom = self._min_zoom
-        else:
-            self._layout.size = self.hex_size(self._zoom)
-            self.draw_map()
-            time.sleep(0.017)
+    def hex_corner(self, corner, center):
+        """
+        Calculate the pixel coordinates of a hexagon corner.
 
-    def zoom_out(self):
-        """Zooming away from map."""
-        self._zoom += self._zoom_interval
-        if self._zoom >= self._max_zoom:
-            self._zoom = self._max_zoom
-        else:
-            self._layout.size = self.hex_size(self._zoom)
-            self.draw_map()
-            time.sleep(0.017)
+        :param corner: The corner of the hexagon.
+        :param size: The radius of the circle inscribing the hexagon.
+        :param center: The pixel coordinates of the center of the hexagon.
+        :return: The x and y coordinates of the hexagon corner.
+        """
+        angle_deg = (60 * corner) + 30
+        angle_rad = (math.pi / 180.0) * angle_deg
+        return [center[0] + self._hex_size * math.cos(angle_rad),
+                center[1] + self._hex_size * math.sin(angle_rad)]
 
-    def draw_hex_grid(self, layout):
+    def calculate_hexagon_corner_coordinates(self, center):
+        """
+        Helper function to calculate the coordinates of all 6 corners.
+
+        :param size: float the size of the circle inscribing the hexagon.
+        :param center: list of pixel coordinates of the center of the hexagon.
+        :return: list containing the set of hexagon corner coordinates.
+        """
+        corners = []
+        for corner in range(6):
+            corners += [self.hex_corner(corner, center)]
+        return corners
+
+    def draw_hex_grid(self):
         """A function which creates a grid."""
+        self._screen.fill((0, 0, 0))
         for hex_point in self._grid.get_hextiles():
             hexagon = self._grid.get_hextile(hex_point)
+            point_coords = self._layout.hex_to_pixel(hexagon)
             pygame.draw.polygon(self._screen, pygame.Color("white"),
-                                layout.polygon_corners(hexagon),
+                                self.calculate_hexagon_corner_coordinates(
+                                [point_coords.x, point_coords.y]),
                                 1)
-
-    def get_mirrors(self):
-        """Get mirrored grids."""
-        mirror_centers = self._grid.mirrors
-        layouts = []
-        for mirror in mirror_centers:
-            layout = Layout(self._layout.size,
-                            self._layout.hex_to_pixel(Hex(mirror[0],
-                                                          mirror[1],
-                                                          mirror[2])))
-            layouts.append(layout)
-        return layouts
-
-    def draw_map(self):
-        """."""
-        self._screen.fill((0, 0, 0))
-        self.draw_hex_grid(self._layout)
-        layouts = self.get_mirrors()
-        for layout in layouts:
-            self.draw_hex_grid(layout)
         pygame.display.flip()
 
 
