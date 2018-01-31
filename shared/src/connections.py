@@ -28,7 +28,8 @@ class Connection:
             self._context.load_verify_locations(
                 config["paths"]["ca-bundle"])
             self._socket = self._context.wrap_socket(
-                socket(AF_INET, SOCK_STREAM), server_hostname="Team 7")
+                socket(AF_INET, SOCK_STREAM),
+                server_hostname=config["server"]["hostname"])
             self._open_status = False
         else:
             self._socket = connection
