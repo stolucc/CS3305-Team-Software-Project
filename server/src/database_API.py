@@ -328,26 +328,33 @@ class Log(Base):
 
     log_id = Column(Integer, Sequence('logs_log_id_seq'), primary_key=True)
     log_level = Column(Integer, nullable=False)
-    log_level_name = Column(String(128), nullable=False)
+    log_level_name = Column(String(256), nullable=False)
+    path = Column(String(256), nullable=False)
+    line_number = Column(Integer, nullable=False)
     log = Column(String(2048), nullable=False)
     created_at = Column(TIMESTAMP, CheckConstraint('type>=0'), nullable=False)
-    created_by = Column(String(128), nullable=False)
+    created_by = Column(String(256), nullable=False)
 
     @staticmethod
-    def insert_log(session, log_level, log_level_name, log, created_at,
-                   created_by):
+    def insert_log(session, log_level, log_level_name, path, line_number, log,
+                   created_at, created_by):
         """
         Create a log and add it to the database.
 
         :param session: sessionmaker object
         :param log_level: log_level of the log
         :param log_level_name: log_level_name of the log
-        (limit is 128 characters)
+        (limit is 256 characters)
+        :param path: pathname of the file where the logging call was made
+        (limit is 256 characters)
+        :param line_number: line number in the file where the logging call was
+        made
         :param log: log message of the log (limit is 2048 characters)
         :param created_at: timestamp of when the log was created
-        :param created_by: what created the log (limit is 128 characters)
+        :param created_by: what created the log (limit is 256 characters)
         """
-        log = Log(log_level=log_level, log_level_name=log_level_name, log=log,
+        log = Log(log_level=log_level, log_level_name=log_level_name,
+                  path=path, line_number=line_number, log=log,
                   created_at=created_at, created_by=created_by)
         session = session()
         session.add(log)
@@ -359,6 +366,8 @@ class Log(Base):
     def __repr__(self):
         """Return a String representation for a Log object."""
         return "<log(log_id='%s', log_level='%s', log_level_name='%s', " \
-               "log='%s', created_at='%s', created_by='%s')>" % (
-                   self.log_id, self.log_level, self.log_level_name,
-                   self.log, self.created_at, self.created_by)
+               "path='%s', line_number='%s', log='%s', created_at='%s', " \
+               "created_by='%s')>" % (
+                   self.log_id, self.log_level, self.log_level_name, self.path,
+                   self.line_number, self.log, self.created_at,
+                   self.created_by)

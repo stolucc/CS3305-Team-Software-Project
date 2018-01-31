@@ -46,5 +46,6 @@ class LoggingHandler(logging.Handler):
         time_created = time.strftime("%Y-%m-%d %H:%M:%S",
                                      time.localtime(record.created))
         Log.insert_log(self.session, str(record.levelno),
-                       str(record.levelname), str(record.msg.strip()),
-                       time_created, str(record.name))
+                       str(record.levelname), str(record.pathname),
+                       record.lineno, str(record.msg.strip()), time_created,
+                       str(record.name))

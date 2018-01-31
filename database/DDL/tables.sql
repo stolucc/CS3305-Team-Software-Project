@@ -105,10 +105,12 @@ CREATE TABLE public.logs
 (
   log_id INTEGER NOT NULL DEFAULT nextval('logs_log_id_seq'),
   log_level INTEGER NOT NULL,
-  log_level_name VARCHAR(128) NOT NULL,
+  log_level_name VARCHAR(256) NOT NULL,
+  path VARCHAR(256) NOT NULL,
+  line_number INTEGER NOT NULL,
   log VARCHAR(2048) NOT NULL,
   created_at TIMESTAMP NOT NULL,
-  created_by VARCHAR(128) NOT NULL,
+  created_by VARCHAR(256) NOT NULL,
   CONSTRAINT log_id PRIMARY KEY (log_id)
 )
 WITH (
