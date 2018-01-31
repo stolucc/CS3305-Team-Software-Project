@@ -231,6 +231,15 @@ class Layout:
         """
         return self._origin
 
+    def change_origin(self, change):
+        """
+        Change origin position.
+
+        :param change: change in origin (tuple)
+        """
+        self._origin = Point(self._origin.x + change[0],
+                             self._origin.y + change[1])
+
     def hex_to_pixel(self, hexagon):
         """
         Convert Hex coordinates to pixel coordinates.

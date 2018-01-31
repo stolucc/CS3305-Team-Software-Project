@@ -2,6 +2,7 @@
 import pygame
 import math
 import sys
+import time
 from layout import Layout, Point
 from hexgrid import Grid
 from enum import Enum
@@ -42,7 +43,7 @@ class Game:
         self._font = 'freesansbold.ttf'
         self._font_size = 115
         self._grid_size = 51
-        self._zoom = 50
+        self._zoom = 150
         self._hex_size = (self._window_size[0] //
                           self._zoom)
         self._grid = Grid(self._grid_size)
@@ -59,17 +60,30 @@ class Game:
                 if event.type in (pygame.QUIT, pygame.KEYDOWN):
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 1:  # Left click
-                        pass
-                    elif event.button == 2:  # Middle click
-                        pass
-                    elif event.button == 3:  # Right click
-                        pass
-                    elif event.button == 4:  # Scrole up
-                        pass
-                    elif event.button == 5:  # Scrole down
-                        pass
+                    self.mouse_button_down(event)
             pygame.display.flip()
+
+    def mouse_button_down(self, event):
+        """Mouse down actions."""
+        if event.button == 1:  # Left click
+            pygame.mouse.get_rel()
+            holding = True
+            while holding:
+                pygame.event.get()
+                change = pygame.mouse.get_rel()
+                self._layout.change_origin(change)
+                self.draw_hex_grid()
+                time.sleep(0.017)
+                holding = pygame.mouse.get_pressed()[0]
+
+        elif event.button == 2:  # Middle click
+            pass
+        elif event.button == 3:  # Right click
+            pass
+        elif event.button == 4:  # Scrole up
+            pass
+        elif event.button == 5:  # Scrole down
+            pass
 
     def text_objects(self, text, font, color):
         """."""
