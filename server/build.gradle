@@ -13,6 +13,7 @@ description = 'Server Build'
 task copyTests(type: Copy){
   from '../shared/test'
   from '../shared/lib'
+  from '../shared/src'
   from 'test'
   from 'src'
   from 'lib'
