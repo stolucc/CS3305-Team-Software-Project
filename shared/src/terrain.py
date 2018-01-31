@@ -73,7 +73,7 @@ class BiomeType(Enum):
 class Terrain:
     """A class for a terrain object."""
 
-    def __init__(self, terrain_type, biome):
+    def __init__(self, terrain_type, biome, resource=None):
         """
         Create a new terrain object.
 
@@ -81,10 +81,12 @@ class Terrain:
             (eg. flat, hill, river, mountain, etc.)
         :param biome: the terrain biome
             (eg. tundra, grassland, desert, etc.)
+        :param resource: the strategic resource available at this tile
         """
         self._terrain_type = terrain_type
         self._biome = biome
         self._movement_cost = self.calculate_movement_cost()
+        self._resource = resource
 
     @property
     def terrain_type(self):
@@ -121,6 +123,33 @@ class Terrain:
         :return: boolean value indicating vision allowed
         """
         return TerrainType.vision_allowed(self._terrain_type)
+
+    @property
+    def has_resource(self):
+        """
+        Determine if terrain has available resource.
+
+        :return: true if resource exists, false otherwise
+        """
+        return self._resource is not None
+
+    @property
+    def resource(self):
+        """
+        Get tile resource if it exists.
+
+        :return: Resource object or None
+        """
+        return self._resource
+
+    @resource.setter
+    def resource(self, resource):
+        """
+        Set tile resource.
+
+        :param resource: Resource object to be set
+        """
+        self._resource = resource
 
     def calculate_movement_cost(self):
         """
