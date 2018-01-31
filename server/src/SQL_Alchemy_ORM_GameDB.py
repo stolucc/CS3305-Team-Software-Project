@@ -97,7 +97,7 @@ class Building(Base):
     __tablename__ = 'buildings'
 
     user_id = Column(Integer, ForeignKey('users.user_id'))
-    building_id = Column(Integer, Sequence('units_unit_id_seq'),
+    building_id = Column(Integer, Sequence('buildings_building_id_seq'),
                          primary_key=True)
     type = Column(Integer, CheckConstraint('type>=0'), nullable=False)
     x = Column(Integer, nullable=False)
