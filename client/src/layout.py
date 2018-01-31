@@ -33,6 +33,16 @@ class Point:
         """
         return self._y
 
+    def __eq__(self, other):
+        """
+        Equality between two Point objects.
+
+        :param other: the other Point to compare
+        :return: a boolean. True if the two Point objects are the same,
+        False otherwise
+        """
+        return self.x == other.x and self.y == other.y
+
     def __str__(self):
         """
         The object representation.
@@ -77,6 +87,20 @@ class Orientation:
         self._b2 = b2
         self._b3 = b3
         self._start_angle = start_angle
+
+    def __eq__(self, other):
+        """
+        Equality between two Point objects.
+
+        :param other: the other Point to compare
+        :return: a boolean. True if the two Point objects are the same,
+        False otherwise
+        """
+        return self.f0 == other.f0 and self.f1 == other.f1 and \
+               self.f2 == other.f2 and self.f3 == other.f3 and \
+               self.b0 == other.b0 and self.b1 == other.b1 and \
+               self.b2 == other.b2 and self.b3 == other.b3 and \
+               self.start_angle == other.start_angle
 
     @property
     def f0(self):
@@ -236,6 +260,8 @@ class Layout:
         q = m.b0 * pt.x + m.b1 * pt.y
         r = m.b2 * pt.x + m.b3 * pt.y
         return Hex(q, r, -q-r)
+        # the Hex must be rounded with grid.hex_round((Hex.x, Hex.y, Hex.z))
+        # after calling this function
 
     def hex_corner_offset(self, corner):
         """
