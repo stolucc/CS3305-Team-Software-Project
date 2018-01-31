@@ -2,6 +2,10 @@
 from socket import socket, gethostbyname, AF_INET, SOCK_STREAM
 import ssl
 import os
+import json
+
+with open(os.path.join("..", "config", "config.json")) as config_file:
+    config = json.load(config_file)
 
 
 class Connection:
@@ -15,14 +19,14 @@ class Connection:
         :param port: port number of other party
         :param connection: default new connection, can be passed existing tcp
         """
-        self._host = gethostbyname(host)  # resolve hostnames
+        self._host = gethostbyname(host)
         self._port = port
         if connection is None:
             self._context = ssl.SSLContext(ssl.PROTOCOL_TLS)
             self._context.verify_mode = ssl.CERT_REQUIRED
             self._context.check_hostname = True
             self._context.load_verify_locations(
-                os.path.join("..", "config", "ca-bundle.crt"))
+                config["paths"]["ca-bundle"])
             self._socket = self._context.wrap_socket(
                 socket(AF_INET, SOCK_STREAM), server_hostname="Team 7")
             self._open_status = False
@@ -90,7 +94,8 @@ class Connection:
                 self._socket.close()
                 self._open_status = False
                 self._socket = self._context.wrap_socket(
-                    socket(AF_INET, SOCK_STREAM), server_hostname="Team 7")
+                    socket(AF_INET, SOCK_STREAM),
+                    server_hostname=config["server"]["hostname"])
             except Exception:
                 raise
         else:
@@ -104,7 +109,7 @@ class NetworkException(Exception):
 
 def main():
     """Test function."""
-    con = Connection("127.0.0.1", 10000)
+    con = Connection(config["server"]["ip"], config["server"]["port"])
     con.open()
     con.send("Can you hear me?")
     con.close()

@@ -4,11 +4,10 @@ import threading
 import ssl
 import os
 from connections import Connection
+import json
 
-context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-certfile = os.path.join("..", "config", "cert.pem")
-keyfile = os.path.join("..", "config", "key.pem")
-context.load_cert_chain(certfile=certfile, keyfile=keyfile)
+with open(os.path.join("..", "config", "config.json")) as config_file:
+    config = json.load(config_file)
 
 
 class ConnectionHandler:
@@ -26,8 +25,8 @@ class ConnectionHandler:
         self._stop_flag = False
         self._context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
         self._context.load_cert_chain(
-            certfile=os.path.join("..", "config", "cert.pem"),
-            keyfile=os.path.join("..", "config", "key.pem"))
+            certfile=config["paths"]["cert"],
+            keyfile=config["paths"]["key"])
 
     def start(self, port):
         """
@@ -72,8 +71,8 @@ class ConnectionHandler:
 def main():
     """Test function."""
     ser = ConnectionHandler(test)
-    ser.start(10000)
-    ser.stop()
+    ser.start(config["server"]["port"])
+    # ser.stop()
 
 
 def test(addr, connection):

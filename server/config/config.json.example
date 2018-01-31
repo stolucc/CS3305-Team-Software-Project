@@ -1,0 +1,16 @@
+{
+  "postgres":{
+    "host":"localhost",
+    "user":"postgres",
+    "password":"password",
+    "database":"gamedb",
+    "port": 5432
+  },
+  "paths":{
+    "cert":"../config/cert.pem",
+    "key":"../config/key.pem"
+  },
+  "server":{
+    "port":10000
+  }
+}

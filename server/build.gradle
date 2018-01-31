@@ -33,7 +33,7 @@ task copy(type: Copy) {
   from 'src'
   from 'lib'
   include '*.py'
-  into '../bin/server'
+  into '../bin/server/src'
 }
 
 task doBuild(){
