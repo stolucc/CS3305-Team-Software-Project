@@ -66,7 +66,7 @@ CREATE TABLE public.buildings
   x INTEGER NOT NULL,
   y INTEGER NOT NULL,
   z INTEGER NOT NULL,
-  CONSTRAINT user_building_id PRIMARY KEY (building_id)
+  CONSTRAINT building_id PRIMARY KEY (building_id)
 )
 WITH (
 OIDS=FALSE
@@ -88,10 +88,31 @@ CREATE TABLE public.units
   x INTEGER NOT NULL,
   y INTEGER NOT NULL,
   z INTEGER NOT NULL,
-  CONSTRAINT user_unit_id PRIMARY KEY (unit_id)
+  CONSTRAINT unit_id PRIMARY KEY (unit_id)
 )
 WITH (
 OIDS=FALSE
 );
 ALTER TABLE public.units OWNER TO postgres;
 ALTER SEQUENCE units_unit_id_seq OWNED BY units.unit_id;
+
+-- Table: public.logs
+
+-- DROP TABLE public.logs;
+
+CREATE SEQUENCE logs_log_id_seq;
+CREATE TABLE public.logs
+(
+  log_id INTEGER NOT NULL DEFAULT nextval('logs_log_id_seq'),
+  log_level INTEGER NOT NULL,
+  log_level_name VARCHAR(128) NOT NULL,
+  log VARCHAR(2048) NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  created_by VARCHAR(128) NOT NULL,
+  CONSTRAINT log_id PRIMARY KEY (log_id)
+)
+WITH (
+OIDS=FALSE
+);
+ALTER TABLE public.logs OWNER TO postgres;
+ALTER SEQUENCE logs_log_id_seq OWNED BY logs.log_id;

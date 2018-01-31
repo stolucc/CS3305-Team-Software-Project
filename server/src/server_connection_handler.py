@@ -4,10 +4,21 @@ import threading
 import ssl
 import os
 from connections import Connection
+import database_API
 import json
+from database_logger import Logger
+
 
 with open(os.path.join("..", "config", "config.json")) as config_file:
     config = json.load(config_file)
+
+db_connection = database_API.Connection(config["postgres"]["user"],
+                                        config["postgres"]["password"],
+                                        config["postgres"]["database"])
+session = db_connection.get_session()
+logger = Logger(session, "server_connection_handler.py",
+                config["logging"]["log_level"])
+log = logger.get_logger()
 
 
 class ConnectionHandler:
@@ -78,7 +89,9 @@ def main():
 def test(addr, connection):
     """Test handler function."""
     print(addr)
-    print(connection.recv())
+    info = connection.recv()
+    log.debug('Server received: %s' % info)
+    print(info)
 
 
 if __name__ == "__main__":

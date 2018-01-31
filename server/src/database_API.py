@@ -1,6 +1,6 @@
 """Server Database API."""
 from sqlalchemy import Column, Integer, Boolean, ForeignKey, \
-    Sequence, create_engine, MetaData, CheckConstraint
+    Sequence, create_engine, MetaData, CheckConstraint, String, TIMESTAMP
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
@@ -319,3 +319,46 @@ class Building(Base):
                "type='%s', x='%s', y='%s', z='%s')>" % (
                    self.user_id, self.building_id,
                    self.type, self.x, self.y, self.z)
+
+
+class Log(Base):
+    """SQL Alchemy class to model the logs database table."""
+
+    __tablename__ = 'logs'
+
+    log_id = Column(Integer, Sequence('logs_log_id_seq'), primary_key=True)
+    log_level = Column(Integer, nullable=False)
+    log_level_name = Column(String(128), nullable=False)
+    log = Column(String(2048), nullable=False)
+    created_at = Column(TIMESTAMP, CheckConstraint('type>=0'), nullable=False)
+    created_by = Column(String(128), nullable=False)
+
+    @staticmethod
+    def insert_log(session, log_level, log_level_name, log, created_at,
+                   created_by):
+        """
+        Create a log and add it to the database.
+
+        :param session: sessionmaker object
+        :param log_level: log_level of the log
+        :param log_level_name: log_level_name of the log
+        (limit is 128 characters)
+        :param log: log message of the log (limit is 2048 characters)
+        :param created_at: timestamp of when the log was created
+        :param created_by: what created the log (limit is 128 characters)
+        """
+        log = Log(log_level=log_level, log_level_name=log_level_name, log=log,
+                  created_at=created_at, created_by=created_by)
+        session = session()
+        session.add(log)
+        session.commit()
+        log_id = log.log_id
+        session.close()
+        return log_id
+
+    def __repr__(self):
+        """Return a String representation for a Log object."""
+        return "<log(log_id='%s', log_level='%s', log_level_name='%s', " \
+               "log='%s', created_at='%s', created_by='%s')>" % (
+                   self.log_id, self.log_level, self.log_level_name,
+                   self.log, self.created_at, self.created_by)
