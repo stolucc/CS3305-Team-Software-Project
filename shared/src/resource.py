@@ -1,16 +1,23 @@
 """Resource Classes."""
+from enum import Enum
 
 
-class Resource:
+class Resource(Enum):
     """Class to represent map resources."""
 
-    def __init__(self, available_quantity):
+    IRON = 0
+    HORSES = 1
+    COAL = 2
+    GEMS = 3
+
+    def __init__(self, resource_type, available_quantity):
         """
         Create base resource.
 
         :param available_quantity: Quantity gathered if worked.
         """
-        self._available_quantity = available_quantity  # given per turn
+        self._resource_type = resource_type
+        self._available_quantity = available_quantity
         self._is_worked = False
 
     def work(self):
@@ -38,3 +45,12 @@ class Resource:
         :return: boolean variable for work resource
         """
         return self._is_worked
+
+    @property
+    def resource_type(self):
+        """
+        Getter for resource type.
+
+        :return: the resource type
+        """
+        return self._resource_type
