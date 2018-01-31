@@ -104,6 +104,7 @@ class Connection:
 
 class NetworkException(Exception):
     """Custom Exception for networkapi."""
+
     pass
 
 

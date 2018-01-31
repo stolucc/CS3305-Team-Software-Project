@@ -1,4 +1,4 @@
-"""Server Connection Handler"""
+"""Server Connection Handler."""
 from socket import socket, gethostname, gethostbyname, AF_INET, SOCK_STREAM
 import threading
 import ssl

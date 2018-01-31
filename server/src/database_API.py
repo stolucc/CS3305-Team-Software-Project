@@ -1,4 +1,4 @@
-"""Server Database API"""
+"""Server Database API."""
 from sqlalchemy import Column, Integer, Boolean, ForeignKey, \
     Sequence, create_engine, MetaData, CheckConstraint
 from sqlalchemy.ext.declarative import declarative_base
@@ -25,21 +25,15 @@ class Connection:
         self.meta = MetaData(bind=self.connection)
 
     def get_connection(self):
-        """
-        Return a connection object.
-        """
+        """Return a connection object."""
         return self.connection
 
     def get_session(self):
-        """
-        Return a session maker object.
-        """
+        """Return a session maker object."""
         return self.session
 
     def get_meta(self):
-        """
-        Return a meta object.
-        """
+        """Return a meta object."""
         return self.meta
 
 
@@ -48,6 +42,7 @@ Base = declarative_base()
 
 class Game(Base):
     """SQL Alchemy class to model the games database table."""
+
     __tablename__ = 'games'
 
     game_id = Column(Integer, Sequence('games_game_id_seq'), primary_key=True)
@@ -88,12 +83,14 @@ class Game(Base):
         session.close()
 
     def __repr__(self):
+        """Return a String representation for a Game object."""
         return "<game(game_id='%s', seed='%d', active='%s')>" % (
             self.game_id, self.seed, self.active)
 
 
 class User(Base):
     """SQL Alchemy class to model the users database table."""
+
     __tablename__ = 'users'
 
     game_id = Column(Integer, ForeignKey('games.game_id'))
@@ -151,6 +148,7 @@ class User(Base):
         session.close()
 
     def __repr__(self):
+        """Return a String representation for a User object."""
         return "<user(game_id='%s', user_id='%s', active='%s', " \
                "gold='%i', production='%i', food='%i', science='%i')>" % (
                    self.game_id, self.user_id, self.active,
@@ -159,6 +157,7 @@ class User(Base):
 
 class Technology(Base):
     """SQL Alchemy class to model the technologies database table."""
+
     __tablename__ = 'technologies'
 
     user_id = Column(Integer, ForeignKey('users.user_id'), primary_key=True)
@@ -200,12 +199,14 @@ class Technology(Base):
         session.close()
 
     def __repr__(self):
+        """Return a String representation for a Technology object."""
         return"<technology(user_id='%s', technology_id='%s')>" % (
             self.user_id, self.technology_id)
 
 
 class Unit(Base):
     """SQL Alchemy class to model the units database table."""
+
     __tablename__ = 'units'
 
     user_id = Column(Integer, ForeignKey('users.user_id'))
@@ -255,6 +256,7 @@ class Unit(Base):
         session.close()
 
     def __repr__(self):
+        """Return a String representation for a Unit object."""
         return "<unit(user_id='%s', unit_id='%s', " \
                "type='%s', health='%s', x='%s', y='%s', z='%s')>" % (
                    self.user_id, self.unit_id,
@@ -263,6 +265,7 @@ class Unit(Base):
 
 class Building(Base):
     """SQL Alchemy class to model the buildings database table."""
+
     __tablename__ = 'buildings'
 
     user_id = Column(Integer, ForeignKey('users.user_id'))
@@ -311,6 +314,7 @@ class Building(Base):
         session.close()
 
     def __repr__(self):
+        """Return a String representation for a Building object."""
         return "<building(user_id='%s', building_id='%s', " \
                "type='%s', x='%s', y='%s', z='%s')>" % (
                    self.user_id, self.building_id,
