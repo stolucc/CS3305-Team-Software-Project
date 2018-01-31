@@ -1,8 +1,7 @@
-# http://docs.sqlalchemy.org/en/latest/orm/tutorial.html
 from sqlalchemy import Column, Integer, Boolean, ForeignKey, \
     Sequence, create_engine, MetaData, CheckConstraint
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship, backref
+from sqlalchemy.orm import sessionmaker, relationship
 
 
 def connect(user, password, db, host="localhost", port=5432):
@@ -28,6 +27,8 @@ class Game(Base):
     seed = Column(Integer, CheckConstraint('seed>=0'), nullable=False)
     active = Column(Boolean, nullable=False)
 
+    users = relationship("User", back_populates="game", passive_deletes="all")
+
     def __repr__(self):
         return "<game(game_id='%s', seed='%d', active='%s')>" % (
             self.game_id, self.seed, self.active)
@@ -36,9 +37,7 @@ class Game(Base):
 class User(Base):
     __tablename__ = 'users'
 
-    game_id = Column(Integer, ForeignKey('games.game_id',
-                                         onupdate="CASCADE",
-                                         ondelete="CASCADE"))
+    game_id = Column(Integer, ForeignKey('games.game_id'))
     user_id = Column(Integer, Sequence('users_user_id_seq'), primary_key=True)
     active = Column(Boolean, nullable=False)
     gold = Column(Integer, CheckConstraint('gold>=0'), nullable=False)
@@ -47,8 +46,12 @@ class User(Base):
     food = Column(Integer, CheckConstraint('food>=0'), nullable=False)
     science = Column(Integer, CheckConstraint('science>=0'), nullable=False)
 
-    game = relationship("Game",
-                        backref=backref("users", cascade="all, delete-orphan"))
+    game = relationship("Game", back_populates="users")
+    units = relationship("Unit", back_populates="user", passive_deletes="all")
+    technologies = relationship("Technology", back_populates="user",
+                                passive_deletes="all")
+    buildings = relationship("Building", back_populates="user",
+                             passive_deletes="all")
 
     def __repr__(self):
         return "<user(game_id='%s', user_id='%s', active='%s', " \
@@ -60,9 +63,7 @@ class User(Base):
 class Unit(Base):
     __tablename__ = 'units'
 
-    user_id = Column(Integer, ForeignKey('users.user_id',
-                                         onupdate="CASCADE",
-                                         ondelete="CASCADE"))
+    user_id = Column(Integer, ForeignKey('users.user_id'))
     unit_id = Column(Integer, Sequence('units_unit_id_seq'), primary_key=True)
     type = Column(Integer, CheckConstraint('type>=0'),  nullable=False)
     health = Column(Integer, CheckConstraint('health>=0'), nullable=False)
@@ -70,8 +71,7 @@ class Unit(Base):
     y = Column(Integer, nullable=False)
     z = Column(Integer, nullable=False)
 
-    user = relationship("User",
-                        backref=backref("units", cascade="all, delete-orphan"))
+    user = relationship("User", back_populates="units")
 
     def __repr__(self):
         return "<unit(user_id='%s', unit_id='%s', " \
@@ -83,14 +83,10 @@ class Unit(Base):
 class Technology(Base):
     __tablename__ = 'technologies'
 
-    user_id = Column(Integer, ForeignKey('users.user_id',
-                                         onupdate="CASCADE",
-                                         ondelete="CASCADE"), primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.user_id'), primary_key=True)
     technology_id = Column(Integer, primary_key=True)
 
-    user = relationship("User",
-                        backref=backref("technologies",
-                                        cascade="all, delete-orphan"))
+    user = relationship("User", back_populates="technologies")
 
     def __repr__(self):
         return"<technology(user_id='%s', technology_id='%s')>" % (
@@ -100,9 +96,7 @@ class Technology(Base):
 class Building(Base):
     __tablename__ = 'buildings'
 
-    user_id = Column(Integer, ForeignKey('users.user_id',
-                                         onupdate="CASCADE",
-                                         ondelete="CASCADE"))
+    user_id = Column(Integer, ForeignKey('users.user_id'))
     building_id = Column(Integer, Sequence('units_unit_id_seq'),
                          primary_key=True)
     type = Column(Integer, CheckConstraint('type>=0'), nullable=False)
@@ -110,9 +104,7 @@ class Building(Base):
     y = Column(Integer, nullable=False)
     z = Column(Integer, nullable=False)
 
-    user = relationship("User",
-                        backref=backref("buildings",
-                                        cascade="all, delete-orphan"))
+    user = relationship("User", back_populates="buildings")
 
     def __repr__(self):
         return "<building(user_id='%s', building_id='%s', " \
@@ -147,14 +139,14 @@ session.commit()
 session.delete(test_game)
 session.commit()
 
-for user in test_game.users:
-    print(user)
-
-for technology in test_user.technologies:
-    print(technology)
-
-for building in test_user.buildings:
-    print(building)
-
-for unit in test_user.units:
-    print(unit)
+# for user in test_game.users:
+#     print(user)
+#
+# for technology in test_user.technologies:
+#     print(technology)
+#
+# for building in test_user.buildings:
+#     print(building)
+#
+# for unit in test_user.units:
+#     print(unit)
