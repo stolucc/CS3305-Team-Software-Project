@@ -134,6 +134,11 @@ class Grid:
                          (y, z, x),
                          (-z, -x, -y)]
 
+    @property
+    def mirrors(self):
+        """Getter for mirrors."""
+        return self._mirrors
+
     def get_hextile(self, coordinates):
         """
         Get hex at coordinates.
@@ -152,7 +157,6 @@ class Grid:
 
         :return: Dictionary of hex objects.
         """
-
         return self._hextiles
 
     def create_grid(self):
@@ -290,8 +294,8 @@ class Grid:
         """
         Return the distance between two coordinates.
 
-        :param first_hex: coordinates (x, y, z)
-        :param second_hex: coordinates (x, y, z)
+        :param first_coord: coordinates (x, y, z)
+        :param second_coord: coordinates (x, y, z)
         :return: the distance between first_hex and second_hex,
         in the form of an int
         """
@@ -495,7 +499,7 @@ class Grid:
         path = []
         if end_hex in reachable:
             nxt = end_hex
-            while (nxt != start_hex):
+            while nxt != start_hex:
                 path += [nxt]
                 nxt = reachable[nxt]
         return path[::-1]
