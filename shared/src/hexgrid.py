@@ -157,7 +157,6 @@ class Grid:
 
         :return: Dictionary of hex objects.
         """
-
         return self._hextiles
 
     def create_grid(self):
