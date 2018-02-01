@@ -50,8 +50,9 @@ class LoggingHandler(logging.Handler):
             Log.insert_log(self.session, str(record.levelno),
                            str(record.levelname), str(record.filename),
                            record.lineno, str(record.funcName),
-                           str(record.msg.strip()), time_created, str(record.name),
-                           record.process, str(record.processName), record.thread,
+                           str(record.msg.strip()), time_created,
+                           str(record.name), record.process,
+                           str(record.processName), record.thread,
                            str(record.threadName))
         except Exception:
             pass
