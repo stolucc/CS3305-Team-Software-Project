@@ -16,7 +16,7 @@ db_connection = database_API.Connection(config["postgres"]["user"],
                                         config["postgres"]["password"],
                                         config["postgres"]["database"])
 session = db_connection.get_session()
-logger = Logger(session, "server_connection_handler.py",
+logger = Logger(session, "Server Connection Handler",
                 config["logging"]["log_level"])
 log = logger.get_logger()
 

@@ -43,9 +43,15 @@ class LoggingHandler(logging.Handler):
 
         :param record: record object that stores the information about the log
         """
-        time_created = time.strftime("%Y-%m-%d %H:%M:%S",
-                                     time.localtime(record.created))
-        Log.insert_log(self.session, str(record.levelno),
-                       str(record.levelname), str(record.pathname),
-                       record.lineno, str(record.msg.strip()), time_created,
-                       str(record.name))
+        try:
+            time_created = time.strftime("%Y-%m-%d %H:%M:%S",
+                                         time.localtime(record.created))
+            time_created += "." + str(record.msecs)[:3]
+            Log.insert_log(self.session, str(record.levelno),
+                           str(record.levelname), str(record.filename),
+                           record.lineno, str(record.funcName),
+                           str(record.msg.strip()), time_created, str(record.name),
+                           record.process, str(record.processName), record.thread,
+                           str(record.threadName))
+        except Exception:
+            pass

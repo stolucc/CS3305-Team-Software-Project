@@ -1,6 +1,7 @@
 """Server Database API."""
 from sqlalchemy import Column, Integer, Boolean, ForeignKey, \
-    Sequence, create_engine, MetaData, CheckConstraint, String, TIMESTAMP
+    Sequence, create_engine, MetaData, CheckConstraint, String, TIMESTAMP, \
+    BIGINT
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
@@ -327,35 +328,59 @@ class Log(Base):
     __tablename__ = 'logs'
 
     log_id = Column(Integer, Sequence('logs_log_id_seq'), primary_key=True)
-    log_level = Column(Integer, nullable=False)
+    log_level = Column(Integer, CheckConstraint('log_level>=0'),
+                       nullable=False)
     log_level_name = Column(String(256), nullable=False)
-    path = Column(String(256), nullable=False)
-    line_number = Column(Integer, nullable=False)
+    file_name = Column(String(256), nullable=False)
+    line_number = Column(Integer, CheckConstraint('line_number>=0'),
+                         nullable=False)
+    function_name = Column(String(256), nullable=False)
     log = Column(String(2048), nullable=False)
-    created_at = Column(TIMESTAMP, CheckConstraint('type>=0'), nullable=False)
+    created_at = Column(TIMESTAMP, CheckConstraint('created_at>=0'),
+                        nullable=False)
     created_by = Column(String(256), nullable=False)
+    process_id = Column(BIGINT, CheckConstraint('process_id>=0'),
+                        nullable=False)
+    process_name = Column(String(256), nullable=False)
+    thread_id = Column(BIGINT, CheckConstraint('thread_id>=0'),
+                       nullable=False)
+    thread_name = Column(String(256), nullable=False)
 
     @staticmethod
-    def insert_log(session, log_level, log_level_name, path, line_number, log,
-                   created_at, created_by):
+    def insert_log(session, log_level, log_level_name, file_name, line_number,
+                   function_name, log, created_at, created_by, process_id,
+                   process_name, thread_id, thread_name):
         """
         Create a log and add it to the database.
 
         :param session: sessionmaker object
-        :param log_level: log_level of the log
+        :param log_level: log_level of the log. Must be >= 0.
         :param log_level_name: log_level_name of the log
         (limit is 256 characters)
-        :param path: pathname of the file where the logging call was made
+        :param file_name: filename of the file where the logging call was made
         (limit is 256 characters)
         :param line_number: line number in the file where the logging call was
-        made
+        made. Must be >= 0.
+        :param function_name: name of function where the logging call was
+        made. (limit is 256 characters)
         :param log: log message of the log (limit is 2048 characters)
         :param created_at: timestamp of when the log was created
         :param created_by: what created the log (limit is 256 characters)
+        :param process_id: id of the process that created the log.
+        Must be >= 0.
+        :param process_name: name of the process that created the log
+        (limit is 256 characters)
+        :param thread_id: id of the thread that created the log.
+        Must be >= 0.
+        :param thread_name: name of the thread that created the log
+        (limit is 256 characters)
         """
         log = Log(log_level=log_level, log_level_name=log_level_name,
-                  path=path, line_number=line_number, log=log,
-                  created_at=created_at, created_by=created_by)
+                  file_name=file_name, line_number=line_number,
+                  function_name=function_name, log=log, created_at=created_at,
+                  created_by=created_by, process_id=process_id,
+                  process_name=process_name, thread_id=thread_id,
+                  thread_name=thread_name)
         session = session()
         session.add(log)
         session.commit()
@@ -366,8 +391,10 @@ class Log(Base):
     def __repr__(self):
         """Return a String representation for a Log object."""
         return "<log(log_id='%s', log_level='%s', log_level_name='%s', " \
-               "path='%s', line_number='%s', log='%s', created_at='%s', " \
-               "created_by='%s')>" % (
-                   self.log_id, self.log_level, self.log_level_name, self.path,
-                   self.line_number, self.log, self.created_at,
-                   self.created_by)
+               "file_name='%s', line_number='%s', function_name='%s' " \
+               "log='%s', created_at='%s', created_by='%s' process_id='%s', " \
+               "process_name='%s', thread_id='%s', thread_name='%s')>" % (
+                   self.log_id, self.log_level, self.log_level_name,
+                   self.file_name, self.line_number, self.function_name,
+                   self.log, self.created_at, self.created_by, self.process_id,
+                   self.process_name, self.thread_id, self.thread_name)

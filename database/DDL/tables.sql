@@ -104,13 +104,18 @@ CREATE SEQUENCE logs_log_id_seq;
 CREATE TABLE public.logs
 (
   log_id INTEGER NOT NULL DEFAULT nextval('logs_log_id_seq'),
-  log_level INTEGER NOT NULL,
+  log_level INTEGER NOT NULL CHECK (log_level >= 0),
   log_level_name VARCHAR(256) NOT NULL,
-  path VARCHAR(256) NOT NULL,
-  line_number INTEGER NOT NULL,
+  file_name VARCHAR(256) NOT NULL,
+  line_number INTEGER NOT NULL CHECK (line_number >= 0),
+  function_name VARCHAR(256) NOT NULL,
   log VARCHAR(2048) NOT NULL,
   created_at TIMESTAMP NOT NULL,
   created_by VARCHAR(256) NOT NULL,
+  process_id BIGINT NOT NULL CHECK (process_id >= 0),
+  process_name VARCHAR(256) NOT NULL,
+  thread_id BIGINT NOT NULL CHECK (thread_id >= 0),
+  thread_name VARCHAR(256) NOT NULL,
   CONSTRAINT log_id PRIMARY KEY (log_id)
 )
 WITH (
