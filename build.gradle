@@ -18,3 +18,133 @@ task devbuild(){
   dependsOn devclient
   dependsOn devserver
 }
+
+boolean pythonFound = false
+String pythonCommand = ""
+
+task checkversion1(type:Exec){
+  onlyIf{
+    !pythonFound
+  }
+  commandLine "python3.6", "--version"
+  ignoreExitValue = true
+  standardOutput = new ByteArrayOutputStream()
+  doLast{
+    if(execResult.getExitValue() == 0){
+      pythonFound = true
+      pythonCommand = "python3.6"
+    }
+  }
+}
+
+task checkversion2(type:Exec){
+    onlyIf{
+      !pythonFound
+    }
+    commandLine "python3", "--version"
+    ignoreExitValue = true
+    standardOutput = new ByteArrayOutputStream()
+    doLast{
+      if(execResult.getExitValue() == 0 && standardOutput.toString().contains("Python 3.6")){
+        pythonFound = true
+        pythonCommand = "python3"
+      }
+  }
+}
+
+task checkversion3(type:Exec){
+    onlyIf{
+      !pythonFound
+    }
+    commandLine "python", "--version"
+    ignoreExitValue = true
+    standardOutput = new ByteArrayOutputStream()
+    doLast{
+      if(execResult.getExitValue() == 0 && standardOutput.toString().contains("Python 3.6")){
+        pythonFound = true
+        pythonCommand = "python"
+    }
+  }
+}
+
+
+task pythonversion(){
+  dependsOn checkversion1
+  dependsOn checkversion2
+  dependsOn checkversion3
+  doLast{
+    if(!pythonFound){
+      throw new GradleException("No valid python3.6 installation found, building failed")
+    }
+  }
+}
+
+String[] required = ["pylama", "Sphinx"]
+Boolean[] installed = [false, false]
+task checktools(dependsOn:pythonversion, type:Exec){
+    doFirst{
+      executable = pythonCommand
+    }
+    args = ["-m","pip","list","--format","columns"]
+    ignoreExitValue = true
+    standardOutput = new ByteArrayOutputStream()
+    doLast{
+      String result = standardOutput.toString()
+      for(int i=0; i<required.length;i++){
+        if(result.contains(required[i])){
+          installed[i] = true
+        }
+      }
+    }
+  }
+
+task installTools(){
+  dependsOn checktools
+  doLast{
+    for(int i=0; i<required.length; i++){
+      if(!installed[i]){
+        exec{
+          doFirst{
+            println pythonCommand
+            executable = pythonCommand
+            args = ["-m","pip","install",required[i]]
+            standardOutput = new ByteArrayOutputStream()
+          }
+        }
+      }
+    }
+  }
+}
+
+task document(){
+  dependsOn installTools
+  doFirst{
+    copy{
+    from 'documentation/core'
+    into 'documentation/source'
+    }
+  }
+  exec{
+    standardOutput = new ByteArrayOutputStream()
+    commandLine 'sphinx-apidoc','-o','documentation/source','shared/src'
+  }
+  exec{
+    standardOutput = new ByteArrayOutputStream()
+    commandLine 'sphinx-apidoc','-o','documentation/source','server/src'
+  }
+  exec{
+    standardOutput = new ByteArrayOutputStream()
+    commandLine 'sphinx-apidoc','-o','documentation/source','client/src'
+  }
+  doLast{
+    exec{
+      commandLine 'sphinx-build','documentation/source','documentation/output'
+    }
+  }
+}
+
+task lint(type:Exec){
+  dependsOn installTools
+  commandLine 'pylama'
+  ignoreExitValue = true 
+}
