@@ -222,6 +222,15 @@ class Layout:
         """
         return self._size
 
+    @size.setter
+    def size(self, new_size):
+        """
+        Setter for size.
+
+        :param new_size: A Point object
+        """
+        self._size = new_size
+
     @property
     def origin(self):
         """
