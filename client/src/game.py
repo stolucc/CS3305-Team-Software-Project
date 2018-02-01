@@ -43,7 +43,10 @@ class Game:
         self._font = 'freesansbold.ttf'
         self._font_size = 115
         self._grid_size = 51
-        self._zoom = 150
+        self._zoom = 100
+        self._zoom_interval = 5
+        self._min_zoom = 1
+        self._max_zoom = 150
         self._hex_size = (self._window_size[0] //
                           self._zoom)
         self._grid = Grid(self._grid_size)
@@ -66,24 +69,51 @@ class Game:
     def mouse_button_down(self, event):
         """Mouse down actions."""
         if event.button == 1:  # Left click
-            pygame.mouse.get_rel()
-            holding = True
-            while holding:
-                pygame.event.get()
-                change = pygame.mouse.get_rel()
-                self._layout.change_origin(change)
-                self.draw_hex_grid()
-                time.sleep(0.017)
-                holding = pygame.mouse.get_pressed()[0]
-
+            self.panning()
         elif event.button == 2:  # Middle click
             pass
         elif event.button == 3:  # Right click
             pass
         elif event.button == 4:  # Scrole up
-            pass
+            self.zoom_in()
         elif event.button == 5:  # Scrole down
-            pass
+            self.zoom_out()
+
+    def panning(self):
+        """Move map while holding down."""
+        pygame.mouse.get_rel()
+        holding = True
+        while holding:
+            pygame.event.get()
+            change = pygame.mouse.get_rel()
+            self._layout.change_origin(change)
+            self.draw_hex_grid()
+            time.sleep(0.017)
+            holding = pygame.mouse.get_pressed()[0]
+
+    def zoom_in(self):
+        """Zooming in on map."""
+        self._zoom -= self._zoom_interval
+        if self._zoom <= self._min_zoom:
+            self._zoom = self._min_zoom
+        else:
+            self._hex_size = (self._window_size[0] //
+                              self._zoom)
+            self._layout.size = Point(self._hex_size, self._hex_size)
+            self.draw_hex_grid()
+            time.sleep(0.017)
+
+    def zoom_out(self):
+        """Zooming away from map."""
+        self._zoom += self._zoom_interval
+        if self._zoom >= self._max_zoom:
+            self._zoom = self._max_zoom
+        else:
+            self._hex_size = (self._window_size[0] //
+                              self._zoom)
+            self._layout.size = Point(self._hex_size, self._hex_size)
+            self.draw_hex_grid()
+            time.sleep(0.017)
 
     def text_objects(self, text, font, color):
         """."""
