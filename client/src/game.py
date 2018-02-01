@@ -1,6 +1,5 @@
 """Client game."""
 import pygame
-import math
 import sys
 import time
 from layout import Layout
@@ -28,7 +27,7 @@ class Game:
     """Class to represent client-side game."""
 
     def __init__(self):
-        """Initalize display surface."""
+        """Initialise display surface."""
         pygame.init()
         pygame.font.init()
         self._flags = (pygame.DOUBLEBUF |
@@ -109,11 +108,6 @@ class Game:
             self._layout.size = self.hex_size(self._zoom)
             self.draw_hex_grid()
             time.sleep(0.017)
-
-    def text_objects(self, text, font, color):
-        """."""
-        textSurface = font.render(str(text), True, color)
-        return textSurface, textSurface.get_rect()
 
     def draw_hex_grid(self):
         """A function which creates a grid."""

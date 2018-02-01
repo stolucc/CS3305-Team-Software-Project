@@ -38,11 +38,11 @@ class Orientation:
         :return: a boolean. True if the two tuples are the same,
         False otherwise
         """
-        return self.f0 == other.f0 and self.f1 == other.f1 and \
-               self.f2 == other.f2 and self.f3 == other.f3 and \
-               self.b0 == other.b0 and self.b1 == other.b1 and \
-               self.b2 == other.b2 and self.b3 == other.b3 and \
-               self.start_angle == other.start_angle
+        return (self.f0 == other.f0 and self.f1 == other.f1 and
+                self.f2 == other.f2 and self.f3 == other.f3 and
+                self.b0 == other.b0 and self.b1 == other.b1 and
+                self.b2 == other.b2 and self.b3 == other.b3 and
+                self.start_angle == other.start_angle)
 
     @property
     def f0(self):
@@ -218,9 +218,9 @@ class Layout:
         size = self.size
         origin = self.origin
         pt = ((point[0] - origin[0]) / size, (point[1] - origin[1]) / size)
-        q = m.b0 * pt.x + m.b1 * pt.y
-        r = m.b2 * pt.x + m.b3 * pt.y
-        return Hex(q, r, -q-r)
+        q = m.b0 * pt[0] + m.b1 * pt[1]
+        r = m.b2 * pt[0] + m.b3 * pt[1]
+        return Hex(q, r, -q - r)
         # the Hex must be rounded with grid.hex_round((Hex.x, Hex.y, Hex.z))
         # after calling this function
 
@@ -265,6 +265,7 @@ def main():
     result_tile = grid.hex_round((ph.x, ph.y, ph.z))
     r = grid.get_hextile(result_tile)
     print(r)
+
 
 if __name__ == '__main__':
     main()
