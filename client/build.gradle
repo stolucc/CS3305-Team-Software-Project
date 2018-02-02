@@ -15,13 +15,24 @@ description = 'Client Build'
 
 task copyTests(type: Copy){
   from '../shared/test'
-  from '../shared/lib'
   from '../shared/src'
   from 'test'
-  from 'lib'
   from 'src'
   include '*.py'
   into '../bin/client/test'
+}
+
+task copyLibTest(type: Copy){
+  from '../shared/lib'
+  from './lib'
+  into '../bin/client/test'
+}
+
+task copyLib(type: Copy){
+  dependsOn copyLibTest
+  from '../shared/lib'
+  from './lib'
+  into '../bin/client/src'
 }
 
 task copyConfig(type: Copy){
@@ -32,9 +43,7 @@ task copyConfig(type: Copy){
 
 task copy(type: Copy) {
   from '../shared/src'
-  from '../shared/lib'
   from 'src'
-  from 'lib'
   include '*.py'
   into '../bin/client/src'
 }
@@ -43,4 +52,5 @@ task doBuild(){
   dependsOn copyConfig
   dependsOn copy
   dependsOn copyTests
+  dependsOn copyLib
 }
