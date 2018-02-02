@@ -137,7 +137,7 @@ class Game:
         return layouts
 
     def draw_map(self):
-        """."""
+        """Draw a map."""
         self._screen.fill((0, 0, 0))
         self.draw_hex_grid(self._layout)
         layouts = self.get_mirrors()

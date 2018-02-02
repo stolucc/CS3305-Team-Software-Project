@@ -229,7 +229,7 @@ class Layout:
         Position of the corner relative to the center of the hex.
 
         :param corner: orientation of the corner,
-                        either 0.0 for 0° or 0.5 for 60°
+                        either 0.0 for 0 or 0.5 for 60
         :return: a tuple with the position of the corner
         """
         m = self.orientation
