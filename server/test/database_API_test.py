@@ -18,6 +18,21 @@ class SimpleDatabaseTest(unittest.TestCase):
         game_id = Game.insert_game(session, 1, True)
         assert type(game_id) is int, "Can't insert game to database"
 
+    def test_select_game(self):
+        """Update a game in the database"""
+        game_id = Game.insert_game(session, 1, True)
+        game_dict = Game.select_game(session, game_id)
+        assert game_dict == {'game_id': game_id, 'active': True, 'seed': 1}, \
+            "Can't select game from database"
+
+    def test_update_game(self):
+        """Update a game in the database"""
+        game_id = Game.insert_game(session, 1, True)
+        Game.update_game(session, game_id, seed=2, active=False)
+        game_dict = Game.select_game(session, game_id)
+        assert game_dict == {'game_id': game_id, 'active': False, 'seed': 2}, \
+            "Can't update game in database"
+
     def test_insert_user(self):
         """Insert a user to the database"""
         game_id = Game.insert_game(session, 1, True)

@@ -70,6 +70,37 @@ class Game(Base):
         return game_id
 
     @staticmethod
+    def select_game(session, game_id):
+        """
+        Select a game that is in the database.
+
+        :param session: sessionmaker object
+        :param game_id: game_id of the game to be selected
+        """
+        session = session()
+        game = session.query(Game).filter(Game.game_id == game_id).first()
+        game_dict = game.__dict__
+        del game_dict['_sa_instance_state']
+        session.close()
+        return game_dict
+
+    @staticmethod
+    def update_game(session, game_id, **kwargs):
+        """
+        Update a game that is in the database.
+        Updatable columns: seed, active
+
+        :param session: sessionmaker object
+        :param game_id: game_id of the game to be updated
+        """
+        session = session()
+        game = session.query(Game).filter(Game.game_id == game_id).first()
+        for name, value in kwargs.items():
+            setattr(game, name, value)
+        session.commit()
+        session.close()
+
+    @staticmethod
     def delete_game(session, game_id):
         """
         Delete a game from the database.
