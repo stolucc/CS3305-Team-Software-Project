@@ -18,7 +18,7 @@ class Orientation:
         :param b1: inverse matrix
         :param b2: inverse matrix
         :param b3: inverse matrix
-        :param start_angle: the angle to start from in multiple of 60°
+        :param start_angle: the angle to start from in multiple of 60
         """
         self._f0 = f0
         self._f1 = f1

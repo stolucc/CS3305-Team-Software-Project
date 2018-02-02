@@ -102,14 +102,12 @@ task installTools(){
   dependsOn checktools
   doLast{
     for(int i=0; i<required.length; i++){
+      println installed
       if(!installed[i]){
         exec{
-          doFirst{
-            println pythonCommand
             executable = pythonCommand
             args = ["-m","pip","install",required[i]]
             standardOutput = new ByteArrayOutputStream()
-          }
         }
       }
     }
@@ -123,18 +121,18 @@ task document(){
     from 'documentation/core'
     into 'documentation/source'
     }
-  }
-  exec{
-    standardOutput = new ByteArrayOutputStream()
-    commandLine 'sphinx-apidoc','-o','documentation/source','shared/src'
-  }
-  exec{
-    standardOutput = new ByteArrayOutputStream()
-    commandLine 'sphinx-apidoc','-o','documentation/source','server/src'
-  }
-  exec{
-    standardOutput = new ByteArrayOutputStream()
-    commandLine 'sphinx-apidoc','-o','documentation/source','client/src'
+    exec{
+      standardOutput = new ByteArrayOutputStream()
+      commandLine 'sphinx-apidoc','-o','documentation/source','shared/src'
+    }
+    exec{
+      standardOutput = new ByteArrayOutputStream()
+      commandLine 'sphinx-apidoc','-o','documentation/source','server/src'
+    }
+    exec{
+      standardOutput = new ByteArrayOutputStream()
+      commandLine 'sphinx-apidoc','-o','documentation/source','client/src'
+    }
   }
   doLast{
     exec{
@@ -146,5 +144,5 @@ task document(){
 task lint(type:Exec){
   dependsOn installTools
   commandLine 'pylama'
-  ignoreExitValue = true 
+  ignoreExitValue = true
 }
