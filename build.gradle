@@ -102,7 +102,6 @@ task installTools(){
   dependsOn checktools
   doLast{
     for(int i=0; i<required.length; i++){
-      println installed
       if(!installed[i]){
         exec{
             executable = pythonCommand
