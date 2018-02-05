@@ -118,6 +118,7 @@ class Game(Base):
         session.commit()
         session.close()
 
+    # NOTE Remove delete method when confirmed it will not be required.
     # @staticmethod
     # def delete(session, game_id):
     #     """
@@ -280,6 +281,7 @@ class User(Base):
         session.commit()
         session.close()
 
+    # NOTE Remove delete method when confirmed it will not be required.
     # @staticmethod
     # def delete(session, user_id):
     #     """
@@ -368,6 +370,7 @@ class Technology(Base):
         session.commit()
         session.close()
 
+    # NOTE Remove delete method when confirmed it will not be required.
     # @staticmethod
     # def delete(session, user_id, technology_id):
     #     """
@@ -479,6 +482,7 @@ class Unit(Base):
         session.commit()
         session.close()
 
+    # NOTE Remove delete method when confirmed it will not be required.
     # @staticmethod
     # def delete(session, unit_id):
     #     """
@@ -591,6 +595,7 @@ class Building(Base):
         session.commit()
         session.close()
 
+    # NOTE Remove delete method when confirmed it will not be required.
     # @staticmethod
     # def delete(session, building_id):
     #     """
