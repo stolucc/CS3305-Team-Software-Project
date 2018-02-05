@@ -1,3 +1,4 @@
+"""Convert between hex and pixel coordinates."""
 import math
 from hexgrid import Hex, Grid
 
@@ -8,8 +9,8 @@ class Orientation:
     def __init__(self, f0, f1, f2, f3, b0, b1, b2, b3, start_angle):
         """
         Create a new Orientation object.
-        Can either be pointy top or flat top.
 
+        Can either be pointy top or flat top.
         :param f0: matrix
         :param f1: matrix
         :param f2: matrix
@@ -239,7 +240,7 @@ class Layout:
 
     def polygon_corners(self, hexagon):
         """
-        The corners in screen locations.
+        Get hex corners in pixel coordinates.
 
         :param hexagon: a Hex object
         :return: an array of corners
@@ -253,8 +254,8 @@ class Layout:
 
 
 def main():
+    """Test functionality."""
     grid = Grid(9)
-    hexmap = grid.create_grid()
     hexagon = grid.get_hextile((0, 1, -1))
     print(hexagon)
     pointy = Layout((10, 10), (200, 200))

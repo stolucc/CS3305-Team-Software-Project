@@ -5,7 +5,7 @@ from terrain import Terrain, TerrainType, BiomeType
 
 
 class Hex:
-    """A class for an Hexagonal shape."""
+    """A class for a Hexagonal shape."""
 
     def __init__(self, x, y, z):
         """
@@ -232,7 +232,7 @@ class Grid:
 
     def get_neighbour_in_direction(self, hexagon, dire):
         """
-        The direction to take when computing the neighbours.
+        Get neighbouring tile in a given direction.
 
         :param hexagon: a Hex object
         :param dire: a direction to pick
@@ -371,7 +371,7 @@ class Grid:
 
     def single_ring(self, centre_hexagon, ring_radius):
         """
-        A ring.
+        Compute a ring of hex objects of a given radius.
 
         :param ring_radius: the radius of the ring
         :param centre_hexagon: the centre tile of the ring
@@ -389,7 +389,7 @@ class Grid:
 
     def spiral_ring(self, centre_hexagon, spiral_radius):
         """
-        An outward spiral ring originating from centre hex.
+        Compute an outward spiral ring originating from centre hex.
 
         :param centre_hexagon: the centre tile of the ring
         :param spiral_radius: the radius of the spiral
@@ -429,7 +429,7 @@ class Grid:
 
     def vision(self, hex, radius):
         """
-        A function to determine which tiles are visible in a certain radius.
+        Determine which tiles are visible in a certain radius.
 
         :param hex: a hex marking centre of the vision radius
         :param radius: the radius to calculate

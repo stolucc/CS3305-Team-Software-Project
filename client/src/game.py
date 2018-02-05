@@ -117,7 +117,7 @@ class Game:
             time.sleep(0.017)
 
     def draw_hex_grid(self, layout):
-        """A function which creates a grid."""
+        """Create a hex grid."""
         for hex_point in self._grid.get_hextiles():
             hexagon = self._grid.get_hextile(hex_point)
             pygame.draw.polygon(self._screen, pygame.Color("white"),
