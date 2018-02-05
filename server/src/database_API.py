@@ -250,7 +250,7 @@ class Technology(Base):
 
         :param session: sessionmaker object
         :param user_id: user_id of the technology to be selected
-        :param user_id: technology_id of the technology to be selected
+        :param technology_id: technology_id of the technology to be selected
         """
         session = session()
         technology = session.query(Technology).filter(
@@ -262,17 +262,19 @@ class Technology(Base):
         return technology_dict
 
     @staticmethod
-    def update_technology(session, user_id, **kwargs):
+    def update_technology(session, old_user_id, old_technology_id, **kwargs):
         """
         Update a technology that is in the database.
-        Updatable columns: technology_id
+        Updatable columns: user_id, technology_id
 
         :param session: sessionmaker object
-        :param user_id: user_id of the technology to be updated
+        :param old_user_id: user_id of the technology to be updated
+        :param old_technology_id: technology_id of the technology to be updated
         """
         session = session()
         technology = session.query(Technology).filter(
-            Technology.user_id == user_id).first()
+            Technology.user_id == old_user_id,
+            Technology.technology_id == old_technology_id).first()
         for name, value in kwargs.items():
             setattr(technology, name, value)
         session.commit()
@@ -361,7 +363,7 @@ class Unit(Base):
     def update_unit(session, unit_id, **kwargs):
         """
         Update a unit that is in the database.
-        Updatable columns: type, health, x, y, z
+        Updatable columns: user_id, type, health, x, y, z
 
         :param session: sessionmaker object
         :param unit_id: unit_id of the unit to be updated
@@ -454,7 +456,7 @@ class Building(Base):
     def update_building(session, building_id, **kwargs):
         """
         Update a building that is in the database.
-        Updatable columns: type, x, y, z
+        Updatable columns: user_id, type, x, y, z
 
         :param session: sessionmaker object
         :param building_id: building_id of the building to be updated
