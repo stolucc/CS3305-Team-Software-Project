@@ -105,6 +105,7 @@ class Game(Base):
     def update(session, game_id, **kwargs):
         """
         Update a game that is in the database.
+
         Updatable columns: seed, active
 
         :param session: sessionmaker object
@@ -266,6 +267,7 @@ class User(Base):
     def update(session, user_id, **kwargs):
         """
         Update a user that is in the database.
+
         Updatable columns: game_id, active, gold, production, food, science
 
         :param session: sessionmaker object
@@ -350,6 +352,7 @@ class Technology(Base):
     def update(session, old_user_id, old_technology_id, **kwargs):
         """
         Update a technology that is in the database.
+
         Updatable columns: user_id, technology_id
 
         :param session: sessionmaker object
@@ -462,6 +465,7 @@ class Unit(Base):
     def update(session, unit_id, **kwargs):
         """
         Update a unit that is in the database.
+
         Updatable columns: user_id, type, health, x, y, z
 
         :param session: sessionmaker object
@@ -573,6 +577,7 @@ class Building(Base):
     def update(session, building_id, **kwargs):
         """
         Update a building that is in the database.
+
         Updatable columns: user_id, type, x, y, z
 
         :param session: sessionmaker object
