@@ -5,13 +5,12 @@ connection = Connection("postgres", "password", "gamedb")
 session = connection.get_session()
 
 
-class SimpleDatabaseTest(unittest.TestCase):
+class GameTest(unittest.TestCase):
 
     def tearDown(self):
         connection = Connection("postgres", "password",
                                 "gamedb").get_connection()
         connection.execute("DELETE FROM public.games;")
-        pass
 
     def test_insert_game(self):
         """Insert a game to the database"""
@@ -25,6 +24,14 @@ class SimpleDatabaseTest(unittest.TestCase):
         assert game_dict == {'game_id': game_id, 'active': True, 'seed': 1}, \
             "Can't select game from database"
 
+    def test_games_users(self):
+        """Get a game's users from the database"""
+        game_id = Game.insert(session, 1, True)
+        user_id = User.insert(session, game_id, True, 0, 0, 0, 0)
+        users = Game.users(session, game_id)
+        assert users == [user_id], \
+            "Can't get a game's users from the database."
+
     def test_update_game(self):
         """Update a game in the database"""
         game_id = Game.insert(session, 1, True)
@@ -32,6 +39,14 @@ class SimpleDatabaseTest(unittest.TestCase):
         game_dict = Game.select(session, game_id)
         assert game_dict == {'game_id': game_id, 'active': False, 'seed': 2}, \
             "Can't update game in database"
+
+
+class UserTest(unittest.TestCase):
+
+    def tearDown(self):
+        connection = Connection("postgres", "password",
+                                "gamedb").get_connection()
+        connection.execute("DELETE FROM public.games;")
 
     def test_insert_user(self):
         """Insert a user to the database"""
@@ -49,6 +64,41 @@ class SimpleDatabaseTest(unittest.TestCase):
                              'food': 0, 'science': 0}, \
             "Can't select user from database"
 
+    def test_users_game(self):
+        """Get a users's game from the database"""
+        game_id = Game.insert(session, 1, True)
+        user_id = User.insert(session, game_id, True, 0, 0, 0, 0)
+        game = User.game(session, user_id)
+        assert game == game_id, \
+            "Can't get a user's game from the database."
+
+    def test_users_units(self):
+        """Get a users's units from the database"""
+        game_id = Game.insert(session, 1, True)
+        user_id = User.insert(session, game_id, True, 0, 0, 0, 0)
+        unit_id = Unit.insert(session, user_id, 0, 100, 0, 0, 0)
+        units = User.units(session, user_id)
+        assert units == [unit_id], \
+            "Can't get user's units from the database."
+
+    def test_users_technologies(self):
+        """Get a users's technologies from the database"""
+        game_id = Game.insert(session, 1, True)
+        user_id = User.insert(session, game_id, True, 0, 0, 0, 0)
+        Technology.insert(session, user_id, 1)
+        technologies = User.technologies(session, user_id)
+        assert technologies == [1], \
+            "Can't get user's technologies from the database."
+
+    def test_users_buildings(self):
+        """Get a users's buildings from the database"""
+        game_id = Game.insert(session, 1, True)
+        user_id = User.insert(session, game_id, True, 0, 0, 0, 0)
+        building_id = Building.insert(session, user_id, True, 0, 0, 0, 0)
+        buildings = User.buildings(session, user_id)
+        assert buildings == [building_id], \
+            "Can't get user's buildings from the database."
+
     def test_update_user(self):
         """Update a user in the database"""
         game_id = Game.insert(session, 1, True)
@@ -61,11 +111,21 @@ class SimpleDatabaseTest(unittest.TestCase):
                              'food': 30, 'science': 40}, \
             "Can't update user in database"
 
+
+class TechnologyTest(unittest.TestCase):
+
+    def tearDown(self):
+        connection = Connection("postgres", "password",
+                                "gamedb").get_connection()
+        connection.execute("DELETE FROM public.games;")
+
     def test_insert_technology(self):
         """Insert a technology to the database"""
         game_id = Game.insert(session, 1, True)
         user_id = User.insert(session, game_id, True, 0, 0, 0, 0)
-        Technology.insert(session, user_id, 1)
+        u_id, t_id = Technology.insert(session, user_id, 1)
+        assert type(u_id) is int, "Can't insert user to database"
+        assert type(t_id) is int, "Can't insert user to database"
 
     def test_select_technology(self):
         """Select a technology in the database"""
@@ -90,6 +150,14 @@ class SimpleDatabaseTest(unittest.TestCase):
                                    'technology_id': 2}, \
             "Can't update technology in database"
 
+
+class UnitTest(unittest.TestCase):
+
+    def tearDown(self):
+        connection = Connection("postgres", "password",
+                                "gamedb").get_connection()
+        connection.execute("DELETE FROM public.games;")
+
     def test_insert_unit(self):
         """Insert a unit to the database"""
         game_id = Game.insert(session, 1, True)
@@ -108,6 +176,15 @@ class SimpleDatabaseTest(unittest.TestCase):
                              'z': 0}, \
             "Can't select unit from database"
 
+    def test_units_user(self):
+        """Get a unit's user from the database"""
+        game_id = Game.insert(session, 1, True)
+        user_id = User.insert(session, game_id, True, 0, 0, 0, 0)
+        unit_id = Unit.insert(session, user_id, 0, 100, 0, 0, 0)
+        u_id = Unit.user(session, unit_id)
+        assert u_id == user_id, \
+            "Can't get units's user from the database."
+
     def test_update_unit(self):
         """Update a unit in the database"""
         game_id = Game.insert(session, 1, True)
@@ -123,14 +200,20 @@ class SimpleDatabaseTest(unittest.TestCase):
                              'z': -1}, \
             "Can't update unit in database"
 
+
+class BuildingTest(unittest.TestCase):
+
+    def tearDown(self):
+        connection = Connection("postgres", "password",
+                                "gamedb").get_connection()
+        connection.execute("DELETE FROM public.games;")
+
     def test_insert_building(self):
         """Insert a building to the database"""
         game_id = Game.insert(session, 1, True)
         user_id = User.insert(session, game_id, True, 0, 0, 0, 0)
         building_id = Building.insert(session, user_id, True, 0, 0, 0, 0)
         assert type(building_id) is int, "Can't insert game to database"
-
-        Game.delete(session, game_id)
 
     def test_select_building(self):
         """Select a building in the database"""
@@ -142,6 +225,15 @@ class SimpleDatabaseTest(unittest.TestCase):
                                  'building_id': building_id,
                                  'type': 0, 'x': 0, 'y': 0, 'z': 0}, \
             "Can't select building from database"
+
+    def test_buildings_user(self):
+        """Get a buildings's user from the database"""
+        game_id = Game.insert(session, 1, True)
+        user_id = User.insert(session, game_id, True, 0, 0, 0, 0)
+        building_id = Building.insert(session, user_id, True, 0, 0, 0, 0)
+        u_id = Building.user(session, building_id)
+        assert u_id == user_id, \
+            "Can't get building's user from the database."
 
     def test_update_building(self):
         """Update a unit in the database"""
