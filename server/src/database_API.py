@@ -406,6 +406,7 @@ class Building(Base):
     user_id = Column(Integer, ForeignKey('users.user_id'))
     building_id = Column(Integer, Sequence('buildings_building_id_seq'),
                          primary_key=True)
+    active = Column(Boolean, nullable=False)
     type = Column(Integer, CheckConstraint('type>=0'), nullable=False)
     x = Column(Integer, nullable=False)
     y = Column(Integer, nullable=False)
@@ -414,12 +415,13 @@ class Building(Base):
     user = relationship("User", back_populates="buildings")
 
     @staticmethod
-    def insert(session, user_id, type, x, y, z):
+    def insert(session, user_id, active, type, x, y, z):
         """
         Create a building and add it to the database.
 
         :param session: sessionmaker object
         :param user_id: user_id of the user that owns the building
+        :param active: specifies if the building is active or not
         :param type: specifies the type of building. Must be >= 0.
         :param x: specifies the location (x coordinate) of building.
         x + y + z must equal 0.
@@ -428,7 +430,8 @@ class Building(Base):
         :param z: specifies the location (z coordinate) of building.
         x + y + z must equal 0.
         """
-        building = Building(user_id=user_id, type=type, x=x, y=y, z=z)
+        building = Building(user_id=user_id, active=active, type=type, x=x,
+                            y=y, z=z)
         session = session()
         session.add(building)
         session.commit()
@@ -486,9 +489,9 @@ class Building(Base):
 
     def __repr__(self):
         """Return a String representation for a Building object."""
-        return "<building(user_id='%s', building_id='%s', " \
+        return "<building(user_id='%s', building_id='%s', active='%s'" \
                "type='%s', x='%s', y='%s', z='%s')>" % (
-                   self.user_id, self.building_id,
+                   self.user_id, self.building_id, self.active,
                    self.type, self.x, self.y, self.z)
 
 

@@ -127,7 +127,7 @@ class SimpleDatabaseTest(unittest.TestCase):
         """Insert a building to the database"""
         game_id = Game.insert(session, 1, True)
         user_id = User.insert(session, game_id, True, 0, 0, 0, 0)
-        building_id = Building.insert(session, user_id, 0, 0, 0, 0)
+        building_id = Building.insert(session, user_id, True, 0, 0, 0, 0)
         assert type(building_id) is int, "Can't insert game to database"
 
         Game.delete(session, game_id)
@@ -136,9 +136,9 @@ class SimpleDatabaseTest(unittest.TestCase):
         """Select a building in the database"""
         game_id = Game.insert(session, 1, True)
         user_id = User.insert(session, game_id, True, 0, 0, 0, 0)
-        building_id = Building.insert(session, user_id, 0, 0, 0, 0)
+        building_id = Building.insert(session, user_id, True, 0, 0, 0, 0)
         building_dict = Building.select(session, building_id)
-        assert building_dict == {'user_id': user_id,
+        assert building_dict == {'user_id': user_id, 'active': True,
                                  'building_id': building_id,
                                  'type': 0, 'x': 0, 'y': 0, 'z': 0}, \
             "Can't select building from database"
@@ -148,14 +148,14 @@ class SimpleDatabaseTest(unittest.TestCase):
         game_id = Game.insert(session, 1, True)
         user_id1 = User.insert(session, game_id, True, 0, 0, 0, 0)
         user_id2 = User.insert(session, game_id, True, 0, 0, 0, 0)
-        building_id = Building.insert(session, user_id1, 0, 0, 0, 0)
+        building_id = Building.insert(session, user_id1, True, 0, 0, 0, 0)
 
-        Building.update(session, building_id, user_id=user_id2,
+        Building.update(session, building_id, user_id=user_id2, active=False,
                         type=1, x=3, y=-2, z=-1)
         building_dict = Building.select(session, building_id)
-        assert building_dict == {'user_id': user_id2,
-                             'building_id': building_id,
-                             'type': 1, 'x': 3, 'y': -2, 'z': -1}, \
+        assert building_dict == {'user_id': user_id2, 'active': False,
+                                 'building_id': building_id,
+                                 'type': 1, 'x': 3, 'y': -2, 'z': -1}, \
             "Can't update building in database"
 
 

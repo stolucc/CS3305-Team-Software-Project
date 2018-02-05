@@ -62,6 +62,7 @@ CREATE TABLE public.buildings
 (
   user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
   building_id INTEGER NOT NULL DEFAULT nextval('buildings_building_id_seq'),
+  active BOOLEAN NOT NULL,
   type INTEGER NOT NULL CHECK (type >= 0),
   x INTEGER NOT NULL,
   y INTEGER NOT NULL,
