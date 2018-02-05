@@ -166,6 +166,37 @@ class User(Base):
         return user_id
 
     @staticmethod
+    def select_user(session, user_id):
+        """
+        Select a user that is in the database.
+
+        :param session: sessionmaker object
+        :param user_id: user_id of the user to be selected
+        """
+        session = session()
+        user = session.query(User).filter(User.user_id == user_id).first()
+        user_dict = user.__dict__
+        del user_dict['_sa_instance_state']
+        session.close()
+        return user_dict
+
+    @staticmethod
+    def update_user(session, user_id, **kwargs):
+        """
+        Update a user that is in the database.
+        Updatable columns: game_id, active, gold, production, food, science
+
+        :param session: sessionmaker object
+        :param user_id: user_id of the user to be updated
+        """
+        session = session()
+        user = session.query(User).filter(User.user_id == user_id).first()
+        for name, value in kwargs.items():
+            setattr(user, name, value)
+        session.commit()
+        session.close()
+
+    @staticmethod
     def delete_user(session, user_id):
         """
         Delete a user from the database.
@@ -209,6 +240,41 @@ class Technology(Base):
         technology = Technology(user_id=user_id, technology_id=technology_id)
         session = session()
         session.add(technology)
+        session.commit()
+        session.close()
+
+    @staticmethod
+    def select_technology(session, user_id, technology_id):
+        """
+        Select a technology that is in the database.
+
+        :param session: sessionmaker object
+        :param user_id: user_id of the technology to be selected
+        :param user_id: technology_id of the technology to be selected
+        """
+        session = session()
+        technology = session.query(Technology).filter(
+            Technology.user_id == user_id,
+            Technology.technology_id == technology_id).first()
+        technology_dict = technology.__dict__
+        del technology_dict['_sa_instance_state']
+        session.close()
+        return technology_dict
+
+    @staticmethod
+    def update_technology(session, user_id, **kwargs):
+        """
+        Update a technology that is in the database.
+        Updatable columns: technology_id
+
+        :param session: sessionmaker object
+        :param user_id: user_id of the technology to be updated
+        """
+        session = session()
+        technology = session.query(Technology).filter(
+            Technology.user_id == user_id).first()
+        for name, value in kwargs.items():
+            setattr(technology, name, value)
         session.commit()
         session.close()
 
@@ -261,8 +327,11 @@ class Unit(Base):
         :param type: specifies the type of unit. Must be >= 0.
         :param health: specifies the health of unit. Must be >= 0.
         :param x: specifies the location (x coordinate) of unit.
+        x + y + z must equal 0.
         :param y: specifies the location (y coordinate) of unit.
+        x + y + z must equal 0.
         :param z: specifies the location (z coordinate) of unit.
+        x + y + z must equal 0.
         """
         unit = Unit(user_id=user_id, type=type, health=health, x=x, y=y,
                     z=z)
@@ -272,6 +341,38 @@ class Unit(Base):
         unit_id = unit.unit_id
         session.close()
         return unit_id
+
+    @staticmethod
+    def select_unit(session, unit_id):
+        """
+        Select a unit that is in the database.
+
+        :param session: sessionmaker object
+        :param unit_id: unit_id of the unit to be selected
+        """
+        session = session()
+        unit = session.query(Unit).filter(Unit.unit_id == unit_id).first()
+        unit_dict = unit.__dict__
+        del unit_dict['_sa_instance_state']
+        session.close()
+        return unit_dict
+
+    @staticmethod
+    def update_unit(session, unit_id, **kwargs):
+        """
+        Update a unit that is in the database.
+        Updatable columns: type, health, x, y, z
+
+        :param session: sessionmaker object
+        :param unit_id: unit_id of the unit to be updated
+        """
+        session = session()
+        unit = session.query(Unit).filter(
+            Unit.unit_id == unit_id).first()
+        for name, value in kwargs.items():
+            setattr(unit, name, value)
+        session.commit()
+        session.close()
 
     @staticmethod
     def delete_unit(session, unit_id):
@@ -319,8 +420,11 @@ class Building(Base):
         :param user_id: user_id of the user that owns the building
         :param type: specifies the type of building. Must be >= 0.
         :param x: specifies the location (x coordinate) of building.
+        x + y + z must equal 0.
         :param y: specifies the location (y coordinate) of building.
+        x + y + z must equal 0.
         :param z: specifies the location (z coordinate) of building.
+        x + y + z must equal 0.
         """
         building = Building(user_id=user_id, type=type, x=x, y=y, z=z)
         session = session()
@@ -329,6 +433,39 @@ class Building(Base):
         building_id = building.building_id
         session.close()
         return building_id
+
+    @staticmethod
+    def select_building(session, building_id):
+        """
+        Select a building_id that is in the database.
+
+        :param session: sessionmaker object
+        :param building_id: building_id of the building to be selected
+        """
+        session = session()
+        building_id = session.query(Building).filter(
+            Building.building_id == building_id).first()
+        building_id_dict = building_id.__dict__
+        del building_id_dict['_sa_instance_state']
+        session.close()
+        return building_id_dict
+
+    @staticmethod
+    def update_building(session, building_id, **kwargs):
+        """
+        Update a building that is in the database.
+        Updatable columns: type, x, y, z
+
+        :param session: sessionmaker object
+        :param building_id: building_id of the building to be updated
+        """
+        session = session()
+        building = session.query(Building).filter(
+            Building.building_id == building_id).first()
+        for name, value in kwargs.items():
+            setattr(building, name, value)
+        session.commit()
+        session.close()
 
     @staticmethod
     def delete_building(session, building_id):
