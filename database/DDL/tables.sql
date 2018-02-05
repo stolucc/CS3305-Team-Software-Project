@@ -66,6 +66,7 @@ CREATE TABLE public.buildings
   x INTEGER NOT NULL,
   y INTEGER NOT NULL,
   z INTEGER NOT NULL,
+  CONSTRAINT valid_hex CHECK(x + y + z = 0),
   CONSTRAINT building_id PRIMARY KEY (building_id)
 )
 WITH (
@@ -88,6 +89,7 @@ CREATE TABLE public.units
   x INTEGER NOT NULL,
   y INTEGER NOT NULL,
   z INTEGER NOT NULL,
+  CONSTRAINT valid_hex CHECK(x + y + z = 0),
   CONSTRAINT unit_id PRIMARY KEY (unit_id)
 )
 WITH (
