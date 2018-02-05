@@ -2,7 +2,6 @@
 
 from queue import PriorityQueue
 from terrain import Terrain, TerrainType, BiomeType
-from random import choice
 
 
 class Hex:
@@ -20,8 +19,9 @@ class Hex:
         self._y = y
         self._z = z
         self._claimed = False
-        self._terrain = Terrain(choice(list(TerrainType)),
-                                choice(list(BiomeType)))
+        self._terrain = Terrain(TerrainType.FLAT, BiomeType.GRASSLAND)
+        self._unit = None
+        self._building = None
 
     @property
     def x(self):
@@ -87,6 +87,7 @@ class Hex:
         return self._terrain.movement_cost
 
     @property
+
     def claimed(self):
         """
         Property indicating whether the tile has been previously claimed.
@@ -98,6 +99,41 @@ class Hex:
     def claim(self):
         """Claim a tile."""
         self._claimed = True
+
+    def unit(self):
+        """
+        Unit currently on this hex.
+
+        :return: unit object
+        """
+        return self._unit
+
+    @unit.setter
+    def unit(self, unit):
+        """
+        Set unit currently on this hex.
+
+        :param unit: unit object
+        """
+        self._unit = unit
+
+    @property
+    def building(self):
+        """
+        Building currently on this hex.
+
+        :return: building object
+        """
+        return self._building
+
+    @building.setter
+    def building(self, building):
+        """
+        Set building currently on this hex.
+
+        :param building: building object
+        """
+        self._building = building
 
     def __eq__(self, other):
         """
