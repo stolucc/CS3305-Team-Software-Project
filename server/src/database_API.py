@@ -119,19 +119,19 @@ class Game(Base):
         session.close()
 
     # NOTE Remove delete method when confirmed it will not be required.
-    # @staticmethod
-    # def delete(session, game_id):
-    #     """
-    #     Delete a game from the database.
-    #
-    #     :param session: sessionmaker object
-    #     :param game_id: game_id of the game to be deleted
-    #     """
-    #     session = session()
-    #     game = session.query(Game).filter(Game.game_id == game_id).first()
-    #     session.delete(game)
-    #     session.commit()
-    #     session.close()
+    @staticmethod
+    def delete(session, game_id):
+        """
+        Delete a game from the database.
+
+        :param session: sessionmaker object
+        :param game_id: game_id of the game to be deleted
+        """
+        session = session()
+        game = session.query(Game).filter(Game.game_id == game_id).first()
+        session.delete(game)
+        session.commit()
+        session.close()
 
     def __repr__(self):
         """Return a String representation for a Game object."""
@@ -282,19 +282,19 @@ class User(Base):
         session.close()
 
     # NOTE Remove delete method when confirmed it will not be required.
-    # @staticmethod
-    # def delete(session, user_id):
-    #     """
-    #     Delete a user from the database.
-    #
-    #     :param session: sessionmaker object
-    #     :param user_id: user_id of the user to be deleted
-    #     """
-    #     session = session()
-    #     user = session.query(User).filter(User.user_id == user_id).first()
-    #     session.delete(user)
-    #     session.commit()
-    #     session.close()
+    @staticmethod
+    def delete(session, user_id):
+        """
+        Delete a user from the database.
+
+        :param session: sessionmaker object
+        :param user_id: user_id of the user to be deleted
+        """
+        session = session()
+        user = session.query(User).filter(User.user_id == user_id).first()
+        session.delete(user)
+        session.commit()
+        session.close()
 
     def __repr__(self):
         """Return a String representation for a User object."""
@@ -371,23 +371,23 @@ class Technology(Base):
         session.close()
 
     # NOTE Remove delete method when confirmed it will not be required.
-    # @staticmethod
-    # def delete(session, user_id, technology_id):
-    #     """
-    #     Delete a technology from the database.
-    #
-    #     :param session: sessionmaker object
-    #     :param user_id: user_id of the technology to be deleted
-    #     :param technology_id: technology_id of the technology to be deleted.
-    #     Must be >= 0.
-    #     """
-    #     session = session()
-    #     technology = session.query(Technology).filter(
-    #         Technology.user_id == user_id,
-    #         Technology.technology_id == technology_id).first()
-    #     session.delete(technology)
-    #     session.commit()
-    #     session.close()
+    @staticmethod
+    def delete(session, user_id, technology_id):
+        """
+        Delete a technology from the database.
+
+        :param session: sessionmaker object
+        :param user_id: user_id of the technology to be deleted
+        :param technology_id: technology_id of the technology to be deleted.
+        Must be >= 0.
+        """
+        session = session()
+        technology = session.query(Technology).filter(
+            Technology.user_id == user_id,
+            Technology.technology_id == technology_id).first()
+        session.delete(technology)
+        session.commit()
+        session.close()
 
     def __repr__(self):
         """Return a String representation for a Technology object."""
@@ -483,19 +483,19 @@ class Unit(Base):
         session.close()
 
     # NOTE Remove delete method when confirmed it will not be required.
-    # @staticmethod
-    # def delete(session, unit_id):
-    #     """
-    #     Delete a unit from the database.
-    #
-    #     :param session: sessionmaker object
-    #     :param unit_id: unit_id of the unit to be deleted
-    #     """
-    #     session = session()
-    #     unit = session.query(Unit).filter(Unit.unit_id == unit_id).first()
-    #     session.delete(unit)
-    #     session.commit()
-    #     session.close()
+    @staticmethod
+    def delete(session, unit_id):
+        """
+        Delete a unit from the database.
+
+        :param session: sessionmaker object
+        :param unit_id: unit_id of the unit to be deleted
+        """
+        session = session()
+        unit = session.query(Unit).filter(Unit.unit_id == unit_id).first()
+        session.delete(unit)
+        session.commit()
+        session.close()
 
     def __repr__(self):
         """Return a String representation for a Unit object."""
@@ -596,20 +596,20 @@ class Building(Base):
         session.close()
 
     # NOTE Remove delete method when confirmed it will not be required.
-    # @staticmethod
-    # def delete(session, building_id):
-    #     """
-    #     Delete a building from the database.
-    #
-    #     :param session: sessionmaker object
-    #     :param building_id: building_id of the unit to be deleted
-    #     """
-    #     session = session()
-    #     building = session.query(Building).filter(
-    #         Building.building_id == building_id).first()
-    #     session.delete(building)
-    #     session.commit()
-    #     session.close()
+    @staticmethod
+    def delete(session, building_id):
+        """
+        Delete a building from the database.
+
+        :param sgession: sessionmaker object
+        :param building_id: building_id of the unit to be deleted
+        """
+        session = session()
+        building = session.query(Building).filter(
+            Building.building_id == building_id).first()
+        session.delete(building)
+        session.commit()
+        session.close()
 
     def __repr__(self):
         """Return a String representation for a Building object."""
