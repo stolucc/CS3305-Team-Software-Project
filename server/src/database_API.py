@@ -53,7 +53,7 @@ class Game(Base):
     users = relationship("User", back_populates="game", passive_deletes="all")
 
     @staticmethod
-    def insert_game(session, seed, active):
+    def insert(session, seed, active):
         """
         Create a game and add it to the database.
 
@@ -70,7 +70,7 @@ class Game(Base):
         return game_id
 
     @staticmethod
-    def select_game(session, game_id):
+    def select(session, game_id):
         """
         Select a game that is in the database.
 
@@ -85,7 +85,7 @@ class Game(Base):
         return game_dict
 
     @staticmethod
-    def update_game(session, game_id, **kwargs):
+    def update(session, game_id, **kwargs):
         """
         Update a game that is in the database.
         Updatable columns: seed, active
@@ -101,7 +101,7 @@ class Game(Base):
         session.close()
 
     @staticmethod
-    def delete_game(session, game_id):
+    def delete(session, game_id):
         """
         Delete a game from the database.
 
@@ -142,7 +142,7 @@ class User(Base):
                              passive_deletes="all")
 
     @staticmethod
-    def insert_user(session, game_id, active, gold, production, food, science):
+    def insert(session, game_id, active, gold, production, food, science):
         """
         Create a user and add it to the database.
 
@@ -166,7 +166,7 @@ class User(Base):
         return user_id
 
     @staticmethod
-    def select_user(session, user_id):
+    def select(session, user_id):
         """
         Select a user that is in the database.
 
@@ -181,7 +181,7 @@ class User(Base):
         return user_dict
 
     @staticmethod
-    def update_user(session, user_id, **kwargs):
+    def update(session, user_id, **kwargs):
         """
         Update a user that is in the database.
         Updatable columns: game_id, active, gold, production, food, science
@@ -197,7 +197,7 @@ class User(Base):
         session.close()
 
     @staticmethod
-    def delete_user(session, user_id):
+    def delete(session, user_id):
         """
         Delete a user from the database.
 
@@ -229,7 +229,7 @@ class Technology(Base):
     user = relationship("User", back_populates="technologies")
 
     @staticmethod
-    def insert_technology(session, user_id, technology_id):
+    def insert(session, user_id, technology_id):
         """
         Create a technology and add it to the database.
 
@@ -244,7 +244,7 @@ class Technology(Base):
         session.close()
 
     @staticmethod
-    def select_technology(session, user_id, technology_id):
+    def select(session, user_id, technology_id):
         """
         Select a technology that is in the database.
 
@@ -262,7 +262,7 @@ class Technology(Base):
         return technology_dict
 
     @staticmethod
-    def update_technology(session, old_user_id, old_technology_id, **kwargs):
+    def update(session, old_user_id, old_technology_id, **kwargs):
         """
         Update a technology that is in the database.
         Updatable columns: user_id, technology_id
@@ -281,7 +281,7 @@ class Technology(Base):
         session.close()
 
     @staticmethod
-    def delete_technology(session, user_id, technology_id):
+    def delete(session, user_id, technology_id):
         """
         Delete a technology from the database.
 
@@ -320,7 +320,7 @@ class Unit(Base):
     user = relationship("User", back_populates="units")
 
     @staticmethod
-    def insert_unit(session, user_id, type, health, x, y, z):
+    def insert(session, user_id, type, health, x, y, z):
         """
         Create a unit and add it to the database.
 
@@ -345,7 +345,7 @@ class Unit(Base):
         return unit_id
 
     @staticmethod
-    def select_unit(session, unit_id):
+    def select(session, unit_id):
         """
         Select a unit that is in the database.
 
@@ -360,7 +360,7 @@ class Unit(Base):
         return unit_dict
 
     @staticmethod
-    def update_unit(session, unit_id, **kwargs):
+    def update(session, unit_id, **kwargs):
         """
         Update a unit that is in the database.
         Updatable columns: user_id, type, health, x, y, z
@@ -377,7 +377,7 @@ class Unit(Base):
         session.close()
 
     @staticmethod
-    def delete_unit(session, unit_id):
+    def delete(session, unit_id):
         """
         Delete a unit from the database.
 
@@ -414,7 +414,7 @@ class Building(Base):
     user = relationship("User", back_populates="buildings")
 
     @staticmethod
-    def insert_building(session, user_id, type, x, y, z):
+    def insert(session, user_id, type, x, y, z):
         """
         Create a building and add it to the database.
 
@@ -437,7 +437,7 @@ class Building(Base):
         return building_id
 
     @staticmethod
-    def select_building(session, building_id):
+    def select(session, building_id):
         """
         Select a building_id that is in the database.
 
@@ -453,7 +453,7 @@ class Building(Base):
         return building_id_dict
 
     @staticmethod
-    def update_building(session, building_id, **kwargs):
+    def update(session, building_id, **kwargs):
         """
         Update a building that is in the database.
         Updatable columns: user_id, type, x, y, z
@@ -470,7 +470,7 @@ class Building(Base):
         session.close()
 
     @staticmethod
-    def delete_building(session, building_id):
+    def delete(session, building_id):
         """
         Delete a building from the database.
 
@@ -517,9 +517,9 @@ class Log(Base):
     thread_name = Column(String(256), nullable=False)
 
     @staticmethod
-    def insert_log(session, log_level, log_level_name, file_name, line_number,
-                   function_name, log, created_at, created_by, process_id,
-                   process_name, thread_id, thread_name):
+    def insert(session, log_level, log_level_name, file_name, line_number,
+               function_name, log, created_at, created_by, process_id,
+               process_name, thread_id, thread_name):
         """
         Create a log and add it to the database.
 
