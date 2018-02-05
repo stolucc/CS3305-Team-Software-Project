@@ -62,10 +62,12 @@ CREATE TABLE public.buildings
 (
   user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
   building_id INTEGER NOT NULL DEFAULT nextval('buildings_building_id_seq'),
+  active BOOLEAN NOT NULL,
   type INTEGER NOT NULL CHECK (type >= 0),
   x INTEGER NOT NULL,
   y INTEGER NOT NULL,
   z INTEGER NOT NULL,
+  CONSTRAINT valid_hex CHECK(x + y + z = 0),
   CONSTRAINT building_id PRIMARY KEY (building_id)
 )
 WITH (
@@ -88,6 +90,7 @@ CREATE TABLE public.units
   x INTEGER NOT NULL,
   y INTEGER NOT NULL,
   z INTEGER NOT NULL,
+  CONSTRAINT valid_hex CHECK(x + y + z = 0),
   CONSTRAINT unit_id PRIMARY KEY (unit_id)
 )
 WITH (

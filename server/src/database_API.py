@@ -50,10 +50,11 @@ class Game(Base):
     seed = Column(Integer, CheckConstraint('seed>=0'), nullable=False)
     active = Column(Boolean, nullable=False)
 
-    users = relationship("User", back_populates="game", passive_deletes="all")
+    game_users = relationship("User", back_populates="user_game",
+                              passive_deletes="all")
 
     @staticmethod
-    def insert_game(session, seed, active):
+    def insert(session, seed, active):
         """
         Create a game and add it to the database.
 
@@ -70,7 +71,56 @@ class Game(Base):
         return game_id
 
     @staticmethod
-    def delete_game(session, game_id):
+    def select(session, game_id):
+        """
+        Select a game that is in the database.
+
+        :param session: sessionmaker object
+        :param game_id: game_id of the game to be selected
+        """
+        session = session()
+        game = session.query(Game).filter(Game.game_id == game_id).first()
+        game_dict = game.__dict__
+        del game_dict['_sa_instance_state']
+        session.close()
+        return game_dict
+
+    @staticmethod
+    def users(session, game_id):
+        """
+        Get a game's users from the database.
+
+        :param session: sessionmaker object
+        :param game_id: game_id of the game to be selected
+        """
+        session = session()
+        game = session.query(Game).filter(Game.game_id == game_id).first()
+        users = []
+        for user in game.game_users:
+            users.append(user.user_id)
+        session.close()
+        return users
+
+    @staticmethod
+    def update(session, game_id, **kwargs):
+        """
+        Update a game that is in the database.
+
+        Updatable columns: seed, active
+
+        :param session: sessionmaker object
+        :param game_id: game_id of the game to be updated
+        """
+        session = session()
+        game = session.query(Game).filter(Game.game_id == game_id).first()
+        for name, value in kwargs.items():
+            setattr(game, name, value)
+        session.commit()
+        session.close()
+
+    # NOTE Remove delete method when confirmed it will not be required.
+    @staticmethod
+    def delete(session, game_id):
         """
         Delete a game from the database.
 
@@ -103,15 +153,18 @@ class User(Base):
     food = Column(Integer, CheckConstraint('food>=0'), nullable=False)
     science = Column(Integer, CheckConstraint('science>=0'), nullable=False)
 
-    game = relationship("Game", back_populates="users")
-    units = relationship("Unit", back_populates="user", passive_deletes="all")
-    technologies = relationship("Technology", back_populates="user",
-                                passive_deletes="all")
-    buildings = relationship("Building", back_populates="user",
-                             passive_deletes="all")
+    user_game = relationship("Game", back_populates="game_users")
+    user_units = relationship("Unit", back_populates="unit_user",
+                              passive_deletes="all")
+    user_technologies = relationship("Technology",
+                                     back_populates="technology_user",
+                                     passive_deletes="all")
+    user_buildings = relationship("Building",
+                                  back_populates="building_user",
+                                  passive_deletes="all")
 
     @staticmethod
-    def insert_user(session, game_id, active, gold, production, food, science):
+    def insert(session, game_id, active, gold, production, food, science):
         """
         Create a user and add it to the database.
 
@@ -135,7 +188,102 @@ class User(Base):
         return user_id
 
     @staticmethod
-    def delete_user(session, user_id):
+    def select(session, user_id):
+        """
+        Select a user that is in the database.
+
+        :param session: sessionmaker object
+        :param user_id: user_id of the user to be selected
+        """
+        session = session()
+        user = session.query(User).filter(User.user_id == user_id).first()
+        user_dict = user.__dict__
+        del user_dict['_sa_instance_state']
+        session.close()
+        return user_dict
+
+    @staticmethod
+    def game(session, user_id):
+        """
+        Get a user's game from the database.
+
+        :param session: sessionmaker object
+        :param user_id: user_id of the user
+        """
+        session = session()
+        user = session.query(User).filter(User.user_id == user_id).first()
+        game_id = user.game_id
+        session.close()
+        return game_id
+
+    @staticmethod
+    def units(session, user_id):
+        """
+        Get a user's units from the database.
+
+        :param session: sessionmaker object
+        :param user_id: user_id of the user
+        """
+        session = session()
+        user = session.query(User).filter(User.user_id == user_id).first()
+        units = []
+        for unit in user.user_units:
+            units.append(unit.unit_id)
+        session.close()
+        return units
+
+    @staticmethod
+    def technologies(session, user_id):
+        """
+        Get a user's technologies from the database.
+
+        :param session: sessionmaker object
+        :param user_id: user_id of the user
+        """
+        session = session()
+        user = session.query(User).filter(User.user_id == user_id).first()
+        technologies = []
+        for technology in user.user_technologies:
+            technologies.append(technology.technology_id)
+        session.close()
+        return technologies
+
+    @staticmethod
+    def buildings(session, user_id):
+        """
+        Get a user's buildings from the database.
+
+        :param session: sessionmaker object
+        :param user_id: user_id of the user
+        """
+        session = session()
+        user = session.query(User).filter(User.user_id == user_id).first()
+        buildings = []
+        for building in user.user_buildings:
+            buildings.append(building.building_id)
+        session.close()
+        return buildings
+
+    @staticmethod
+    def update(session, user_id, **kwargs):
+        """
+        Update a user that is in the database.
+
+        Updatable columns: game_id, active, gold, production, food, science
+
+        :param session: sessionmaker object
+        :param user_id: user_id of the user to be updated
+        """
+        session = session()
+        user = session.query(User).filter(User.user_id == user_id).first()
+        for name, value in kwargs.items():
+            setattr(user, name, value)
+        session.commit()
+        session.close()
+
+    # NOTE Remove delete method when confirmed it will not be required.
+    @staticmethod
+    def delete(session, user_id):
         """
         Delete a user from the database.
 
@@ -164,10 +312,10 @@ class Technology(Base):
     user_id = Column(Integer, ForeignKey('users.user_id'), primary_key=True)
     technology_id = Column(Integer, primary_key=True)
 
-    user = relationship("User", back_populates="technologies")
+    technology_user = relationship("User", back_populates="user_technologies")
 
     @staticmethod
-    def insert_technology(session, user_id, technology_id):
+    def insert(session, user_id, technology_id):
         """
         Create a technology and add it to the database.
 
@@ -178,11 +326,53 @@ class Technology(Base):
         technology = Technology(user_id=user_id, technology_id=technology_id)
         session = session()
         session.add(technology)
+        u_id = technology.user_id
+        t_id = technology.technology_id
+        session.commit()
+        session.close()
+        return u_id, t_id
+
+    @staticmethod
+    def select(session, user_id, technology_id):
+        """
+        Select a technology that is in the database.
+
+        :param session: sessionmaker object
+        :param user_id: user_id of the technology to be selected
+        :param technology_id: technology_id of the technology to be selected
+        """
+        session = session()
+        technology = session.query(Technology).filter(
+            Technology.user_id == user_id,
+            Technology.technology_id == technology_id).first()
+        technology_dict = technology.__dict__
+        del technology_dict['_sa_instance_state']
+        session.close()
+        return technology_dict
+
+    @staticmethod
+    def update(session, old_user_id, old_technology_id, **kwargs):
+        """
+        Update a technology that is in the database.
+
+        Updatable columns: user_id, technology_id
+
+        :param session: sessionmaker object
+        :param old_user_id: user_id of the technology to be updated
+        :param old_technology_id: technology_id of the technology to be updated
+        """
+        session = session()
+        technology = session.query(Technology).filter(
+            Technology.user_id == old_user_id,
+            Technology.technology_id == old_technology_id).first()
+        for name, value in kwargs.items():
+            setattr(technology, name, value)
         session.commit()
         session.close()
 
+    # NOTE Remove delete method when confirmed it will not be required.
     @staticmethod
-    def delete_technology(session, user_id, technology_id):
+    def delete(session, user_id, technology_id):
         """
         Delete a technology from the database.
 
@@ -218,10 +408,10 @@ class Unit(Base):
     y = Column(Integer, nullable=False)
     z = Column(Integer, nullable=False)
 
-    user = relationship("User", back_populates="units")
+    unit_user = relationship("User", back_populates="user_units")
 
     @staticmethod
-    def insert_unit(session, user_id, type, health, x, y, z):
+    def insert(session, user_id, type, health, x, y, z):
         """
         Create a unit and add it to the database.
 
@@ -230,8 +420,11 @@ class Unit(Base):
         :param type: specifies the type of unit. Must be >= 0.
         :param health: specifies the health of unit. Must be >= 0.
         :param x: specifies the location (x coordinate) of unit.
+        x + y + z must equal 0.
         :param y: specifies the location (y coordinate) of unit.
+        x + y + z must equal 0.
         :param z: specifies the location (z coordinate) of unit.
+        x + y + z must equal 0.
         """
         unit = Unit(user_id=user_id, type=type, health=health, x=x, y=y,
                     z=z)
@@ -243,7 +436,55 @@ class Unit(Base):
         return unit_id
 
     @staticmethod
-    def delete_unit(session, unit_id):
+    def select(session, unit_id):
+        """
+        Select a unit that is in the database.
+
+        :param session: sessionmaker object
+        :param unit_id: unit_id of the unit to be selected
+        """
+        session = session()
+        unit = session.query(Unit).filter(Unit.unit_id == unit_id).first()
+        unit_dict = unit.__dict__
+        del unit_dict['_sa_instance_state']
+        session.close()
+        return unit_dict
+
+    @staticmethod
+    def user(session, unit_id):
+        """
+        Get a units's user from the database.
+
+        :param session: sessionmaker object
+        :param unit_id: unit_id of the unit
+        """
+        session = session()
+        unit = session.query(Unit).filter(Unit.unit_id == unit_id).first()
+        user_id = unit.user_id
+        session.close()
+        return user_id
+
+    @staticmethod
+    def update(session, unit_id, **kwargs):
+        """
+        Update a unit that is in the database.
+
+        Updatable columns: user_id, type, health, x, y, z
+
+        :param session: sessionmaker object
+        :param unit_id: unit_id of the unit to be updated
+        """
+        session = session()
+        unit = session.query(Unit).filter(
+            Unit.unit_id == unit_id).first()
+        for name, value in kwargs.items():
+            setattr(unit, name, value)
+        session.commit()
+        session.close()
+
+    # NOTE Remove delete method when confirmed it will not be required.
+    @staticmethod
+    def delete(session, unit_id):
         """
         Delete a unit from the database.
 
@@ -272,26 +513,32 @@ class Building(Base):
     user_id = Column(Integer, ForeignKey('users.user_id'))
     building_id = Column(Integer, Sequence('buildings_building_id_seq'),
                          primary_key=True)
+    active = Column(Boolean, nullable=False)
     type = Column(Integer, CheckConstraint('type>=0'), nullable=False)
     x = Column(Integer, nullable=False)
     y = Column(Integer, nullable=False)
     z = Column(Integer, nullable=False)
 
-    user = relationship("User", back_populates="buildings")
+    building_user = relationship("User", back_populates="user_buildings")
 
     @staticmethod
-    def insert_building(session, user_id, type, x, y, z):
+    def insert(session, user_id, active, type, x, y, z):
         """
         Create a building and add it to the database.
 
         :param session: sessionmaker object
         :param user_id: user_id of the user that owns the building
+        :param active: specifies if the building is active or not
         :param type: specifies the type of building. Must be >= 0.
         :param x: specifies the location (x coordinate) of building.
+        x + y + z must equal 0.
         :param y: specifies the location (y coordinate) of building.
+        x + y + z must equal 0.
         :param z: specifies the location (z coordinate) of building.
+        x + y + z must equal 0.
         """
-        building = Building(user_id=user_id, type=type, x=x, y=y, z=z)
+        building = Building(user_id=user_id, active=active, type=type, x=x,
+                            y=y, z=z)
         session = session()
         session.add(building)
         session.commit()
@@ -300,11 +547,61 @@ class Building(Base):
         return building_id
 
     @staticmethod
-    def delete_building(session, building_id):
+    def select(session, building_id):
+        """
+        Select a building_id that is in the database.
+
+        :param session: sessionmaker object
+        :param building_id: building_id of the building to be selected
+        """
+        session = session()
+        building_id = session.query(Building).filter(
+            Building.building_id == building_id).first()
+        building_id_dict = building_id.__dict__
+        del building_id_dict['_sa_instance_state']
+        session.close()
+        return building_id_dict
+
+    @staticmethod
+    def user(session, building_id):
+        """
+        Get a building's user from the database.
+
+        :param session: sessionmaker object
+        :param building_id: building_id of the building
+        """
+        session = session()
+        building = session.query(Building).filter(
+            Building.building_id == building_id).first()
+        user_id = building.user_id
+        session.close()
+        return user_id
+
+    @staticmethod
+    def update(session, building_id, **kwargs):
+        """
+        Update a building that is in the database.
+
+        Updatable columns: user_id, type, x, y, z
+
+        :param session: sessionmaker object
+        :param building_id: building_id of the building to be updated
+        """
+        session = session()
+        building = session.query(Building).filter(
+            Building.building_id == building_id).first()
+        for name, value in kwargs.items():
+            setattr(building, name, value)
+        session.commit()
+        session.close()
+
+    # NOTE Remove delete method when confirmed it will not be required.
+    @staticmethod
+    def delete(session, building_id):
         """
         Delete a building from the database.
 
-        :param session: sessionmaker object
+        :param sgession: sessionmaker object
         :param building_id: building_id of the unit to be deleted
         """
         session = session()
@@ -316,9 +613,9 @@ class Building(Base):
 
     def __repr__(self):
         """Return a String representation for a Building object."""
-        return "<building(user_id='%s', building_id='%s', " \
+        return "<building(user_id='%s', building_id='%s', active='%s'" \
                "type='%s', x='%s', y='%s', z='%s')>" % (
-                   self.user_id, self.building_id,
+                   self.user_id, self.building_id, self.active,
                    self.type, self.x, self.y, self.z)
 
 
@@ -347,9 +644,9 @@ class Log(Base):
     thread_name = Column(String(256), nullable=False)
 
     @staticmethod
-    def insert_log(session, log_level, log_level_name, file_name, line_number,
-                   function_name, log, created_at, created_by, process_id,
-                   process_name, thread_id, thread_name):
+    def insert(session, log_level, log_level_name, file_name, line_number,
+               function_name, log, created_at, created_by, process_id,
+               process_name, thread_id, thread_name):
         """
         Create a log and add it to the database.
 
