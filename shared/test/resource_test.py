@@ -1,7 +1,7 @@
 """Resource Tests."""
 
 import unittest
-from resource import Resource
+from mapresource import Resource
 
 
 class ResourceTests(unittest.TestCase):
