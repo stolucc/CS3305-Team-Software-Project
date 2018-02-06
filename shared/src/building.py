@@ -25,18 +25,18 @@ class Building(Enum):
         """Currency values produced by this building."""
         values = {
             Building.FARM: {
-                Currency.GOLD: 0,
+                Currency.GOLD: -2,
                 Currency.FOOD: 5,
                 Currency.SCIENCE: 0,
             },
             Building.TRADE_POST: {
                 Currency.GOLD: 5,
-                Currency.FOOD: 0,
+                Currency.FOOD: -2,
                 Currency.SCIENCE: 0,
             },
             Building.UNIVERSITY: {
-                Currency.GOLD: 0,
-                Currency.FOOD: 0,
+                Currency.GOLD: -2,
+                Currency.FOOD: -3,
                 Currency.SCIENCE: 5,
             }
         }
