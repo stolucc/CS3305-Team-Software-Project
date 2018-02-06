@@ -18,6 +18,7 @@ class Hex:
         self._x = x
         self._y = y
         self._z = z
+        self._claimed = False
         self._terrain = Terrain(TerrainType.FLAT, BiomeType.GRASSLAND)
 
     @property
@@ -82,6 +83,19 @@ class Hex:
         :return: movement cost value
         """
         return self._terrain.movement_cost
+
+    @property
+    def claimed(self):
+        """
+        Property indicating whether the tile has been previously claimed.
+
+        :return: boolean claimed value
+        """
+        return self._claimed
+
+    def claim(self):
+        """Claim a tile."""
+        self._claimed = True
 
     def __eq__(self, other):
         """
