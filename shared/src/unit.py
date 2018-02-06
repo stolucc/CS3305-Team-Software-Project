@@ -335,6 +335,17 @@ class Swordsman(Soldier):
         super().__init__(health, level, movement_range,
                          strength, attack_range=1, cost=cost, hex=hex)
 
+    def attack_unit(self, unit):
+        """
+        Attack enemy unit, enemy attacks back
+        :param unit: Unit
+        """
+        damage = self.strength * (self.health/self.max_health)
+        unit.receive_damage(damage)
+        if isinstance(unit, Soldier):
+            damage = unit.strength * (unit.health/unit.max_health)
+            self.receive_damage(damage)
+
     def level_up(self):
         """
         Level up Swordsman
