@@ -124,12 +124,12 @@ class Game:
         sprite = pygame.image.load(os.path.join("..", "resources", "buildings",
                                                 "city.png"))
         sprite = pygame.transform.scale(sprite,
-                                        (floor(1500 / self._zoom),
-                                         floor(1500 / self._zoom)))
+                                        (floor(2000 / self._zoom),
+                                         floor(2000 / self._zoom)))
         sprite.convert()
         self._screen.blit(sprite,
-                          (floor(center_x - (1500 / (self._zoom * 2))),
-                           floor(center_y - (1500 / (self._zoom * 2)))))
+                          (floor(center_x - (2000 / (self._zoom * 2))),
+                           floor(center_y - (2000 / (self._zoom * 2)))))
 
     def draw_hex_grid(self, layout):
         """Create a hex grid."""
