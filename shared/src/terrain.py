@@ -9,9 +9,8 @@ class TerrainType(Enum):
 
     FLAT = 0
     HILL = 1
-    RIVER = 2
-    MOUNTAIN = 3
-    OCEAN = 4
+    MOUNTAIN = 2
+    OCEAN = 3
 
     @staticmethod
     def get_movement_cost(terrain_type):
@@ -22,13 +21,12 @@ class TerrainType(Enum):
         :return: movement cost for terrain type
         """
         values = {
-            TerrainType.FLAT: 1,
-            TerrainType.HILL: 2,
-            TerrainType.RIVER: 2,
-            TerrainType.MOUNTAIN: inf,
-            TerrainType.OCEAN: inf
+            TerrainType.FLAT.value: 1,
+            TerrainType.HILL.value: 2,
+            TerrainType.MOUNTAIN.value: inf,
+            TerrainType.OCEAN.value: inf
         }
-        return values[terrain_type]
+        return values[terrain_type.value]
 
     @staticmethod
     def vision_allowed(terrain_type):
@@ -39,7 +37,6 @@ class TerrainType(Enum):
         :return: a boolean value indicating whether vision is allowed
         """
         allowed = [TerrainType.FLAT,
-                   TerrainType.RIVER,
                    TerrainType.OCEAN]
         return terrain_type in allowed
 
@@ -50,7 +47,6 @@ class BiomeType(Enum):
     TUNDRA = 0
     GRASSLAND = 1
     DESERT = 2
-    JUNGLE = 3
 
     @staticmethod
     def get_movement_cost(biome_type):
@@ -61,13 +57,11 @@ class BiomeType(Enum):
         :return: movement cost for biome type
         """
         values = {
-            BiomeType.TUNDRA: 2,
-            BiomeType.GRASSLAND: 0,
-            BiomeType.DESERT: 1,
-            BiomeType.JUNGLE: 1,
-
+            BiomeType.TUNDRA.value: 2,
+            BiomeType.GRASSLAND.value: 0,
+            BiomeType.DESERT.value: 1
         }
-        return values[biome_type]
+        return values[biome_type.value]
 
 
 class Terrain:
