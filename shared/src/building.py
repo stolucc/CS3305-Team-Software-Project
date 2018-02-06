@@ -11,7 +11,8 @@ class Building(Enum):
     UNIVERSITY = 2
 
     def __init__(self, building_type, hexagon):
-        """Instantiate a new building.
+        """
+        Instantiate a new building.
 
         :param building_type: The type of the building to be created.
         :param hexagon: The hexagon tile the building is created on.
