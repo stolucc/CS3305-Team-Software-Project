@@ -5,10 +5,10 @@ from enum import Enum
 class Resource(Enum):
     """Class to represent map resources."""
 
-    IRON = 0
-    HORSES = 1
-    COAL = 2
-    GEMS = 3
+    COAL = 0
+    GEMS = 1
+    IRON = 2
+    LOGS = 3
 
     def __init__(self, resource_type, available_quantity):
         """

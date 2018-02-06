@@ -5,6 +5,8 @@ import time
 from layout import Layout
 from hexgrid import Grid, Hex
 from enum import Enum
+import os
+from math import floor
 
 
 class Resolution(Enum):
@@ -116,6 +118,19 @@ class Game:
             self.draw_map()
             time.sleep(0.017)
 
+    def draw_sprite(self, hexagon, layout):
+        """Draw a sprite on a hex tile."""
+        center_x, center_y = layout.hex_to_pixel(hexagon)
+        sprite = pygame.image.load(os.path.join("..", "resources", "buildings",
+                                                "city.png"))
+        sprite = pygame.transform.scale(sprite,
+                                        (floor(1500 / self._zoom),
+                                         floor(1500 / self._zoom)))
+        sprite.convert()
+        self._screen.blit(sprite,
+                          (floor(center_x - (1500 / (self._zoom * 2))),
+                           floor(center_y - (1500 / (self._zoom * 2)))))
+
     def draw_hex_grid(self, layout):
         """Create a hex grid."""
         for hex_point in self._grid.get_hextiles():
@@ -123,6 +138,7 @@ class Game:
             pygame.draw.polygon(self._screen, pygame.Color("white"),
                                 layout.polygon_corners(hexagon),
                                 1)
+            self.draw_sprite(hexagon, layout)
 
     def get_mirrors(self):
         """Get mirrored grids."""
