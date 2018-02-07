@@ -6,7 +6,7 @@ class Unit():
     Base class for the units
     """
 
-    def __init__(self, health, level, movement_range, cost, hex):
+    def __init__(self, health, level, movement_range, cost, hextile):
         """
         Initialise units attributes
         :param health: Amount of health unit begins with
@@ -19,8 +19,8 @@ class Unit():
         self._max_health = health
         self._level = level
         self._movement_range = movement_range
-        self.cost = cost
-        self._position = hex
+        self._cost = cost
+        self._position = hextile
 
     @property
     def health(self):
@@ -126,9 +126,9 @@ class Unit():
         :param science: int
         :return:
         """
-        self.cost['food'] += food
-        self.cost['gold'] += gold
-        self.cost['science'] += science
+        self._cost['food'] += food
+        self._cost['gold'] += gold
+        self._cost['science'] += science
 
     def level_up(self, health_increase, movement_increase):
         """
@@ -136,18 +136,18 @@ class Unit():
         :param health_increase: amount health should increase by
         :param movement_increase: amount movement_range should increase by
         """
-        self.health += health_increase
-        self.max_health += health_increase
-        self.movement_range += movement_increase
-        self.level += 1
+        self._health += health_increase
+        self._max_health += health_increase
+        self._movement_range += movement_increase
+        self._level += 1
 
     def receive_damage(self, damage):
         """
         Take damage from attack
         :param damage: amount of damage to be taken from health
         """
-        self.health -= damage
-        if self.health <= 0:
+        self._health -= damage
+        if self._health <= 0:
             self.death()
 
     def death(self):
@@ -160,9 +160,9 @@ class Unit():
         """
         health = self.health + restore
         if health > self.max_health:
-            self.health = self.max_health
+            self._health = self.max_health
         else:
-            self.health = health
+            self._health = health
 
     def __repr__(self):
         """
@@ -172,9 +172,9 @@ class Unit():
         string = "Health: %i, Max Health: %i, " \
                  "Movement Range: %i, Level: %i, Cost:(Food:%i Gold:%i, " \
                  "Science:%i), Position: %i,%i,%i, " % \
-                 (self.health, self.max_health,self.movement_range, self.level,
-                  self.cost['food'], self.cost['gold'], self.cost['science'],
-                  self.position.x, self.position.y, self.position.z)
+                 (self._health, self._max_health,self._movement_range, self._level,
+                  self._cost['food'], self._cost['gold'], self._cost['science'],
+                  self._position.x, self._position.y, self._position.z)
         return string
 
 
@@ -189,11 +189,11 @@ class Worker(Unit):
         :param level: int Level of the unit
         :param hex: Current hex tile the unit is on
         """
-        increment = level - 1
-        health = 100 + 10 * increment
-        movement = 4 + increment
-        cost = {'food':level, 'gold':0, 'science':0}
-        super().__init__(health, level, movement, cost, hex)
+        self._increment = level - 1
+        self._health = 100 + 10 * self._increment
+        self._movement = 4 + self._increment
+        self._cost = {'food':level, 'gold':0, 'science':0}
+        super().__init__(self._health, level, self._movement, self._cost, hex)
         self._build_speed = level
 
     @property
@@ -229,8 +229,9 @@ class Worker(Unit):
         Build building on current hex tile
         :param building: the building to be built
         """
-        if self.position.building is None:
-            self.position.building = building
+
+        if self._position._building is None:
+            self._position._building = building
         else:
             print("Building is already placed here.")
 
@@ -239,7 +240,7 @@ class Worker(Unit):
         Upgrade building on units hex tile
         :return:
         """
-        if self.position.building is None:
+        if self._position._building is None:
             print("No building is placed here.")
         else:
             pass
@@ -251,7 +252,7 @@ class Worker(Unit):
         """
         string = "Worker: "
         string += super().__repr__()
-        string += "Build Speed: %i" %(self.build_speed)
+        string += "Build Speed: %i" %(self._build_speed)
         return string
 
 
@@ -327,13 +328,14 @@ class Swordsman(Soldier):
         :param level: int
         :param hex: Hex
         """
-        increment = level - 1
-        health = 130 + 30 * increment
-        movement_range = 4 + increment
-        strength = 30 + 20 * increment
-        cost = {'food':level, 'gold':level-1, 'science':0}
-        super().__init__(health, level, movement_range,
-                         strength, attack_range=1, cost=cost, hex=hex)
+        self._increment = level - 1
+        self._health = 130 + 30 * self._increment
+        self._movement_range = 4 + self._increment
+        self._strength = 30 + 20 * self._increment
+        self._cost = {'food':level, 'gold':level-1, 'science':0}
+        super().__init__(self._health, level, self._movement_range,
+                         self._strength, attack_range=1, cost=self._cost,
+                         hex=hex)
 
     def attack_unit(self, unit):
         """
@@ -350,7 +352,7 @@ class Swordsman(Soldier):
         """
         Level up Swordsman
         """
-        if level >= 3:
+        if self._level >= 3:
             print("Max level reached.")
         else:
             super().level_up(health_increase=30, movement_increase=1)
@@ -379,20 +381,20 @@ class Archer(Soldier):
         :param level: int
         :param hex: Hex
         """
-        increment = level - 1
-        health = 110 + 20 * increment
-        movement_range = 5 + increment
-        strength = 20 + 10 * increment
-        attack_range = 2 + increment
-        cost = {'food':2, 'gold':0, 'science':level-1}
-        super().__init__(health,level,movement_range,
-                         strength,attack_range,cost,hex)
+        self._increment = level - 1
+        self._health = 110 + 20 * self._increment
+        self._movement_range = 5 + self._increment
+        self._strength = 20 + 10 * self._increment
+        self._attack_range = 2 + self._increment
+        self._cost = {'food':2, 'gold':0, 'science':level-1}
+        super().__init__(self._health,level,self._movement_range,
+                         self._strength,self._attack_range,self._cost,hex)
 
     def level_up(self):
         """
         Level up Archer
         """
-        if level >= 3:
+        if self._level >= 3:
             print("Max level reached.")
         else:
             super().level_up(health_increase=20, movement_increase=1)
