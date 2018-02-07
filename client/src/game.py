@@ -118,18 +118,18 @@ class Game:
             self.draw_map()
             time.sleep(0.017)
 
-    def draw_sprite(self, hexagon, layout):
+    def draw_sprite(self, hexagon, layout, size, sprite):
         """Draw a sprite on a hex tile."""
         center_x, center_y = layout.hex_to_pixel(hexagon)
-        sprite = pygame.image.load(os.path.join("..", "resources", "buildings",
-                                                "city.png"))
+        adjusted_size = floor(size / self._zoom)
         sprite = pygame.transform.scale(sprite,
-                                        (floor(2000 / self._zoom),
-                                         floor(2000 / self._zoom)))
+                                        (adjusted_size,
+                                         adjusted_size))
         sprite.convert()
+        offset = size / (self._zoom * 2)
         self._screen.blit(sprite,
-                          (floor(center_x - (2000 / (self._zoom * 2))),
-                           floor(center_y - (2000 / (self._zoom * 2)))))
+                          (floor(center_x - offset),
+                           floor(center_y - offset)))
 
     def draw_hex_grid(self, layout):
         """Create a hex grid."""
@@ -138,7 +138,9 @@ class Game:
             pygame.draw.polygon(self._screen, pygame.Color("white"),
                                 layout.polygon_corners(hexagon),
                                 1)
-            self.draw_sprite(hexagon, layout)
+            sprite = pygame.image.load(os.path.join("..", "resources",
+                                                    "buildings", "city.png"))
+            self.draw_sprite(hexagon, layout, 2000, sprite)
 
     def get_mirrors(self):
         """Get mirrored grids."""
