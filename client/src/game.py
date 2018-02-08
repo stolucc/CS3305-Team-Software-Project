@@ -139,8 +139,11 @@ class Game:
                                 layout.polygon_corners(hexagon),
                                 1)
             sprite = pygame.image.load(os.path.join("..", "resources",
-                                                    "buildings", "city.png"))
-            self.draw_sprite(hexagon, layout, 2000, sprite)
+                                                    "units", "archers3.png"))
+            self.draw_sprite(hexagon, layout, 1800, sprite)
+            sprite = pygame.image.load(os.path.join("..", "resources",
+                                                    "health", "health_bar.png"))
+            self.draw_sprite(hexagon, layout, 1800, sprite)
 
     def get_mirrors(self):
         """Get mirrored grids."""
