@@ -52,26 +52,26 @@ class Game:
         self._zoom_interval = 5
         self._min_zoom = 1
         self._max_zoom = 1000
-        self.hex_size = lambda x: (self.infoObject.current_w // x)
+        self._hex_size = lambda x: (self.infoObject.current_w // x)
         self._grid = Grid(self._grid_size)
         self._grid.create_grid()
-        self._layout = Layout(self.hex_size(self._zoom),
+        self._layout = Layout(self._hex_size(self._zoom),
                               (self._window_size[0] / 2,
                                self._window_size[1] / 2))
-        self._terrain_biome_images = {(0, 0): pygame.image.load("resources/images/tiles/tundra_flat.png"),
-                                      (0, 1): pygame.image.load("resources/images/tiles/grassland_flat.png"),
-                                      (0, 2): pygame.image.load("resources/images/tiles/desert_flat.png"),
-                                      (1, 0): pygame.image.load("resources/images/tiles/tundra_hill.png"),
-                                      (1, 1): pygame.image.load("resources/images/tiles/grassland_hill.png"),
-                                      (1, 2): pygame.image.load("resources/images/tiles/desert_hill.png"),
-                                      (2, 0): pygame.image.load("resources/images/tiles/tundra_mountain.png"),
-                                      (2, 1): pygame.image.load("resources/images/tiles/grassland_mountain.png"),
-                                      (2, 2): pygame.image.load("resources/images/tiles/desert_mountain.png"),
-                                      (3, 0): pygame.image.load("resources/images/tiles/ocean.png"),
-                                      (3, 1): pygame.image.load("resources/images/tiles/ocean.png"),
-                                      (3, 2): pygame.image.load("resources/images/tiles/ocean.png")}
+        self._terrain_images = {(0, 0): pygame.image.load("tundra_flat.png").convert_alpha(),
+                                (0, 1): pygame.image.load("grassland_flat.png").convert_alpha(),
+                                (0, 2): pygame.image.load("desert_flat.png").convert_alpha(),
+                                (1, 0): pygame.image.load("tundra_hill.png").convert_alpha(),
+                                (1, 1): pygame.image.load("grassland_hill.png").convert_alpha(),
+                                (1, 2): pygame.image.load("desert_hill.png").convert_alpha(),
+                                (2, 0): pygame.image.load("tundra_mountain.png").convert_alpha(),
+                                (2, 1): pygame.image.load("grassland_mountain.png").convert_alpha(),
+                                (2, 2): pygame.image.load("desert_mountain.png").convert_alpha(),
+                                (3, 0): pygame.image.load("ocean.png").convert_alpha(),
+                                (3, 1): pygame.image.load("ocean.png").convert_alpha(),
+                                (3, 2): pygame.image.load("ocean.png").convert_alpha()}
 
-        self._scaled_terrain_biome_images = self._terrain_biome_images.copy()
+        self._scaled_terrain_images = self._terrain_images.copy()
 
     def start(self):
         """Start game."""
@@ -79,12 +79,11 @@ class Game:
         self.draw_map()
         while True:
             for event in pygame.event.get():  # something happened
-                if event.type in (pygame.QUIT, pygame.KEYDOWN):
+                if event.type in [pygame.QUIT, pygame.KEYDOWN]:
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     self.mouse_button_down(event)
             time.sleep(0.001)
-            # pygame.display.flip()
 
     def mouse_button_down(self, event):
         """Mouse down actions."""
@@ -94,13 +93,14 @@ class Game:
             pass
         elif event.button == 3:  # Right click
             pass
-        elif event.button == 4:  # Scrole up
+        elif event.button == 4:  # Scroll up
             self.zoom_in()
-        elif event.button == 5:  # Scrole down
+        elif event.button == 5:  # Scroll down
             self.zoom_out()
 
     def panning(self):
         """Move map while holding down."""
+        pygame.mouse.get_rel()
         holding = True
         while holding:
             pygame.event.get()
@@ -122,26 +122,26 @@ class Game:
         if self._zoom <= self._min_zoom:
             self._zoom = self._min_zoom
         else:
-            self._layout.size = self.hex_size(self._zoom)
+            self._layout.size = self._hex_size(self._zoom)
             self.scale_images_to_hex_size()
             self.draw_map()
+
     def zoom_out(self):
         """Zooming away from map."""
         self._zoom += self._zoom_interval
         if self._zoom >= self._max_zoom:
             self._zoom = self._max_zoom
         else:
-            self._layout.size = self.hex_size(self._zoom)
+            self._layout.size = self._hex_size(self._zoom)
             self.scale_images_to_hex_size()
             self.draw_map()
 
     def scale_images_to_hex_size(self, ):
-        for k in self._terrain_biome_images:
-            self._scaled_terrain_biome_images[k] = pygame.transform.smoothscale(copy(self._terrain_biome_images[k]),
-                                                                                (math.ceil((self.hex_size(self._zoom) * 2) * math.sqrt(3) / 2),
-                                                                                 self.hex_size(self._zoom) * 2
-                                                                                 ))
-
+        for k in self._terrain_images:
+            self._scaled_terrain_images[k] = pygame.transform.smoothscale(
+                self._terrain_images[k],
+                (math.ceil((self._hex_size(self._zoom) * 2) * math.sqrt(3) / 2),
+                 self._hex_size(self._zoom) * 2))
 
     def draw_sprite(self, hexagon, layout, size, sprite):
         """Draw a sprite on a hex tile."""
@@ -158,22 +158,18 @@ class Game:
 
     def draw_hex_grid(self, layout):
         """Create a hex grid."""
-        current_width = pygame.display.get_surface().get_width() // 2
-        current_height= pygame.display.get_surface().get_height() // 2
-        origin = layout.origin
-        print(origin)
+        size = pygame.display.get_surface().get_size()
         for hex_point in self._grid.get_hextiles():
 
             hexagon = self._grid.get_hextile(hex_point)
             hexagon_coords = layout.hex_to_pixel(hexagon)
-            if (self._window_size[0]//2 +100 + origin[0] > hexagon_coords[0] > -self._window_size[0]//2 -100 - origin[0] and
-                self._window_size[1]//2 + 100 + origin[1] > hexagon_coords[1] > -self._window_size[1]//2 - 100 - origin[1]):
+            if (size[0] + 100 > hexagon_coords[0] > -100 and
+               size[1] + 100 > hexagon_coords[1] > -100):
                 terrain = hexagon.terrain
-                terrain_image = self._scaled_terrain_biome_images[(terrain.terrain_type.value, terrain.biome.value)]
-                tile = pygame.draw.polygon(self._screen, pygame.Color("white"),
-                                           layout.polygon_corners(hexagon),
-                                           1)
-                pygame.Surface.blit(self._screen, terrain_image, tile)
+                terrain_image = self._scaled_terrain_images[(terrain.terrain_type.value, terrain.biome.value)]
+                self._screen.blit(terrain_image,
+                                  (hexagon_coords[0] - math.ceil(self._layout.size * (math.sqrt(3) / 2)),
+                                   hexagon_coords[1] - self._layout.size))
                 sprite = pygame.image.load(os.path.join("..", "resources",
                                                         "units", "archers3.png"))
                 self.draw_sprite(hexagon, layout, 1800, sprite)
@@ -181,7 +177,6 @@ class Game:
                                                         "health",
                                                         "health_bar_75.png"))
                 self.draw_sprite(hexagon, layout, 1800, sprite)
-
 
 def get_mirrors(self):
         """Get mirrored grids."""
