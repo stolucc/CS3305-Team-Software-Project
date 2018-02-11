@@ -1,3 +1,4 @@
+import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.internal.logging.text.StyledTextOutput;
 import org.gradle.internal.logging.text.StyledTextOutputFactory;
 def Style = StyledTextOutput.Style
@@ -61,6 +62,21 @@ ext.runTest = {location, testFile, errout ->
   return result.getExitValue()
 }
 
+ext.yesNoPrompt = { text ->
+  def console = System.console()
+  highlight text + "(Y/N)"
+  while (true){
+    String ans = console.readLine()
+    if(ans.toLowerCase().trim().equals("y")){
+      return true
+    }else if(ans.toLowerCase().trim().equals("n")){
+      return false
+    }else{
+      failPrint "(Y/N)"
+    }
+  }
+}
+
 ext.runTests = {location ->
   infoPrint("\n\nRunning " + location + " tests.\n")
   testsRun = true
@@ -87,37 +103,53 @@ ext.runTests = {location ->
   if(failedCount > 0){
     testsPassed = false
     failPrint(failedCount.toString() + " test(s) failed.")
-    infoPrint("\nFailed Results have been logged to: test.log")
+    infoPrint("\nFailed Results have been logged to: test.log\n\n")
+    if(!yesNoPrompt("Not all tests completed successfully, continue with build?")){
+      throw new GradleException("Build Stopped due to user input.")
+    }
   }
 }
 
-ext.yesNoPrompt = { text ->
-  def console = System.console()
-  highlight text
-  while (true){
-    String ans = console.readLine()
-    if(ans.toLowerCase().trim().equals("y")){
-      return true
-    }else if(ans.toLowerCase().trim().equals("n")){
-      return false
-    }else{
-      failPrint "(Y/N)"
+ext.createScripts = {directory ->
+  File bashfile = file(directory+'/activate.sh')
+  File batfile = file(directory+'/activate.bat')
+  if (file(directory+'/src/'+launchFile).exists()){
+    try{
+      bashfile.text = "#!/bin/bash\n"+pythonCommand.replace(" ","\\ ")+" "+'src/'+ launchFile
+      if(!Os.isFamily(Os.FAMILY_WINDOWS)){
+        exec{
+          workingDir directory
+          commandLine 'chmod','+x','activate.sh'
+        }
+      }
+      successPrint "Created bash launch script"
+    }catch(Exception e){
+      failPrint "Failed to build bash launch Script"
     }
+
+    try{
+      batfile.text = pythonCommand.replace(" ","\\ ")+" "+'src/'+ launchFile
+      successPrint "Created bat launch script"
+    }catch(Exception e){
+      failPrint "Failed to build bat launch Script"
+    }
+  }else{
+    failPrint "Script Generation failed, unable to find " + launchFile
   }
 }
 
 task clean(){
   doLast{
     if(file("bin/env/").exists()){
-      if(yesNoPrompt("There is an existing virtual environment, Delete it? (Y/N)")){
+      if(yesNoPrompt("There is an existing virtual environment, Delete it?")){
         delete{
           delete 'bin'
         }
       }else{
-        FileTree tree = fileTree("bin")
-        tree.exclude 'env'
         delete{
-          delete tree
+          delete 'bin/client'
+          delete 'bin/server'
+          delete 'bin/test'
         }
       }
     }
@@ -254,10 +286,12 @@ task lint(){
       ignoreExitValue = true
     }
     if(result.getExitValue() != 0){
-      boolean res = yesNoPrompt "Some linting issues exist, continue with build?(Y/N)"
+      boolean res = yesNoPrompt "Some linting issues exist, continue with build?"
       if (!res){
         throw new GradleException("Build Stopped due to user input.")
       }
+    }else{
+      successPrint "No linter errors"
     }
   }
 }
@@ -268,13 +302,20 @@ task tests{
   doLast{
     runTests("client")
     runTests("server")
-    infoPrint('\nTests Complete, Removing test directory from build. ')
-    delete{
-      delete 'bin/tests'
+    if (yesNoPrompt ('\nTests Complete, Remove test directory from build?')){
+      delete{
+        delete 'bin/client/test'
+        delete 'bin/server/test'
+      }
     }
   }
 }
 
 task build(){
   dependsOn tests
+  doLast{
+    infoPrint "Generating Launch Scripts"
+    createScripts("bin/client/")
+    createScripts("bin/server/")
+  }
 }
