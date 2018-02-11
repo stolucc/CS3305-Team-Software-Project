@@ -109,7 +109,7 @@ class Hex:
 
     def __lt__(self, other):
         """Less than comparison between hexes."""
-        return (self.x + self.y + self.z) < (other.x + other.y + other.z)
+        return self.x < other.x or self.y < other.y or self.z < other.z
 
     def __repr__(self):
         """
@@ -117,7 +117,7 @@ class Hex:
 
         :return: a formatted list showing x, y and z coordinates
         """
-        return "x:%s, y:%s, z:%s\n" % (self.x, self.y, self.z)
+        return "(x:%s, y:%s, z:%s)" % (self.x, self.y, self.z)
 
     def __hash__(self):
         """

@@ -2,13 +2,17 @@
 from enum import Enum
 
 
-class Resource(Enum):
-    """Class to represent map resources."""
+class ResourceType(Enum):
+    """Enumerate Resource Types."""
 
     COAL = 0
     GEMS = 1
     IRON = 2
     LOGS = 3
+
+
+class Resource():
+    """Class to represent map resources."""
 
     def __init__(self, resource_type, available_quantity):
         """

@@ -4,9 +4,6 @@ import ssl
 import os
 import json
 
-with open(os.path.join("..", "config", "config.json")) as config_file:
-    config = json.load(config_file)
-
 
 class Connection:
     """Class the represent a TCP connection."""
@@ -19,6 +16,8 @@ class Connection:
         :param port: port number of other party
         :param connection: default new connection, can be passed existing tcp
         """
+        with open(os.path.join("..", "config", "config.json")) as config_file:
+            self._config = json.load(config_file)
         self._host = gethostbyname(host)
         self._port = port
         if connection is None:
@@ -26,10 +25,10 @@ class Connection:
             self._context.verify_mode = ssl.CERT_REQUIRED
             self._context.check_hostname = True
             self._context.load_verify_locations(
-                config["paths"]["ca-bundle"])
+                self._config["paths"]["ca-bundle"])
             self._socket = self._context.wrap_socket(
                 socket(AF_INET, SOCK_STREAM),
-                server_hostname=config["server"]["hostname"])
+                server_hostname=self._config["server"]["hostname"])
             self._open_status = False
         else:
             self._socket = connection
@@ -96,7 +95,7 @@ class Connection:
                 self._open_status = False
                 self._socket = self._context.wrap_socket(
                     socket(AF_INET, SOCK_STREAM),
-                    server_hostname=config["server"]["hostname"])
+                    server_hostname=self._config["server"]["hostname"])
             except Exception:
                 raise
         else:
@@ -111,6 +110,8 @@ class NetworkException(Exception):
 
 def main():
     """Test function."""
+    with open(os.path.join("..", "config", "config.json")) as config_file:
+        config = json.load(config_file)
     con = Connection(config["server"]["ip"], config["server"]["port"])
     con.open()
     con.send("Can you hear me?")

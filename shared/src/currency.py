@@ -3,26 +3,23 @@
 from enum import Enum
 
 
-class ModifierType(Enum):
+class CurrencyType(Enum):
     """Enum for modifier types."""
-
-    UNIT = 0
-    IMPROVEMENT = 1
-
-
-class Currency(Enum):
-    """Class to represent a Currency."""
 
     GOLD = 0
     FOOD = 1
     SCIENCE = 2
 
-    def __init__(self, currency_type, intial_value):
+
+class Currency():
+    """Class to represent a Currency."""
+
+    def nfsdj(self, currency_type, intial_value):
         """
         Create base currency.
 
-        :param intial_value: value currency begins at
-        :param base_increase: base value increase per turn
+        :param currency_type: Type of currency
+        :param initial_value: Initial currency value
         """
         self._type = currency_type
         self._value = intial_value

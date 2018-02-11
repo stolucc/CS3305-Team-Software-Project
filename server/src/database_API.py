@@ -420,11 +420,11 @@ class Unit(Base):
         :param type: specifies the type of unit. Must be >= 0.
         :param health: specifies the health of unit. Must be >= 0.
         :param x: specifies the location (x coordinate) of unit.
-        x + y + z must equal 0.
+            x + y + z must equal 0.
         :param y: specifies the location (y coordinate) of unit.
-        x + y + z must equal 0.
+            x + y + z must equal 0.
         :param z: specifies the location (z coordinate) of unit.
-        x + y + z must equal 0.
+            x + y + z must equal 0.
         """
         unit = Unit(user_id=user_id, type=type, health=health, x=x, y=y,
                     z=z)
@@ -531,11 +531,11 @@ class Building(Base):
         :param active: specifies if the building is active or not
         :param type: specifies the type of building. Must be >= 0.
         :param x: specifies the location (x coordinate) of building.
-        x + y + z must equal 0.
+            x + y + z must equal 0.
         :param y: specifies the location (y coordinate) of building.
-        x + y + z must equal 0.
+            x + y + z must equal 0.
         :param z: specifies the location (z coordinate) of building.
-        x + y + z must equal 0.
+            x + y + z must equal 0.
         """
         building = Building(user_id=user_id, active=active, type=type, x=x,
                             y=y, z=z)
@@ -653,24 +653,24 @@ class Log(Base):
         :param session: sessionmaker object
         :param log_level: log_level of the log. Must be >= 0.
         :param log_level_name: log_level_name of the log
-        (limit is 256 characters)
+            (limit is 256 characters)
         :param file_name: filename of the file where the logging call was made
-        (limit is 256 characters)
+            (limit is 256 characters)
         :param line_number: line number in the file where the logging call was
-        made. Must be >= 0.
+            made. Must be >= 0.
         :param function_name: name of function where the logging call was
-        made. (limit is 256 characters)
+            made. (limit is 256 characters)
         :param log: log message of the log (limit is 2048 characters)
         :param created_at: timestamp of when the log was created
         :param created_by: what created the log (limit is 256 characters)
         :param process_id: id of the process that created the log.
-        Must be >= 0.
+            Must be >= 0.
         :param process_name: name of the process that created the log
         (limit is 256 characters)
         :param thread_id: id of the thread that created the log.
-        Must be >= 0.
+            Must be >= 0.
         :param thread_name: name of the thread that created the log
-        (limit is 256 characters)
+            (limit is 256 characters)
         """
         log = Log(log_level=log_level, log_level_name=log_level_name,
                   file_name=file_name, line_number=line_number,
