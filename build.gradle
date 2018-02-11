@@ -1,118 +1,280 @@
-subprojects {
-    version = '1.0'
-}
-
-task clean(type: Delete){
-  delete 'bin'
-}
-
-task devclient(){
-  dependsOn(":client:doBuild")
-}
-
-task devserver(){
-  dependsOn(":server:doBuild")
-}
-
-task devbuild(){
-  dependsOn devclient
-  dependsOn devserver
-}
+import org.gradle.internal.logging.text.StyledTextOutput;
+import org.gradle.internal.logging.text.StyledTextOutputFactory;
+def Style = StyledTextOutput.Style
+def out = services.get(StyledTextOutputFactory).create("")
 
 boolean pythonFound = false
+boolean testsRun = true
 String pythonCommand = ""
+String[] requiredDependencies = pypiDependencies.replace(" ","").split(",")
+boolean[] installed = new boolean[requiredDependencies.length]
 
+System.setProperty('org.gradle.color.description', 'BLUE')
+
+ext.infoPrint = { String text ->
+  out.withStyle(Style.Info).println(text)
+}
+
+ext.successPrint = { String text ->
+  out.withStyle(Style.Success).println(text)
+}
+
+ext.failPrint = { String text ->
+  out.withStyle(Style.Failure).println(text)
+}
+
+ext.highlight = { String text ->
+  out.withStyle(Style.Description).println(text)
+}
+
+ext.copyFiles = { location ->
+  infoPrint("Copying " + location + " files")
+  copy{
+    from 'shared/'
+    from location
+    include 'config/**'
+    include 'resources/**'
+    include 'src/**'
+    include 'test/**'
+    into 'bin/' + location
+  }
+  copy{
+    from 'shared/lib'
+    from location + '/lib'
+    into 'bin/'+location+'/src'
+  }
+  copy{
+    from 'bin/'+location+'/src'
+    into 'bin/'+location+'/test'
+  }
+}
+
+ext.runTest = {location, testFile, errout ->
+  ExecResult result = exec{
+    workingDir 'bin/' + location + '/test'
+    infoPrint("Running Tests: " + testFile.split("/")[-1])
+    executable pythonCommand
+    args testFile
+    errorOutput = errout
+    ignoreExitValue = true
+  }
+  return result.getExitValue()
+}
+
+ext.runTests = {location ->
+  infoPrint("\n\nRunning " + location + " tests.\n")
+  testsRun = true
+  String[] testFiles = fileTree(dir: 'bin/'+ location +'/test', include: '*_test.py').getFiles()
+  int passedCount = 0, failedCount = 0
+  File logFile = file(location+'/test.log')
+  logFile.text = ""
+  for(int i=0;i<testFiles.length; i++){
+    ByteArrayOutputStream errout = new ByteArrayOutputStream()
+    int exitCode = runTest(location, testFiles[i], errout)
+    if(exitCode == 0){
+      successPrint("Passed.")
+      passedCount++
+    }else{
+      failPrint("Failed.")
+      failedCount++
+      logFile.text += "File: " + testFiles[i] + "\n\n" + errout.toString()
+    }
+  }
+  infoPrint("\nUnit Test Results: ")
+  if(passedCount > 0){
+    successPrint(passedCount.toString() + " test(s) passed.")
+  }
+  if(failedCount > 0){
+    testsPassed = false
+    failPrint(failedCount.toString() + " test(s) failed.")
+    infoPrint("\nFailed Results have been logged to: test.log")
+  }
+}
+
+ext.yesNoPrompt = { text ->
+  def console = System.console()
+  highlight text
+  while (true){
+    String ans = console.readLine()
+    if(ans.toLowerCase().trim().equals("y")){
+      return true
+    }else if(ans.toLowerCase().trim().equals("n")){
+      return false
+    }else{
+      failPrint "(Y/N)"
+    }
+  }
+}
+
+task clean(){
+  doLast{
+    if(file("bin/env/").exists()){
+      if(yesNoPrompt("There is an existing virtual environment, Delete it? (Y/N)")){
+        delete{
+          delete 'bin'
+        }
+      }else{
+        FileTree tree = fileTree("bin")
+        tree.exclude 'env'
+        delete{
+          delete tree
+        }
+      }
+    }
+  }
+}
 
 task checkVersion(){
   doLast{
-    String[] pythonCommands = ["python3.6","python3","python"]
-    ByteArrayOutputStream stdout = new ByteArrayOutputStream()
-    for (int i = 0; i < pythonCommands.length; i++){
-      try{
-        exec{
-          commandLine pythonCommands[i],'--version'
-          standardOutput = stdout
+    if (!file("bin/env/").exists()){
+      String[] pythonCommands = ["python3.6","python3","python"]
+      ByteArrayOutputStream stdout = new ByteArrayOutputStream()
+      for (int i = 0; i < pythonCommands.length; i++){
+        try{
+          exec{
+            commandLine pythonCommands[i],'--version'
+            standardOutput = stdout
+          }
+          if(stdout.toString().contains('Python 3.6')){
+            pythonCommand = pythonCommands[i]
+            pythonFound = true
+            break
+          }
+        }catch(Exception e){
+          failPrint 'No Command ' + pythonCommands[i] + ' continuing check'
         }
-        if(stdout.toString().contains('Python 3.6')){
-          pythonCommand = pythonCommands[i]
-          pythonFound = true
-          break
-        }
-      }catch(Exception e){
-        println 'No Command ' + pythonCommands[i] + ' continuing check'
       }
-    }
-    if(!pythonFound){
-      throw new GradleException("No valid python3.6 installation found, building failed")
-    }else{
-      println "Found python 3.6 with command " + pythonCommand
+      if(!pythonFound){
+        throw new GradleException("No valid python3.6 installation found, building failed")
+      }else{
+        successPrint "Found python 3.6 installation using command " + pythonCommand
+      }
     }
   }
 }
 
-String[] required = ["pylama", "Sphinx"]
-Boolean[] installed = [false, false]
-task checktools(dependsOn:checkVersion, type:Exec){
-    doFirst{
-      executable = pythonCommand
+task createVenv(){
+  dependsOn checkVersion
+  doLast{
+    infoPrint("Checking for existing environment")
+    if (!file("bin/env").exists()){
+      infoPrint("Creating new python environment")
+      exec{
+        commandLine pythonCommand,'-m','venv','bin/env/','--copies'
+      }
     }
-    args = ["-m","pip","list","--format","columns"]
-    ignoreExitValue = true
-    standardOutput = new ByteArrayOutputStream()
+    successPrint("Virtual Python Environment established")
+    pythonCommand = file("bin/env/bin/python3").getAbsolutePath()
+  }
+}
+
+task checkDependencies(){
+  dependsOn createVenv
     doLast{
-      String result = standardOutput.toString()
-      for(int i=0; i<required.length;i++){
-        if(result.contains(required[i])){
+      ByteArrayOutputStream stdout = new ByteArrayOutputStream()
+      exec{
+        executable = pythonCommand
+        args = ["-m","pip","list","--format","columns"]
+        ignoreExitValue = true
+        standardOutput = stdout
+      }
+      String result = stdout.toString().toLowerCase()
+      for(int i=0; i<requiredDependencies.length;i++){
+        infoPrint "Checking for presence of " + requiredDependencies[i]
+        if(result.contains(requiredDependencies[i])){
+          successPrint "Found " + requiredDependencies[i]
           installed[i] = true
+        }else{
+          failPrint "Not Found"
         }
       }
     }
   }
 
-task installTools(){
-  dependsOn checktools
+task installDependencies(){
+  dependsOn checkDependencies
   doLast{
-    for(int i=0; i<required.length; i++){
+    for(int i=0; i<requiredDependencies.length; i++){
       if(!installed[i]){
+        infoPrint "Attempting to install " + requiredDependencies[i]
         exec{
             executable = pythonCommand
-            args = ["-m","pip","install",required[i]]
+            args = ["-m", "pip", "install", requiredDependencies[i]]
             standardOutput = new ByteArrayOutputStream()
         }
+        successPrint "Installed " + requiredDependencies[i]
       }
     }
+  }
+}
+
+task buildFiles(){
+  doLast{
+    copyFiles("client")
+    copyFiles("server")
   }
 }
 
 task document(){
-  dependsOn installTools
-  doFirst{
-    copy{
-    from 'documentation/core'
-    into 'documentation/source'
-    }
-    exec{
-      standardOutput = new ByteArrayOutputStream()
-      commandLine 'sphinx-apidoc','-o','documentation/source','shared/src'
-    }
-    exec{
-      standardOutput = new ByteArrayOutputStream()
-      commandLine 'sphinx-apidoc','-o','documentation/source','server/src'
-    }
-    exec{
-      standardOutput = new ByteArrayOutputStream()
-      commandLine 'sphinx-apidoc','-o','documentation/source','client/src'
-    }
-  }
+  dependsOn installDependencies
+  dependsOn buildFiles
   doLast{
+    copy{
+      from 'documentation/core'
+      into 'documentation/source'
+    }
+    infoPrint "Generating Documentation"
+
+    infoPrint "Generating Client ReStructuredText"
     exec{
-      commandLine 'sphinx-build','documentation/source','documentation/output'
+      standardOutput = new ByteArrayOutputStream()
+      commandLine pythonCommand,'-m','sphinx.apidoc','-o','documentation/source','bin/client/src'
+    }
+
+    infoPrint "Generating Server ReStructuredText"
+    exec{
+      standardOutput = new ByteArrayOutputStream()
+      commandLine pythonCommand,'-m','sphinx.apidoc','-o','documentation/source','bin/server/src'
+    }
+
+    infoPrint "Generating HTML docs"
+    exec{
+      commandLine pythonCommand,'-m','sphinx','documentation/source','documentation/output'
+    }
+    successPrint "Documentation built in html format. Written to directory 'documentation/output'"
+  }
+}
+
+task lint(){
+  dependsOn installDependencies
+  doLast{
+    infoPrint "Linting All Files"
+    ExecResult result = exec{
+      commandLine 'pylama'
+      ignoreExitValue = true
+    }
+    if(result.getExitValue() != 0){
+      boolean res = yesNoPrompt "Some linting issues exist, continue with build?(Y/N)"
+      if (!res){
+        throw new GradleException("Build Stopped due to user input.")
+      }
     }
   }
 }
 
-task lint(type:Exec){
-  dependsOn installTools
-  commandLine 'pylama'
-  ignoreExitValue = true
+task tests{
+  dependsOn lint
+  dependsOn buildFiles
+  doLast{
+    runTests("client")
+    runTests("server")
+    infoPrint('\nTests Complete, Removing test directory from build. ')
+    delete{
+      delete 'bin/tests'
+    }
+  }
+}
+
+task build(){
+  dependsOn tests
 }
