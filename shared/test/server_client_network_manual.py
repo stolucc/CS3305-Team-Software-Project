@@ -3,7 +3,7 @@ from connections import Connection
 from server_connection_handler import ConnectionHandler
 
 
-class SimpleNetworkTest(unittest.TestCase):
+class SimpleNetworkTest():
 
     def setUp(self):
         """Call before every test case."""

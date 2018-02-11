@@ -227,7 +227,7 @@ class HexGridTest(unittest.TestCase):
                   Hex(-1, 0, 1),
                   Hex(-1, 2, -1),
                   Hex(0, 1, -1)]
-        self.assertEqual(grid.vision(hexagon, 2), result)
+        self.assertEqual(set(grid.vision(hexagon, 2)), set(result))
 
     def test_dijkstra(self):
         """Test dijkstras."""
@@ -267,8 +267,8 @@ class HexGridTest(unittest.TestCase):
                                                        BiomeType.GRASSLAND)
         grid.get_hextile((-1, 0, 1)).terrain = Terrain(TerrainType.MOUNTAIN,
                                                        BiomeType.GRASSLAND)
-        result = [Hex(-2, 1, 1),
-                  Hex(2, -1, -1),
+        result = [Hex(-1, 2, -1),
+                  Hex(2, -2, 0),
                   Hex(1, -1, 0)]
         self.assertEqual(grid.shortest_path(start, end, 3), result)
 

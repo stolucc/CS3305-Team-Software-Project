@@ -3,7 +3,7 @@ from socket import socket, AF_INET, SOCK_STREAM
 import ssl
 import os
 import json
-from bin.client.test.connections import Connection, NetworkException
+from connections import Connection, NetworkException
 import unittest
 
 with open(os.path.join("..", "config", "config.json")) as config_file:
