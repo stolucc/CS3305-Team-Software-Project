@@ -1,14 +1,13 @@
-from enum import Enum
 from hexgrid import Hex
 
+
 class Unit():
-    """
-    Base class for the units
-    """
+    """Base class for the units."""
 
     def __init__(self, health, level, movement_range, cost, hextile):
         """
-        Initialise units attributes
+        Initialise units attributes.
+
         :param health: Amount of health unit begins with
         :param level: Level of the unit
         :param movement_range: Amount of tiles the unit can travel
@@ -25,7 +24,8 @@ class Unit():
     @property
     def health(self):
         """
-        Health of the unit
+        Health of the unit.
+
         :return: current health of the unit
         """
         return self._health
@@ -33,7 +33,8 @@ class Unit():
     @health.setter
     def health(self, health):
         """
-        Set health of the unit
+        Set health of the unit.
+
         :param health:
         """
         self._health = health
@@ -41,7 +42,8 @@ class Unit():
     @property
     def max_health(self):
         """
-        Max health of the unit
+        Max health of the unit.
+
         :return: current max health of the unit
         """
         return self._max_health
@@ -49,7 +51,8 @@ class Unit():
     @max_health.setter
     def max_health(self, max_health):
         """
-        Set max health
+        Set max health.
+
         :param max_health: new max health of the unit
         """
         self._max_health = max_health
@@ -57,7 +60,8 @@ class Unit():
     @property
     def level(self):
         """
-        Level of the unit
+        Level of the unit.
+
         :return: current level of the unit
         """
         return self._level
@@ -65,7 +69,8 @@ class Unit():
     @level.setter
     def level(self, level):
         """
-        Set level
+        Set level.
+
         :param level: set new level of the unit
         """
         self._level = level
@@ -73,7 +78,8 @@ class Unit():
     @property
     def movement_range(self):
         """
-        Movement range of the unit
+        Movement range of the unit.
+
         :return: current movement range of the unit
         """
         return self._movement_range
@@ -81,7 +87,8 @@ class Unit():
     @movement_range.setter
     def movement_range(self, movement_range):
         """
-        Set movement range
+        Set movement range.
+
         :param movement_range: set new movement range of the unit
         """
         self._movement_range = movement_range
@@ -89,7 +96,8 @@ class Unit():
     @property
     def cost(self):
         """
-        Cost of unit per turn
+        Cost of unit per turn.
+
         :return: dict of resource costs
         """
         return self._cost
@@ -97,7 +105,8 @@ class Unit():
     @cost.setter
     def cost(self, cost):
         """
-        Set new cost of unit
+        Set new cost of unit.
+
         :param cost: dict of resource costs
         """
         self._cost = cost
@@ -105,7 +114,8 @@ class Unit():
     @property
     def position(self):
         """
-        Position of unit
+        Position of unit.
+
         :return: hex tile that unit is positioned on
         """
         return self._position
@@ -113,14 +123,16 @@ class Unit():
     @position.setter
     def position(self, hex):
         """
-        Set position of unit
+        Set position of unit.
+
         :param hex: new hex tile that unit is situated on
         """
         self._position = hex
 
     def cost_increase(self, food, gold, science):
         """
-        Increase cost of resources used per turn
+        Increase cost of resources used per turn.
+
         :param food: int
         :param gold: int
         :param science: int
@@ -132,7 +144,8 @@ class Unit():
 
     def level_up(self, health_increase, movement_increase):
         """
-        Units level increases along with certain attributes
+        Unit level increases along with certain attributes.
+
         :param health_increase: amount health should increase by
         :param movement_increase: amount movement_range should increase by
         """
@@ -143,7 +156,8 @@ class Unit():
 
     def receive_damage(self, damage):
         """
-        Take damage from attack
+        Take damage from attack.
+
         :param damage: amount of damage to be taken from health
         """
         self._health -= damage
@@ -155,7 +169,8 @@ class Unit():
 
     def restore_health(self, restore):
         """
-        Restore health of unit
+        Restore health of unit.
+
         :param restore: amount of health to be restored
         """
         health = self.health + restore
@@ -166,40 +181,42 @@ class Unit():
 
     def __repr__(self):
         """
-        String representation
+        String representation.
+
         :return: string
         """
         string = "Health: %i, Max Health: %i, " \
                  "Movement Range: %i, Level: %i, Cost:(Food:%i Gold:%i, " \
                  "Science:%i), Position: %i,%i,%i, " % \
-                 (self._health, self._max_health,self._movement_range, self._level,
-                  self._cost['food'], self._cost['gold'], self._cost['science'],
-                  self._position.x, self._position.y, self._position.z)
+                 (self._health, self._max_health, self._movement_range,
+                  self._level, self._cost['food'], self._cost['gold'],
+                  self._cost['science'], self._position.x, self._position.y,
+                  self._position.z)
         return string
 
 
 class Worker(Unit):
-    """
-    Worker class, for creating and upgrading buildings
-    """
+    """Worker class, for creating and upgrading buildings."""
 
     def __init__(self, level, hex):
         """
-        Initialise workers attributes
+        Initialise workers attributes.
+
         :param level: int Level of the unit
         :param hex: Current hex tile the unit is on
         """
-        self._increment = level - 1
-        self._health = 100 + 10 * self._increment
-        self._movement = 4 + self._increment
-        self._cost = {'food':level, 'gold':0, 'science':0}
-        super().__init__(self._health, level, self._movement, self._cost, hex)
+        increment = level - 1
+        health = 100 + 10 * increment
+        movement = 4 + increment
+        cost = {'food': level, 'gold': 0, 'science': 0}
+        super().__init__(health, level, movement, cost, hex)
         self._build_speed = level
 
     @property
     def build_speed(self):
         """
-        Build speed of worker
+        Build speed of worker.
+
         :return: int current build speed of worker
         """
         return self._build_speed
@@ -207,14 +224,16 @@ class Worker(Unit):
     @build_speed.setter
     def build_speed(self, build_speed):
         """
-        Set new build speed of worker
+        Set new build speed of worker.
+
         :param build_speed: int new build speed of worker
         """
         self._build_speed = build_speed
 
     def level_up(self):
         """
-        Worker unit levels up
+        Worker unit levels up.
+
         Health increases by 20, movement and build_speed by 1, each level
         """
         if self.level >= 3:
@@ -226,10 +245,10 @@ class Worker(Unit):
 
     def build(self, building):
         """
-        Build building on current hex tile
+        Build building on current hex tile.
+
         :param building: the building to be built
         """
-
         if self._position._building is None:
             self._position._building = building
         else:
@@ -237,7 +256,8 @@ class Worker(Unit):
 
     def upgrade_building(self):
         """
-        Upgrade building on units hex tile
+        Upgrade building on units hex tile.
+
         :return:
         """
         if self._position._building is None:
@@ -247,23 +267,24 @@ class Worker(Unit):
 
     def __repr__(self):
         """
-        String representation of Worker class
+        String representation of Worker class.
+
         :return: string
         """
         string = "Worker: "
         string += super().__repr__()
-        string += "Build Speed: %i" %(self._build_speed)
+        string += "Build Speed: %i" % (self._build_speed)
         return string
 
 
 class Soldier(Unit):
-    """
-    Soldier unit, for attacking other units and buildings
-    """
+    """Soldier unit, for attacking other units and buildings."""
 
-    def __init__(self, health, level, movement_range, strength, attack_range, cost, hex):
+    def __init__(self, health, level, movement_range, strength, attack_range,
+                 cost, hex):
         """
-        Initialise soldiers attributes
+        Initialise soldiers attributes.
+
         :param health: Amount of health unit begins with
         :param level: Level of the unit
         :param movement_range: Amount of tiles the unit can travel
@@ -279,7 +300,8 @@ class Soldier(Unit):
     @property
     def strength(self):
         """
-        Soldiers strength when attacking
+        Soldier strength when attacking.
+
         :return: int current soldiers strength
         """
         return self._strength
@@ -287,7 +309,8 @@ class Soldier(Unit):
     @strength.setter
     def strength(self, strength):
         """
-        Set new strength of soldier
+        Set new strength of soldier.
+
         :param strength: int new strength of soldier
         """
         self._strength = strength
@@ -295,7 +318,8 @@ class Soldier(Unit):
     @property
     def attack_range(self):
         """
-        Attack range of the soldier
+        Attack range of the soldier.
+
         :return: int amount of tiles unit can attack across
         """
         return self._attack_range
@@ -303,14 +327,16 @@ class Soldier(Unit):
     @attack_range.setter
     def attack_range(self, attack_range):
         """
-        Set attack range
+        Set attack range.
+
         :param attack_range: int new attack range of unit
         """
         self._attack_range = attack_range
 
     def attack_unit(self, unit):
         """
-        Attack enemy unit
+        Attack enemy unit.
+
         :param unit: Unit
         """
         damage = self.strength * (self.health/self.max_health)
@@ -318,28 +344,27 @@ class Soldier(Unit):
 
 
 class Swordsman(Soldier):
-    """
-    Close range soldier
-    """
+    """Close range soldier."""
 
     def __init__(self, level, hex):
         """
-        Set Swordsman attributes according to level
+        Set Swordsman attributes according to level.
+
         :param level: int
         :param hex: Hex
         """
-        self._increment = level - 1
-        self._health = 130 + 30 * self._increment
-        self._movement_range = 4 + self._increment
-        self._strength = 30 + 20 * self._increment
-        self._cost = {'food':level, 'gold':level-1, 'science':0}
-        super().__init__(self._health, level, self._movement_range,
-                         self._strength, attack_range=1, cost=self._cost,
-                         hex=hex)
+        increment = level - 1
+        health = 130 + 30 * increment
+        movement_range = 4 + increment
+        strength = 30 + 20 * increment
+        cost = {'food': level, 'gold': level-1, 'science': 0}
+        super().__init__(health, level, movement_range, strength,
+                         attack_range=1, cost=cost, hex=hex)
 
     def attack_unit(self, unit):
         """
-        Attack enemy unit, enemy attacks back
+        Attack enemy unit, enemy attacks back.
+
         :param unit: Unit
         """
         damage = self.strength * (self.health/self.max_health)
@@ -349,9 +374,7 @@ class Swordsman(Soldier):
             self.receive_damage(damage)
 
     def level_up(self):
-        """
-        Level up Swordsman
-        """
+        """Level up Swordsman."""
         if self._level >= 3:
             print("Max level reached.")
         else:
@@ -361,39 +384,37 @@ class Swordsman(Soldier):
 
     def __repr__(self):
         """
-        String representation of Swordsman
+        String representation of Swordsman.
+
         :return: string
         """
         string = "Swordsman: " + super().__repr__()
-        string += "Strength: %i, Attack Range: %i"\
-                 %(self.strength, self.attack_range)
+        string += "Strength: %i, Attack Range: %i" % (self.strength,
+                                                      self.attack_range)
         return string
 
 
 class Archer(Soldier):
-    """
-    Long range Soldier class
-    """
+    """Long range Soldier class."""
 
     def __init__(self, level, hex):
         """
-        Set Archers attributes according to level
+        Set Archers attributes according to level.
+
         :param level: int
         :param hex: Hex
         """
-        self._increment = level - 1
-        self._health = 110 + 20 * self._increment
-        self._movement_range = 5 + self._increment
-        self._strength = 20 + 10 * self._increment
-        self._attack_range = 2 + self._increment
-        self._cost = {'food':2, 'gold':0, 'science':level-1}
-        super().__init__(self._health,level,self._movement_range,
-                         self._strength,self._attack_range,self._cost,hex)
+        increment = level - 1
+        health = 110 + 20 * increment
+        movement_range = 5 + increment
+        strength = 20 + 10 * increment
+        attack_range = 2 + increment
+        cost = {'food': 2, 'gold': 0, 'science': level-1}
+        super().__init__(health, level, movement_range, strength, attack_range,
+                         cost, hex)
 
     def level_up(self):
-        """
-        Level up Archer
-        """
+        """Level up Archer."""
         if self._level >= 3:
             print("Max level reached.")
         else:
@@ -404,12 +425,13 @@ class Archer(Soldier):
 
     def __repr__(self):
         """
-        String representation of Archer class
+        String representation of Archer class.
+
         :return: string
         """
         string = "Archer: " + super().__repr__()
-        string += "Strength: %i, Attack Range: %i"\
-                 %(self.strength, self.attack_range)
+        string += "Strength: %i, Attack Range: %i" % (self.strength,
+                                                      self.attack_range)
         return string
 
 
@@ -421,4 +443,3 @@ if __name__ == "__main__":
     print(worker)
     print(sword)
     print(archer)
-
