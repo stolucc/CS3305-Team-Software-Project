@@ -101,7 +101,6 @@ ext.runTests = {location ->
     successPrint(passedCount.toString() + " test(s) passed.")
   }
   if(failedCount > 0){
-    testsPassed = false
     failPrint(failedCount.toString() + " test(s) failed.")
     infoPrint("\nFailed Results have been logged to: test.log\n\n")
     if(!yesNoPrompt("Not all tests completed successfully, continue with build?")){
