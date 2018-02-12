@@ -555,3 +555,21 @@ class Grid:
                 path += [nxt]
                 nxt = reachable[nxt]
         return path[::-1]
+
+    def move_along_path(self, start_hex, end_hex, movement):
+        """
+        Move the unit along the path from their current tile to their
+        destination
+
+        :param path: start_hex: the hex the path begins from
+        :param end_hex: the hex the path ends at
+        :param movement: the total movement cost available
+        """
+
+        path = self.shortest_path(start_hex, end_hex, movement)
+        unit = start_hex.unit
+        for tile in range(len(path)):
+            unit.position = path[tile]
+            path[tile].unit = unit
+            if tile > 0:
+                path[tile - 1].unit = None
