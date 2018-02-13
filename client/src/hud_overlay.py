@@ -25,4 +25,13 @@ class HudOverlay:
 
         :param info_ref: dictonary containing ref to info to be displayed.
         """
-        self.info_references = info_ref
+        self.info_references = {InfoType.GOLD: None,
+                                InfoType.FOOD: None,
+                                InfoType.SCIENCE: None,
+                                InfoType.PRODUCTION: None,
+                                InfoType.TURN: None,
+                                InfoType.TURN_TIME: None,
+                                InfoType.TURN_INDICATIOR: None,
+                                InfoType.PING: None}
+        for key in info_ref:
+            self.info_references[key] = info_ref[key]
