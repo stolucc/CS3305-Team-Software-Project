@@ -281,7 +281,7 @@ task lint(){
   doLast{
     infoPrint "Linting All Files"
     ExecResult result = exec{
-      commandLine 'pylama'
+      commandLine pythonCommand,'-m','pylama'
       ignoreExitValue = true
     }
     if(result.getExitValue() != 0){
