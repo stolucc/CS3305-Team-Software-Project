@@ -87,7 +87,6 @@ class Hex:
         return self._terrain.movement_cost
 
     @property
-
     def claimed(self):
         """
         Property indicating whether the tile has been previously claimed.
@@ -100,6 +99,7 @@ class Hex:
         """Claim a tile."""
         self._claimed = True
 
+    @property
     def unit(self):
         """
         Unit currently on this hex.

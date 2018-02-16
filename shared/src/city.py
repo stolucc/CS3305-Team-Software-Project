@@ -1,5 +1,5 @@
 """City representation."""
-from currency import Currency
+from currency import *
 from mapresource import Resource
 
 
@@ -12,7 +12,14 @@ class City():
         """Instantiate new City object."""
         self._hex = hexagon
         hexagon.building = self
-        self._tiles = None
+        self._tiles = []
+
+    def __repr__(self):
+        """String representation of City."""
+        string = "City: Amount of tiles: %i, Amount of buildings: %i, \
+        Hex: " % (len(self.tiles), len(self.buildings))
+        string += str(self._hex)
+        return string
 
     @property
     def tiles(self):
@@ -30,7 +37,7 @@ class City():
     def currency(self):
         """Property to evaluate total currency produced by this city."""
         currencies = {}
-        for currency in list(Currency):
+        for currency in list(CurrencyType):
             currencies[currency] = 0
         for tile in self._tiles:
             if tile.building is not None:
@@ -49,3 +56,13 @@ class City():
                and tile.terrain.resource.is_worked:
                     resources[tile.terrain.resource] += 1
         return resources
+
+    @property
+    def buildings(self):
+        """Property to give list of buildings in this city."""
+        buildings = []
+        for tile in self._tiles:
+            building = tile.building
+            if building is not None:
+                buildings += [building]
+        return buildings

@@ -2,14 +2,16 @@
 from enum import Enum
 from currency import Currency
 
+
 class BuildingType(Enum):
-    """Enum for available building types"""
+    """Enum for available building types."""
+
     FARM = 0
     TRADE_POST = 1
     UNIVERSITY = 2
 
 
-class Building(Enum):
+class Building():
     """A single resource-producing building."""
 
     def __init__(self, building_type, hexagon):
