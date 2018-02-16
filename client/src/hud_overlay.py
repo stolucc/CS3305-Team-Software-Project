@@ -20,12 +20,12 @@ class InfoType(Enum):
 class HudOverlay:
     """Class to represent a HUD Overlay."""
 
-    def __init__(self, info_ref, screen, resolution):
+    def __init__(self, info_ref, screen_surface, resolution):
         """
         Construct hud_overlay.
 
         :param info_ref: dictonary containing ref to info to be displayed.
-        :param screen: pygame display surface.
+        :param screen_surface: pygame display surface.
         :param resolution: tuple or screen resolution (w, h).
         """
         self._scale = 3
@@ -40,7 +40,7 @@ class HudOverlay:
         for key in info_ref:
             self._info_references[key] = info_ref[key]
 
-        self._screen = screen
+        self._screen = screen_surface
         self._resolution = resolution
         self.font = pygame.font.Font('freesansbold.ttf', self._scale * 4)
         path = "../resources/hud/"
@@ -76,7 +76,7 @@ class HudOverlay:
             value = self._info_references[resource]
             if value is not None:
                 logo = self._hud_images[resource]
-                screen.blit(logo, (offset, self._scale * 2))
+                self._screen.blit(logo, (offset, self._scale * 2))
                 self.draw_text(value, (offset, self._scale * 10))
                 offset += self._scale * 20
 
@@ -91,25 +91,4 @@ class HudOverlay:
         text = self.font.render(text, True, (0, 0, 0))
         rect = text.get_rect()
         rect.center = (position[0] + self._scale * 8, position[1])
-        screen.blit(text, rect)
-
-
-if __name__ == "__main__":
-    pygame.init()
-    pygame.font.init()
-    flags = (pygame.DOUBLEBUF |
-             pygame.HWSURFACE)
-    window_size = (1024, 576)
-    camera_position = (window_size[0]/2,
-                       window_size[1]/2)
-    screen = pygame.display.set_mode(window_size,
-                                     flags,
-                                     0)
-    dic = {InfoType.GOLD: 9,
-           InfoType.FOOD: 12,
-           InfoType.SCIENCE: 980,
-           InfoType.PRODUCTION: 1280}
-    hud = HudOverlay(dic, screen, window_size)
-    hud.draw()
-    while True:
-        pass
+        self._screen.blit(text, rect)
