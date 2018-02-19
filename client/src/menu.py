@@ -4,7 +4,7 @@ from pygame.locals import *
 
 
 class MenuOption:
-    """A Class for a single menu option in a menu"""
+    """A Class for a single menu option in a menu."""
 
     def __init__(self, name, menu_function):
         """
@@ -48,9 +48,8 @@ class Menu:
         self._screen = screen
         for i in options:
             self._options += [MenuOption(i[0], i[1])]
+        self._header = "Menu"
 
-    def set_screen(self, screen):
-        self._screen = screen
     def text_objects(self, text, font, colour):
         """
         Create a text object.
@@ -63,7 +62,7 @@ class Menu:
         textSurface = font.render(str(text), True, colour)
         return textSurface, textSurface.get_rect()
 
-    def message_display(self, text, text_size, y_cord, x_cord, colour):
+    def message_display(self, text, text_size, x_cord, y_cord, colour):
         """
         Display message on screen.
 
@@ -76,7 +75,7 @@ class Menu:
         """
         largeText = pygame.font.Font('freesansbold.ttf', text_size)
         TextSurf, TextRect = self.text_objects(text, largeText, colour)
-        TextRect.center = (y_cord, x_cord + text_size/2)
+        TextRect.center = (x_cord, y_cord + text_size/2)
         self._screen.blit(TextSurf, TextRect)
 
     def size_of_option(self, width, height):
@@ -88,48 +87,84 @@ class Menu:
         :return: return the width of the menu option (option_width)
                 and the height (option_height)
         """
-        option_height_space = 20
+        option_height_space = 60
         option_height = 35
-        option_width = width/4
+        option_width = width/2
         return option_width, option_height, option_height_space
 
     def display_menu(self):
-        """Display the menu."""
+        """Display the menu and save it to the object."""
         pygame.font.init()
         colour_black = (0, 0, 0)
         colour_white = (255, 255, 255)
         colour_green = (0, 255, 0)
         colour_red = (255, 0, 0)
+        background_colour = (91, 185, 247)
+        main_background_colour = (150, 150, 150)
+        text_colour = (249, 243, 122)
+        text_size = 30
 
         screen_width, screen_height = (1280, 720)
         option_width, option_height, option_space = self.size_of_option(
                                                 screen_width, screen_height)
-        x_coordinate = 0
-        pygame.draw.rect(self._screen, colour_red, pygame.Rect(
-            (screen_width / 2 - option_width/2), x_coordinate,
-            option_width, option_height))
-        self.message_display("MENU", 30, screen_width/2,
-                             x_coordinate, colour_green)
-        x_coordinate += option_height + option_space
+        y_coordinate = 0
+        pygame.draw.rect(self._screen, main_background_colour, pygame.Rect(
+            (screen_width/2 - screen_width/4), y_coordinate,
+            screen_width/2, screen_height))
+        self.message_display(self._header, text_size, screen_width/2,
+                             y_coordinate, text_colour)
+        heading_space = 140 + option_space + option_height
+        # Coordinates for where menu display starts.
+        y_coordinate += heading_space
+        x_coordinate = screen_width / 2 - option_width/2
+        # Stores locations of where menu option is drawn.
+        self._start = []
+        self._end = []
+        # Each Menu Option
         for i in self._options:
-            pygame.draw.rect(self._screen, colour_red, pygame.Rect(
-                (screen_width / 2 - option_width/2), x_coordinate,
-                option_width, option_height))
-            self.message_display(i.name, 30, screen_width/2,
-                                 x_coordinate, colour_green)
-            x_coordinate += option_height + option_space
+            option_block = pygame.Rect(
+                x_coordinate, y_coordinate,
+                option_width, option_height)
+            pygame.draw.rect(self._screen, background_colour, option_block, 1)
+            self.message_display(i.name, 30, x_coordinate + option_width/2,
+                                 y_coordinate, text_colour)
+            self._start += [(x_coordinate, y_coordinate)]
+            self._end += [(x_coordinate + option_width,
+                           y_coordinate + option_height)]
+            y_coordinate += option_height + option_space
         pygame.display.flip()
+
+    def menu_click(self, pos):
+        """
+        Run the function that the user has clicked.
+
+        :param pos: A tuple of coordinates that represent where
+                    the user clicked
+        """
+        for i in range(len(self._options)):
+            if pos[0] >= self._start[i][0] and pos[0] <= self._end[i][0]:
+                if pos[1] >= self._start[i][1] and pos[1] <= self._end[i][1]:
+                    self._options[i].menu_function
+
 
 def test():
     print("lol")
+
+def exit():
+    sys.exit()
 
 
 if __name__ == "__main__":
     screen = pygame.display.set_mode((1280, 720),
                                      HWSURFACE | DOUBLEBUF | RESIZABLE)
-    menu = Menu(screen, [("Resume", test), ("Options", test), ("Exit", test)])
+    menu = Menu(screen, [("Resume", test), ("Options", test),
+                         ("Halp", test), ("Exit", sys.exit)])
     menu.display_menu()
     while True:
         for event in pygame.event.get():   # User did something
             if event.type == pygame.QUIT:
                 sys.exit()
+            if event.type == pygame.MOUSEBUTTONUP:
+                pos = pygame.mouse.get_pos()
+                print(pos)
+                menu.menu_click(pos)
