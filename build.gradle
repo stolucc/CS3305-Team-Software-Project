@@ -195,11 +195,11 @@ task createVenv(){
       }
     }
     successPrint("Virtual Python Environment established")
-    String binDir = "bin"
+    String path = "bin/env/bin/"+pythonCommand
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-      binDir = "Scripts"
+      path = "bin/env/Scripts/"+pythonCommand+".exe"
     }
-    pythonCommand = file("bin/env/"+binDir+"/python3").getAbsolutePath()
+    pythonCommand = file(path).getAbsolutePath()
   }
 }
 
