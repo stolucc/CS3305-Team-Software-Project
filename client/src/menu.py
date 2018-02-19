@@ -1,6 +1,6 @@
+"""Module for building main game menu."""
 import pygame
 import sys
-from pygame.locals import *
 
 
 class MenuOption:
@@ -95,10 +95,6 @@ class Menu:
     def display_menu(self):
         """Display the menu and save it to the object."""
         pygame.font.init()
-        colour_black = (0, 0, 0)
-        colour_white = (255, 255, 255)
-        colour_green = (0, 255, 0)
-        colour_red = (255, 0, 0)
         background_colour = (91, 185, 247)
         main_background_colour = (150, 150, 150)
         text_colour = (249, 243, 122)
@@ -110,7 +106,7 @@ class Menu:
         y_coordinate = 0
         pygame.draw.rect(self._screen, main_background_colour, pygame.Rect(
             (screen_width/2 - screen_width/4), y_coordinate,
-            screen_width/2, screen_height))
+            screen_width/2, option_height))
         self.message_display(self._header, text_size, screen_width/2,
                              y_coordinate, text_colour)
         heading_space = 140 + option_space + option_height
@@ -147,16 +143,13 @@ class Menu:
                     self._options[i].menu_function
 
 
-def test():
-    print("lol")
-
-def exit():
-    sys.exit()
-
-
 if __name__ == "__main__":
-    screen = pygame.display.set_mode((1280, 720),
-                                     HWSURFACE | DOUBLEBUF | RESIZABLE)
+    screen = pygame.display.set_mode((1280, 720))
+
+    def test():
+        """Test Function."""
+        print("test")
+
     menu = Menu(screen, [("Resume", test), ("Options", test),
                          ("Halp", test), ("Exit", sys.exit)])
     menu.display_menu()

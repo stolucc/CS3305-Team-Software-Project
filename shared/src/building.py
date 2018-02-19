@@ -3,6 +3,7 @@ from enum import Enum
 from currency import CurrencyType
 
 
+
 class BuildingType(Enum):
     """Enum for available building types."""
 
