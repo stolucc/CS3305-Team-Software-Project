@@ -20,7 +20,8 @@ class Hex:
         self._y = y
         self._z = z
         self._claimed = False
-        self._terrain = Terrain(choice(list(TerrainType)),choice(list(BiomeType)))
+        self._terrain = Terrain(choice(list(TerrainType)),
+                                choice(list(BiomeType)))
 
     @property
     def x(self):
