@@ -1,5 +1,6 @@
 """Server Connection Handler."""
-from socket import socket, gethostname, gethostbyname, AF_INET, SOCK_STREAM
+from socket import socket, gethostname, gethostbyname, AF_INET, SOCK_STREAM, \
+    timeout
 import threading
 import ssl
 import os
@@ -57,10 +58,16 @@ class ConnectionHandler:
             try:
                 self._socket.settimeout(0.2)
                 conn, addr = self._socket.accept()
-            except Exception:
+                conn = self._context.wrap_socket(conn, server_side=True)
+            except ssl.SSLEOFError as e:
+                self._log.error("Run-time error: %s" % e)
+                pass
+            except timeout:
+                pass
+            except Exception as e:
+                self._log.error("Run-time error: %s" % e)
                 pass
             else:
-                conn = self._context.wrap_socket(conn, server_side=True)
                 client_conn = Connection(addr[0], addr[1], connection=conn)
                 thread = threading.Thread(name="worker",
                                           target=self._function,
