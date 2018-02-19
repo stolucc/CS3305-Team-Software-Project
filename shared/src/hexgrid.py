@@ -20,10 +20,10 @@ class Hex:
         self._x = x
         self._y = y
         self._z = z
-        self._unit = (choice([None, None, None, None, unit.Archer(3, self)]))
         self._claimed = False
-        self._terrain = Terrain(choice(list(TerrainType)),
-                                choice(list(BiomeType)))
+        self._terrain = Terrain(TerrainType.FLAT, BiomeType.GRASSLAND)
+        self._unit = None
+        self._building = None
 
     @property
     def x(self):
@@ -69,6 +69,15 @@ class Hex:
         :param unit: a Unit object, or None
         """
         self._unit = unit
+
+    @property
+    def coords(self):
+        """
+        Property for coordinates.
+
+        :return: a tuple in the form (x,y,z)
+        """
+        return (self._x, self._y, self._z)
 
     @property
     def terrain(self):
