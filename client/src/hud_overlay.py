@@ -28,7 +28,7 @@ class HudOverlay:
         :param screen_surface: pygame display surface.
         :param resolution: tuple or screen resolution (w, h).
         """
-        self._scale = 3
+        self._scale = 50
         self._info_references = {InfoType.GOLD: None,
                                  InfoType.FOOD: None,
                                  InfoType.SCIENCE: None,
@@ -42,14 +42,14 @@ class HudOverlay:
 
         self._screen = screen_surface
         self._resolution = resolution
-        self.font = pygame.font.Font('freesansbold.ttf', self._scale * 4)
-        path = "../resources/hud/"
+        self.font = pygame.font.Font('freesansbold.ttf', int(self._scale // 3))
+        path = "../resources/images/hud/"
         self._hud_images = {
-            InfoType.GOLD: self._load_img(path+"gold_logo.png", 16, 16),
-            InfoType.FOOD: self._load_img(path+"food_logo.png", 16, 16),
-            InfoType.SCIENCE: self._load_img(path+"science_logo.png", 16, 16),
-            InfoType.PRODUCTION: self._load_img(path+"production_logo.png", 16,
-                                                16)
+            InfoType.GOLD: self._load_img(path+"gold_logo.png", 1, 1),
+            InfoType.FOOD: self._load_img(path+"food_logo.png", 1, 1),
+            InfoType.SCIENCE: self._load_img(path+"science_logo.png", 1, 1),
+            InfoType.PRODUCTION: self._load_img(path+"production_logo.png", 1,
+                                                1)
             }
 
     def _load_img(self, img, size_w, size_h):
@@ -57,12 +57,13 @@ class HudOverlay:
         return self._img_scale(image, size_w, size_h)
 
     def _img_scale(self, img, size_w, size_h):
-        return pygame.transform.scale(img, (self._scale * size_w,
-                                            self._scale * size_h))
+        return pygame.transform.scale(img, (self._scale // size_w,
+                                            self._scale // size_h))
 
     def draw(self):
         """Draw all HUD elements."""
         self.draw_resource_panel()
+        self.draw_info_panel()
         pygame.display.flip()
 
     def draw_resource_panel(self):
@@ -71,16 +72,41 @@ class HudOverlay:
                      InfoType.FOOD,
                      InfoType.SCIENCE,
                      InfoType.PRODUCTION]
-        offset = self._scale * 3
+        offset = self._scale // 3
         for resource in resources:
             value = self._info_references[resource]
             if value is not None:
                 logo = self._hud_images[resource]
-                self._screen.blit(logo, (offset, self._scale * 2))
-                self.draw_text(value, (offset, self._scale * 10))
-                offset += self._scale * 20
+                self._screen.blit(logo, (offset, self._scale // 4))
+                self.draw_text(value, (offset, self._scale * 0.75), (0, 0, 0))
+                offset += self._scale // 0.75
 
-    def draw_text(self, text, position):
+    def draw_info_panel(self):
+        """Draw info panel containing turn details and ping."""
+        info = [(InfoType.TURN, "Turn: "),
+                (InfoType.TURN_TIME, "Time left: "),
+                (InfoType.PING, "Ping: ")]
+        offset = self._resolution[0]/2 + self._scale
+        for detail in info:
+            value = self._info_references[detail[0]]
+            if value is not None:
+                # logo = self._hud_images[resource]
+                # self._screen.blit(logo, (offset, self._scale * 2))
+                self.draw_text(detail[1] + str(value),
+                               (offset, self._scale * 0.4),
+                               (255, 255, 255))
+                offset += self._scale // 0.5
+        value = self._info_references[InfoType.TURN_INDICATIOR]
+        if value[1]:
+            color = (124, 252, 0)
+        else:
+            color = (0, 0, 0)
+        value = value[0] + "\'s Turn"
+        self.draw_text(value,
+                       (offset + self._scale // 2, self._scale * 0.4),
+                       color)
+
+    def draw_text(self, text, position, color):
         """
         Draw text to screen.
 
@@ -88,7 +114,29 @@ class HudOverlay:
         :param position: tuple (x,y).
         """
         text = str(text)
-        text = self.font.render(text, True, (0, 0, 0))
+        text = self.font.render(text, True, color)
         rect = text.get_rect()
-        rect.center = (position[0] + self._scale * 8, position[1])
+        rect.center = (position[0] + self._scale // 2, position[1])
         self._screen.blit(text, rect)
+
+
+if __name__ == "__main__":
+    import time
+    pygame.init()
+    pygame.font.init()
+    flags = (pygame.DOUBLEBUF |
+             pygame.HWSURFACE)
+    window_size = (1024, 576)
+    screen = pygame.display.set_mode(window_size, flags, 0)
+    hud = HudOverlay({InfoType.GOLD: 9,
+                      InfoType.FOOD: 12,
+                      InfoType.SCIENCE: 980,
+                      InfoType.PRODUCTION: 1200,
+                      InfoType.TURN: 56,
+                      InfoType.TURN_TIME: 30,
+                      InfoType.TURN_INDICATIOR: ("Alessia", True),
+                      InfoType.PING: 32},
+                     screen, window_size)
+    hud.draw()
+    while True:
+        time.sleep(10)
