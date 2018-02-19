@@ -9,18 +9,6 @@ import json
 from database_logger import Logger
 
 
-with open(os.path.join("..", "config", "config.json")) as config_file:
-    config = json.load(config_file)
-
-db_connection = database_API.Connection(config["postgres"]["user"],
-                                        config["postgres"]["password"],
-                                        config["postgres"]["database"])
-session = db_connection.get_session()
-logger = Logger(session, "Server Connection Handler",
-                config["logging"]["log_level"])
-log = logger.get_logger()
-
-
 class ConnectionHandler:
     """Class to handle incoming tcp connections."""
 
@@ -30,6 +18,16 @@ class ConnectionHandler:
 
         :param function: callback function, called with arguments (addr, Conn)
         """
+        with open(os.path.join("..", "config", "config.json")) as config_file:
+            config = json.load(config_file)
+        db_connection = database_API.Connection(config["postgres"]["user"],
+                                                config["postgres"]["password"],
+                                                config["postgres"]["database"])
+        session = db_connection.get_session()
+        logger = Logger(session, "Server Connection Handler",
+                        config["logging"]["log_level"])
+        self._log = logger.get_logger()
+        self._config = config
         self._function = function
         self._socket = socket(AF_INET, SOCK_STREAM)
         self._threads = []
@@ -66,7 +64,7 @@ class ConnectionHandler:
                 client_conn = Connection(addr[0], addr[1], connection=conn)
                 thread = threading.Thread(name="worker",
                                           target=self._function,
-                                          args=(addr, client_conn))
+                                          args=(addr, client_conn, self._log))
                 thread.start()
                 self._threads.append(thread)
 
@@ -81,12 +79,14 @@ class ConnectionHandler:
 
 def main():
     """Test function."""
+    with open(os.path.join("..", "config", "config.json")) as config_file:
+        config = json.load(config_file)
     ser = ConnectionHandler(test)
     ser.start(config["server"]["port"])
     # ser.stop()
 
 
-def test(addr, connection):
+def test(addr, connection, log):
     """Test handler function."""
     print(addr)
     info = connection.recv()

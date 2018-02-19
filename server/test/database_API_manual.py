@@ -3,17 +3,8 @@ from database_API import Connection, Game, User, Technology, Unit, Building
 import os
 import json
 
-"""
-with open(os.path.join("..", "config", "config.json")) as config_file:
-    config = json.load(config_file)
 
-connection = Connection(config["postgres_test"]["user"],
-                        config["postgres_test"]["password"],
-                        config["postgres_test"]["database"])
-session = connection.get_session()
-"""
-
-class GameTest():
+class GameTest:
 
     def tearDown(self):
         connection = Connection(config["postgres_test"]["user"],
@@ -270,5 +261,11 @@ class BuildingTest():
 
 
 if __name__ == "__main__":
-    #unittest.main()
-    pass
+    with open(os.path.join("..", "config", "config.json")) as config_file:
+        config = json.load(config_file)
+
+    connection = Connection(config["postgres_test"]["user"],
+                            config["postgres_test"]["password"],
+                            config["postgres_test"]["database"])
+    session = connection.get_session()
+    unittest.main()

@@ -8,9 +8,6 @@ import json
 from server_connection_handler import ConnectionHandler, test
 import unittest
 
-with open(os.path.join("..", "config", "config.json")) as config_file:
-    config = json.load(config_file)
-
 
 class ServerConnectionHandlerTests(unittest.TestCase):
     """Tests for the Server Connection Handler class."""
@@ -29,5 +26,4 @@ class ServerConnectionHandlerTests(unittest.TestCase):
         
         
 if __name__ == '__main__':
-
     unittest.main()
