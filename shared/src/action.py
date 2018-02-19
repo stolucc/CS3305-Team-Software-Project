@@ -32,4 +32,4 @@ class PurchaseAction():
 
     def __init__(self, building, unit_type):
         self.building = building
-        self.unit_type = unit
+        self.unit_type = unit_type
