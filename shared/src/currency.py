@@ -14,7 +14,7 @@ class CurrencyType(Enum):
 class Currency():
     """Class to represent a Currency."""
 
-    def nfsdj(self, currency_type, intial_value):
+    def __init__(self, currency_type, intial_value):
         """
         Create base currency.
 

@@ -1,3 +1,5 @@
+"""Unit representation."""
+
 from hexgrid import Hex
 
 
@@ -144,7 +146,7 @@ class Unit():
 
     def level_up(self, health_increase, movement_increase):
         """
-        Unit level increases along with certain attributes.
+        Increase level and attributes.
 
         :param health_increase: amount health should increase by
         :param movement_increase: amount movement_range should increase by
@@ -162,10 +164,7 @@ class Unit():
         """
         self._health -= damage
         if self._health <= 0:
-            self.death()
-
-    def death(self):
-        pass
+            self.health = 0
 
     def restore_health(self, restore):
         """
@@ -181,7 +180,7 @@ class Unit():
 
     def __repr__(self):
         """
-        String representation.
+        Return string representation.
 
         :return: string
         """
@@ -243,31 +242,9 @@ class Worker(Unit):
             super().level_up(health_increase=20, movement_increase=1)
             self.build_speed += 1
 
-    def build(self, building):
-        """
-        Build building on current hex tile.
-
-        :param building: the building to be built
-        """
-        if self._position._building is None:
-            self._position._building = building
-        else:
-            print("Building is already placed here.")
-
-    def upgrade_building(self):
-        """
-        Upgrade building on units hex tile.
-
-        :return:
-        """
-        if self._position._building is None:
-            print("No building is placed here.")
-        else:
-            pass
-
     def __repr__(self):
         """
-        String representation of Worker class.
+        Return string representation of Worker class.
 
         :return: string
         """
@@ -333,14 +310,14 @@ class Soldier(Unit):
         """
         self._attack_range = attack_range
 
-    def attack_unit(self, unit):
+    def attack_power(self):
         """
-        Attack enemy unit.
+        Attack power.
 
-        :param unit: Unit
+        :return:
         """
-        damage = self.strength * (self.health/self.max_health)
-        unit.receive_damage(damage)
+        power = self.strength * (self.health/self.max_health)
+        return power
 
 
 class Swordsman(Soldier):
@@ -361,18 +338,6 @@ class Swordsman(Soldier):
         super().__init__(health, level, movement_range, strength,
                          attack_range=1, cost=cost, hex=hex)
 
-    def attack_unit(self, unit):
-        """
-        Attack enemy unit, enemy attacks back.
-
-        :param unit: Unit
-        """
-        damage = self.strength * (self.health/self.max_health)
-        unit.receive_damage(damage)
-        if isinstance(unit, Soldier):
-            damage = unit.strength * (unit.health/unit.max_health)
-            self.receive_damage(damage)
-
     def level_up(self):
         """Level up Swordsman."""
         if self._level >= 3:
@@ -384,7 +349,7 @@ class Swordsman(Soldier):
 
     def __repr__(self):
         """
-        String representation of Swordsman.
+        Return string representation of Swordsman.
 
         :return: string
         """
@@ -425,7 +390,7 @@ class Archer(Soldier):
 
     def __repr__(self):
         """
-        String representation of Archer class.
+        Return string representation of Archer class.
 
         :return: string
         """

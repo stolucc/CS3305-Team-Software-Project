@@ -102,7 +102,7 @@ class Hex:
     @property
     def unit(self):
         """
-        Unit currently on this hex.
+        Return unit currently on this hex.
 
         :return: unit object
         """
@@ -120,7 +120,7 @@ class Hex:
     @property
     def building(self):
         """
-        Building currently on this hex.
+        Return building currently on this hex.
 
         :return: building object
         """
@@ -558,14 +558,12 @@ class Grid:
 
     def move_along_path(self, start_hex, end_hex, movement):
         """
-        Move the unit along the path from their current tile to their
-        destination
+        Move the unit along the path to their destination.
 
         :param path: start_hex: the hex the path begins from
         :param end_hex: the hex the path ends at
         :param movement: the total movement cost available
         """
-
         path = self.shortest_path(start_hex, end_hex, movement)
         unit = start_hex.unit
         for tile in range(len(path)):

@@ -1,8 +1,7 @@
-import unit
+"""Civilisation representation."""
+
+from unit import Worker, Archer, Swordsman
 from city import City
-from currency import Currency
-from mapresource import ResourceType
-from hexgrid import Hex, Grid
 from building import Building, BuildingType
 
 
@@ -23,7 +22,7 @@ class Civilisation(object):
         self._science = 0
 
     def __repr__(self):
-        """String representation of Civilisation."""
+        """Return string representation of Civilisation."""
         string = "Cities: %i, Units: %i, Gold: %i, Food: %i, Science: %i" \
                  % (len(self.cities), len(self.units), self._gold, self._food,
                     self._science)
@@ -135,42 +134,45 @@ class Civilisation(object):
         :param tile: hex tile to build city on
         :param grid: grid that is being used
         """
-        if not tile.claimed and isinstance(worker, unit.Worker):
+        if not tile.claimed and isinstance(worker, Worker):
             city = City(tile)
             tiles = self.grid.spiral_ring(tile, City.RANGE)
             city.tiles = tiles
             self.cities += [city]
         else:
-            print("Tile is claimed, unable to build city.")
+            print("Unable to build city.")
 
     def start_civlisation(self, start_hex):
         """
         Create city, worker, archer, swordsman.
 
+        City placed on start hex.Worker is placed on start_hex, Archer placed
+        bottom right, Swordsman placed bottom left.
+
         :param start_hex: where to start Civilisation
         """
-        worker = unit.Worker(1, start_hex)
-        archer = unit.Archer(1, self.grid.get_neighbour_in_direction
-                             (start_hex, 5))
-        swordsman = unit.Swordsman(1, self.grid.get_neighbour_in_direction
-                                   (start_hex, 4))
+        worker = Worker(1, start_hex)
+        archer = Archer(1, self.grid.get_neighbour_in_direction
+                        (start_hex, 5))
+        swordsman = Swordsman(1, self.grid.get_neighbour_in_direction
+                              (start_hex, 4))
         self.units += [worker, archer, swordsman]
         self.build_city_on_tile(start_hex, worker)
 
-    def build_farm(self, worker):
+    def build_structure(self, worker, building_type):
         """
-        Build farm at workers position.
+        Build building at workers position.
 
         :param worker: worker unit
         """
         tile = worker.position
         if tile.building is None and tile.claimed is True:
             # Need to check if tile is claimed by your civilisation
-            cost_of_farm = 10
-            if self.gold >= cost_of_farm:
-                self.gold -= cost_of_farm
-                farm = Building(BuildingType.FARM, tile)
-                tile.building = farm
+            cost_of_building = 10
+            if self.gold >= cost_of_building:
+                self.gold -= cost_of_building
+                building = Building(building_type, tile)
+                tile.building = building
             else:
                 print("Not enough money.")
         else:
@@ -202,31 +204,108 @@ class Civilisation(object):
             movement_cost += hex.terrain.calculate_movement_cost()
         return movement_cost
 
-    def update_currency(self):
-        """Update currency based on units and buildings."""
-        unit_costs = self.get_cost_of_units()
-        if self._gold < 0:
-            self._gold = 0
-        if self._food < 0:
-            self._food = 0
-        if self._science < 0:
-            self._science = 0
-
-    def get_currency_of_cities(self):
-        city_currency = {'food': 0, 'gold': 0, 'science': 0}
-        for city in self.cities:
-            print(city)
-            print(city.currency)
-
-    def get_cost_of_units(self):
+    def attack_unit(self, soldier, enemy):
         """
-        Get costs of all units in civilisation.
+        Attack enemy unit with Archer or Swordsman.
+
+        :param soldier: Soldier unit of player
+        :param enemy: enemy unit of opponent
+        """
+        distance = self.grid.hex_distance(soldier.position, enemy.position)
+        if soldier.attack_range >= distance:
+            damage = soldier.attack_power()
+            enemy.receive_damage(damage)
+            self.is_dead(enemy)
+            if distance == 1 and isinstance(enemy, Swordsman):
+                damage = enemy.attack_power()
+                soldier.receive_damage(damage)
+                self.is_dead(soldier)
+
+    def is_dead(self, unit):
+        """Check if unit is dead and remove references if True."""
+        if unit.health == 0:
+            unit.position.unit = None
+            self.units.remove(unit)
+
+    def buy_worker(self, level, city):
+        """
+        Buy Worker.
+
+        Worker will be placed on first tile near city that has no unit.
+
+        :param level: int level of unit
+        :param city: city to spawn worker at
+        """
+        cost_of_worker = 10 * level
+        position = city.no_unit_tile()
+        if self.gold >= cost_of_worker and position is not None:
+            self.gold -= cost_of_worker
+            worker = Worker(level, position)
+            position.unit = worker
+            self.units += [worker]
+        else:
+            print("Unable to purchase worker.")
+
+    def buy_swordsman(self, level, city):
+        """
+        Buy Swordsman.
+
+        Swordsman will be placed on first tile near city that has no unit.
+
+        :param level: int level of unit
+        :param city: city to spawn swordsman at
+        """
+        cost_of_swordsman = 20 * level
+        position = city.no_unit_tile()
+        if self.gold >= cost_of_swordsman and position is not None:
+            self.gold -= cost_of_swordsman
+            swordsman = Swordsman(level, position)
+            position.unit = swordsman
+            self.units += [swordsman]
+        else:
+            print("Unable to purchase swordsman.")
+
+    def buy_archer(self, level, city):
+        """
+        Buy Archer.
+
+        Archer will be placed on first tile near city that has no unit.
+
+        :param level: int level of unit
+        :param city: city to spawn archer at
+        """
+        cost_of_archer = 15 * level
+        position = city.no_unit_tile()
+        if self.gold >= cost_of_archer and position is not None:
+            self.gold -= cost_of_archer
+            archer = Archer(level, position)
+            position.unit = archer
+            self.units += [archer]
+        else:
+            print("Unable to purchase archer.")
+
+    def cost_of_units(self):
+        """
+        Cost of all units per turn.
 
         :return: dict of costs
         """
-        unit_costs = {'food': 0, 'gold': 0, 'science': 0}
+        cost = {'gold': 0, 'food': 0, 'science': 0}
         for unit in self.units:
-            unit_costs['gold'] += unit.cost['gold']
-            unit_costs['food'] += unit.cost['food']
-            unit_costs['science'] += unit.cost['science']
-        return unit_costs
+            cost['gold'] += unit.cost['gold']
+            cost['food'] += unit.cost['food']
+            cost['science'] += unit.cost['science']
+        return cost
+
+    def currency_of_buildings(self):
+        """
+        Currency generated by buildings eac turn.
+
+        :return:
+        """
+        currency = {'gold': 0, 'food': 0, 'science': 0}
+        for city in self.cities:
+            for building in city.buildings:
+                if building._type != BuildingType.CITY:
+                    print(building)
+                    print(building.currency)

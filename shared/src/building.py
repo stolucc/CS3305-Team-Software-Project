@@ -1,6 +1,6 @@
 """Enumerated Building classes."""
 from enum import Enum
-from currency import Currency
+from currency import CurrencyType
 
 
 class BuildingType(Enum):
@@ -9,6 +9,7 @@ class BuildingType(Enum):
     FARM = 0
     TRADE_POST = 1
     UNIVERSITY = 2
+    CITY = 3
 
 
 class Building():
@@ -24,24 +25,34 @@ class Building():
         self._location = hexagon
         self._type = building_type
 
+    def __repr__(self):
+        """Return string represention of building."""
+        string = str(self._type) + " Position: " + str(self._location)
+        return string
+
     @property
     def currency(self):
         """Currency values produced by this building."""
         values = {
-            Building.FARM: {
-                Currency.GOLD: -2,
-                Currency.FOOD: 5,
-                Currency.SCIENCE: 0,
+            BuildingType.FARM: {
+                CurrencyType.GOLD: -2,
+                CurrencyType.FOOD: 5,
+                CurrencyType.SCIENCE: 0,
             },
-            Building.TRADE_POST: {
-                Currency.GOLD: 5,
-                Currency.FOOD: -2,
-                Currency.SCIENCE: 0,
+            BuildingType.TRADE_POST: {
+                CurrencyType.GOLD: 5,
+                CurrencyType.FOOD: -2,
+                CurrencyType.SCIENCE: 0,
             },
-            Building.UNIVERSITY: {
-                Currency.GOLD: -2,
-                Currency.FOOD: -3,
-                Currency.SCIENCE: 5,
+            BuildingType.UNIVERSITY: {
+                CurrencyType.GOLD: -2,
+                CurrencyType.FOOD: -3,
+                CurrencyType.SCIENCE: 5,
+            },
+            BuildingType.CITY: {
+                CurrencyType.GOLD: 0,
+                CurrencyType.FOOD: 0,
+                CurrencyType.SCIENCE: 0,
             }
         }
         return values[self._type]

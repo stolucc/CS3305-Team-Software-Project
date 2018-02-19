@@ -1,6 +1,7 @@
 """City representation."""
-from currency import *
+from currency import CurrencyType
 from mapresource import Resource
+from building import BuildingType
 
 
 class City():
@@ -13,11 +14,12 @@ class City():
         self._hex = hexagon
         hexagon.building = self
         self._tiles = []
+        self._type = BuildingType.CITY
 
     def __repr__(self):
-        """String representation of City."""
-        string = "City: Amount of tiles: %i, Amount of buildings: %i, \
-        Hex: " % (len(self.tiles), len(self.buildings))
+        """Return string representation of City."""
+        string = "City: Amount of tiles: %i, " % (len(self.tiles))
+        string += "Amount of buildings: %i, Hex: " % (len(self.buildings))
         string += str(self._hex)
         return string
 
@@ -32,6 +34,13 @@ class City():
             if not tile.claimed:
                 self._tiles += [tile]
                 tile.claim()
+
+    def no_unit_tile(self):
+        """Return first tile with no unit on it, None otherwise."""
+        for tile in self.tiles:
+            if tile.unit is None:
+                return tile
+        return None
 
     @property
     def currency(self):
