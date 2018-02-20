@@ -24,6 +24,14 @@ class Message:
         self._type = str(obj.__class__)
         self._timestamp = datetime.now()
 
+    def __str__(self):
+        """
+        Return a String representation of a Message object.
+        """
+        return ("<obj: '%s' player_id: '%s' type: '%s' timestamp: '%s'>" %
+                (str(self._obj), str(self._id), str(self._type),
+                 str(self._timestamp)))
+
     def serialise(self):
         """
         Serialise Message object to byte string.

@@ -3,6 +3,7 @@ from socket import socket, gethostbyname, AF_INET, SOCK_STREAM
 import ssl
 import os
 import json
+from message import Message
 
 
 class Connection:
@@ -45,8 +46,8 @@ class Connection:
         if self._open_status:
             try:
                 msglen = "{:16}".format(len(message))  # create padded string
-                message = msglen + message  # add the message length
-                self._socket.sendall(message.encode())  # send encoded message
+                message = msglen.encode() + message  # add the message length
+                self._socket.sendall(message)  # send encoded message
                 if wait_response:
                     return self.recv()  # recv message in response
                 return None
@@ -65,9 +66,9 @@ class Connection:
             try:
                 amount_expected = int(self._socket.recv(16).decode())
                 amount_received = 0
-                message = ""
+                message = b""
                 while amount_received < amount_expected:
-                    data = self._socket.recv(16).decode()  # get 16 bytes
+                    data = self._socket.recv(16)  # get 16 bytes
                     message += data
                     amount_received += len(data)
                 return message
@@ -114,10 +115,10 @@ def main():
         config = json.load(config_file)
     con = Connection(config["server"]["ip"], config["server"]["port"])
     con.open()
-    con.send("Can you hear me?")
-    con.close()
-    con.open()
-    con.send("Can you hear me now?")
+    message = Message([1, 2], 1)
+    con.send(message.serialise())
+    message = con.recv()
+    print(str(Message.deserialise(message)))
     con.close()
 
 

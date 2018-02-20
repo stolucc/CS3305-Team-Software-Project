@@ -8,16 +8,18 @@ from connections import Connection
 import database_API
 import json
 from database_logger import Logger
+from message import Message
 
 
 class ConnectionHandler:
     """Class to handle incoming tcp connections."""
 
-    def __init__(self, function):
+    def __init__(self, function, game):
         """
         Create base ConnectionHandler.
 
         :param function: callback function, called with arguments (addr, Conn)
+        :param game: list containing the civilizations (users) in the game
         """
         with open(os.path.join("..", "config", "config.json")) as config_file:
             config = json.load(config_file)
@@ -37,6 +39,7 @@ class ConnectionHandler:
         self._context.load_cert_chain(
             certfile=config["paths"]["cert"],
             keyfile=config["paths"]["key"])
+        self._game = game
 
     def start(self, port):
         """
@@ -71,7 +74,8 @@ class ConnectionHandler:
                 client_conn = Connection(addr[0], addr[1], connection=conn)
                 thread = threading.Thread(name="worker",
                                           target=self._function,
-                                          args=(addr, client_conn, self._log))
+                                          args=(addr, client_conn, self._log,
+                                                self._game))
                 thread.start()
                 self._threads.append(thread)
 
@@ -88,17 +92,20 @@ def main():
     """Test function."""
     with open(os.path.join("..", "config", "config.json")) as config_file:
         config = json.load(config_file)
-    ser = ConnectionHandler(test)
+    game = []
+    ser = ConnectionHandler(test, game)
     ser.start(config["server"]["port"])
     # ser.stop()
 
 
-def test(addr, connection, log):
+def test(addr, connection, log, game):
     """Test handler function."""
-    print(addr)
     info = connection.recv()
-    log.debug('Server received: %s' % info)
-    print(info)
+    message = Message.deserialise(info)
+    print(message)
+    log.debug(str(message))
+    bytestream = message.serialise()
+    connection.send(bytestream)
 
 
 if __name__ == "__main__":
