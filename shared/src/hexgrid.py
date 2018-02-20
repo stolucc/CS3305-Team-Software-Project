@@ -227,10 +227,16 @@ class Grid:
         :param coordinates: tuple (x, y, z)
         :return: Hex object
         """
-        try:
-            return self._hextiles[coordinates]
-        except KeyError:
+        coordinates_sum = coordinates[0] + coordinates[1] + coordinates[2]
+        should_wrap = ((abs(coordinates[0]) > self._radius) or
+                       (abs(coordinates[1]) > self._radius) or
+                       (abs(coordinates[2]) > self._radius))
+        if coordinates_sum is not 0:
+            raise KeyError
+        elif should_wrap:
             return self._hextiles[self.wrap_around(coordinates)]
+        else:
+            return self._hextiles[coordinates]
 
     def get_hextiles(self):
         """

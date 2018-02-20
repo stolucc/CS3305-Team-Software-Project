@@ -130,7 +130,7 @@ class Orientation:
 class Layout:
     """A class for representing a Layout."""
 
-    def __init__(self, size, origin):
+    def __init__(self, size, origin, pointy=True):
         """
         Create a new Layout object.
 
@@ -139,13 +139,28 @@ class Layout:
         """
         self._size = size
         self._origin = origin
-        # orientation is pointy topped
-        # use the following for flat topped:
-        # Orientation(3.0 / 2.0, 0.0, math.sqrt(3.0) / 2.0, math.sqrt(3.0),
-        # 2.0 / 3.0, 0.0, -1.0 / 3.0, math.sqrt(3.0) / 3.0, 0.0)
-        self._orientation = Orientation(math.sqrt(3.0), math.sqrt(3.0) / 2.0,
-                                        0.0, 3.0 / 2.0, math.sqrt(3.0) / 3.0,
-                                        -1.0 / 3.0, 0.0, 2.0 / 3.0, 0.5)
+        if not pointy:
+            # use the following for flat topped:
+            self._orientation = Orientation(3.0 / 2.0,
+                                            0.0,
+                                            math.sqrt(3.0) / 2.0,
+                                            math.sqrt(3.0),
+                                            2.0 / 3.0,
+                                            0.0,
+                                            -1.0 / 3.0,
+                                            math.sqrt(3.0) / 3.0,
+                                            0.0)
+        else:
+            # orientation is pointy topped
+            self._orientation = Orientation(math.sqrt(3.0),
+                                            math.sqrt(3.0) / 2.0,
+                                            0.0,
+                                            3.0 / 2.0,
+                                            math.sqrt(3.0) / 3.0,
+                                            -1.0 / 3.0,
+                                            0.0,
+                                            2.0 / 3.0,
+                                            0.5)
 
     @property
     def orientation(self):
