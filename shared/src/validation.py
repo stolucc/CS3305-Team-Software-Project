@@ -10,14 +10,16 @@ class ActionValidatior():
     """Class used to validate actions created."""
 
     def __init__(self, gamestate):
-        """Instantiate new validator.
+        """
+        Instantiate new validator.
 
         :param gamestate: A reference to the current gamestate to be used
         """
         self._gamestate = gamestate
 
     def validate(self, action):
-        """Validate a created action.
+        """
+        Validate a created action.
 
         :param action: Action to be validated
         """
@@ -33,7 +35,8 @@ class ActionValidatior():
             self.validate_purchase(action)
 
     def valid_hex(self, tile):
-        """Determine if hex is a valid tile.
+        """
+        Determine if hex is a valid tile.
 
         :param tile: The hextile object to be checked
         """
@@ -45,7 +48,8 @@ class ActionValidatior():
             return None
 
     def valid_unit(self, unit_id):
-        """Determine if a unit is valid.
+        """
+        Determine if a unit is valid.
 
         :param unit_id: The identifier of the unit to be checked.
         """
@@ -56,7 +60,8 @@ class ActionValidatior():
             return None
 
     def valid_building(self, building):
-        """Determine if a building is valid.
+        """
+        Determine if a building is valid.
 
         :param building: The building object to be checked.
         """
@@ -67,14 +72,16 @@ class ActionValidatior():
             return None
 
     def unit_is_worker(self, unit):
-        """Determine if a unit is a worker.
+        """
+        Determine if a unit is a worker.
 
         :param unit: The unit to be checked.
         """
         return type(unit) == Worker
 
     def tile_suitable_for_unit(self, tile):
-        """Determine if a tile can support a unit.
+        """
+        Determine if a tile can support a unit.
 
         :param tile: The tile to be checked
         """
@@ -87,7 +94,8 @@ class ActionValidatior():
         return True
 
     def tile_suitable_for_building(self, tile):
-        """Determine if a tile can support a building.
+        """
+        Determine if a tile can support a building.
 
         :param tile: The tile to be checked
         """
@@ -100,7 +108,8 @@ class ActionValidatior():
         return True
 
     def path_exists(self, unit, tile):
-        """Determine if a path from units position to tile exists.
+        """
+        Determine if a path from units position to tile exists.
 
         :param unit: The unit to be checked
         :param tile: The destination tile
@@ -110,7 +119,8 @@ class ActionValidatior():
         return path != []
 
     def in_range(self, attacker, defender):
-        """Determine if a unit is within range to attack another.
+        """
+        Determine if a unit is within range to attack another.
 
         :param attacker: The unit object attacking
         :param defender: The unit object defending
@@ -122,14 +132,16 @@ class ActionValidatior():
         return arange >= distance
 
     def upgrade_possible(self, unit):
-        """Determine if unit is not already at max level.
+        """
+        Determine if unit is not already at max level.
 
         :param unit: The unit to be checked
         """
         return unit.level < 3
 
     def research_available(self, unit):
-        """Determine if civ has required research available.
+        """
+        Determine if civ has required research available.
 
         :param unit: The unit to be checked
         """
@@ -137,7 +149,8 @@ class ActionValidatior():
         return True
 
     def currency_available(self, civ, gold=0, food=0, science=0):
-        """Determine if civ has the currency available.
+        """
+        Determine if civ has the currency available.
 
         :param civ: The civilisation which is being checked
         :param gold: The gold amount required, defaults to 0
@@ -147,39 +160,50 @@ class ActionValidatior():
         return civ.gold >= gold and civ.food >= food and civ.science > science
 
     def resources_available(self, civ, resource_type, resource_amount):
-        """Determine if civ has the required resource available."""
+        """
+        Determine if civ has the required resource available.
+
+        :param civ: The civ to be checked
+        :param resource_type: The type of resource to be checked
+        :param resource_amount: The amount of the resource required
+        """
         return civ.resources[resource_type] > resource_amount
 
     def get_tile_resource(self, tile):
-        """Get resource available on tile.
+        """
+        Get resource available on tile.
 
         :param tile: The tile to be checked
         """
         return tile.terrain.resource.resource_type
 
     def tile_has_city(self, tile):
-        """Determine if a city exists on the current tile.
+        """
+        Determine if a city exists on the current tile.
 
         :param tile: The tile to be checked
         """
         return tile.building.building_type == BuildingType.CITY
 
     def valid_building_type(self, building_type):
-        """Ensure building type exists.
+        """
+        Ensure building type exists.
 
         :param building_type: The building type to be checked
         """
         return building_type in BuildingType
 
     def valid_unit_type(self, unit_type):
-        """Ensure unit type exists.
+        """
+        Ensure unit type exists.
 
         :param unit_type: The building type to be checked
         """
         return unit_type in [Worker, Swordsman, Archer]
 
     def validate_movement(self, action):
-        """Ensure that movement action is valid.
+        """
+        Ensure that movement action is valid.
 
         :param action: The action to be validated
         """
@@ -194,7 +218,8 @@ class ActionValidatior():
             return False
 
     def validate_combat(self, action):
-        """Ensure that combat action is valid.
+        """
+        Ensure that combat action is valid.
 
         :param action: The action to be validated
         """
@@ -207,13 +232,14 @@ class ActionValidatior():
             return False
 
     def validate_upgrade(self, action):
-        """Ensure that upgrade action is valid.
+        """
+        Ensure that upgrade action is valid.
 
         :param action: The action to be validated
         """
         try:
             unit = self.valid_unit(action.unit)
-            civ = self._gamestate.getCiv(unit)
+            civ = self._gamestate.get_civ_from_unit(unit)
             upgrade_possible = self.upgrade_possible(unit)
             research_available = self.research_available(unit)
 
@@ -229,7 +255,8 @@ class ActionValidatior():
             return False
 
     def validate_build(self, action):
-        """Ensure build is valid.
+        """
+        Ensure build is valid.
 
         :param action: The action to be validated
         """
@@ -255,18 +282,21 @@ class ActionValidatior():
             return False
 
     def validate_purchase(self, action):
-        """Ensure purchase is valid.
+        """
+        Ensure purchase is valid.
 
         :param action: The action to be validated
         """
         try:
             building = self.valid_building(action.building)
             is_city = self.tile_has_city(building.position)
+            civ = self._gamestate.get_civ_from_building(building)
             valid_unit_type = self.valid_unit_type(action.unit_type)
-            # TODO
-            currency_available = True
-            # TODO
-            resources_available = True
+            gold_cost = action.unit_type.gold_cost(action.level)
+            currency_available = self.currency_available(civ, gold=gold_cost)
+            resource_cost = action.unit_type.resource_cost(action.level)
+            resources_available = \
+                self.resources_available(civ, resource_cost, 1)
             tile_suitable_for_unit = \
                 self.tile_suitable_for_unit(building.position)
             return is_city and valid_unit_type and valid_unit_type and \

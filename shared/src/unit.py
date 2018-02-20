@@ -1,5 +1,7 @@
 """Unit representation."""
 
+from hexgrid import Hex
+from mapresource import ResourceType
 
 class Unit:
     """Base class for the units."""
@@ -191,6 +193,24 @@ class Unit:
                   self._position.z)
         return string
 
+    @staticmethod
+    def gold_cost(level):
+        """
+        Get the gold cost of a unit at a given level.
+
+        :param level: The level of the unit
+        """
+        return level * 10
+
+    @staticmethod
+    def resource_cost(level):
+        """
+        Get the resource cost of the unit at a given level.
+
+        :param level: The level of the unit
+        """
+        return None
+
 
 class Worker(Unit):
     """Worker class, for creating and upgrading buildings."""
@@ -356,6 +376,17 @@ class Swordsman(Soldier):
                                                       self.attack_range)
         return string
 
+    @staticmethod
+    def resource_cost(level):
+        """
+        Get the resource cost of the unit at a given level.
+
+        :param level: The level of the unit
+        """
+        if level > 1:
+            return ResourceType.IRON
+        return None
+
 
 class Archer(Soldier):
     """Long range Soldier class."""
@@ -396,6 +427,17 @@ class Archer(Soldier):
         string += "Strength: %i, Attack Range: %i" % (self.strength,
                                                       self.attack_range)
         return string
+
+    @staticmethod
+    def resource_cost(level):
+        """
+        Get the resource cost of the unit at a given level.
+
+        :param level: The level of the unit
+        """
+        if level > 1:
+            return ResourceType.LOGS
+        return None
 
 
 # if __name__ == "__main__":
