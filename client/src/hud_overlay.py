@@ -57,8 +57,8 @@ class HudOverlay:
         return self._img_scale(image, size_w, size_h)
 
     def _img_scale(self, img, size_w, size_h):
-        return pygame.transform.scale(img, (self._scale // size_w,
-                                            self._scale // size_h))
+        return pygame.transform.scale(img, (int(self._scale * size_w),
+                                            int(self._scale * size_h)))
 
     def draw(self):
         """Draw all HUD elements."""
@@ -83,15 +83,19 @@ class HudOverlay:
 
     def draw_info_panel(self):
         """Draw info panel containing turn details and ping."""
+        points = [(self._resolution[0]/2 + self._scale, 0),
+                  (self._resolution[0], 0),
+                  (self._resolution[0], self._scale*0.75),
+                  ((self._resolution[0]/2)*1.2, self._scale*0.75),
+                  (self._resolution[0]/2 + self._scale, self._scale/2)]
+        pygame.draw.polygon(self._screen, (74, 74, 74), points, 0)
         info = [(InfoType.TURN, "Turn: "),
                 (InfoType.TURN_TIME, "Time left: "),
                 (InfoType.PING, "Ping: ")]
-        offset = self._resolution[0]/2 + self._scale
+        offset = self._resolution[0]/2 + self._scale*1.75
         for detail in info:
             value = self._info_references[detail[0]]
             if value is not None:
-                # logo = self._hud_images[resource]
-                # self._screen.blit(logo, (offset, self._scale * 2))
                 self.draw_text(detail[1] + str(value),
                                (offset, self._scale * 0.4),
                                (255, 255, 255))
@@ -100,7 +104,7 @@ class HudOverlay:
         if value[1]:
             color = (124, 252, 0)
         else:
-            color = (0, 0, 0)
+            color = (255, 255, 255)
         value = value[0] + "\'s Turn"
         self.draw_text(value,
                        (offset + self._scale // 2, self._scale * 0.4),
