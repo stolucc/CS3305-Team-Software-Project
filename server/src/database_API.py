@@ -402,6 +402,7 @@ class Unit(Base):
 
     user_id = Column(Integer, ForeignKey('users.user_id'))
     unit_id = Column(Integer, Sequence('units_unit_id_seq'), primary_key=True)
+    level = Column(Integer, CheckConstraint('level>=0'),  nullable=False)
     type = Column(Integer, CheckConstraint('type>=0'),  nullable=False)
     health = Column(Integer, CheckConstraint('health>=0'), nullable=False)
     x = Column(Integer, nullable=False)
@@ -411,12 +412,13 @@ class Unit(Base):
     unit_user = relationship("User", back_populates="user_units")
 
     @staticmethod
-    def insert(session, user_id, type, health, x, y, z):
+    def insert(session, user_id, level, type, health, x, y, z):
         """
         Create a unit and add it to the database.
 
         :param session: sessionmaker object
         :param user_id: user_id of the user that owns the unit
+        :param level: specifies the level of unit. Must be >= 0.
         :param type: specifies the type of unit. Must be >= 0.
         :param health: specifies the health of unit. Must be >= 0.
         :param x: specifies the location (x coordinate) of unit.
@@ -426,7 +428,7 @@ class Unit(Base):
         :param z: specifies the location (z coordinate) of unit.
             x + y + z must equal 0.
         """
-        unit = Unit(user_id=user_id, type=type, health=health, x=x, y=y,
+        unit = Unit(user_id=user_id, level=level, type=type, health=health, x=x, y=y,
                     z=z)
         session = session()
         session.add(unit)
@@ -499,9 +501,9 @@ class Unit(Base):
 
     def __repr__(self):
         """Return a String representation for a Unit object."""
-        return "<unit(user_id='%s', unit_id='%s', " \
+        return "<unit(user_id='%s', unit_id='%s', level='%s'" \
                "type='%s', health='%s', x='%s', y='%s', z='%s')>" % (
-                   self.user_id, self.unit_id,
+                   self.user_id, self.unit_id, self.level,
                    self.type, self.health, self.x, self.y, self.z)
 
 

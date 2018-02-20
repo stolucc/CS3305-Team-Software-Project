@@ -4,7 +4,7 @@ import os
 import json
 
 
-class GameTest:
+class GameTest(unittest.TestCase):
 
     def tearDown(self):
         connection = Connection(config["postgres_test"]["user"],
@@ -42,7 +42,7 @@ class GameTest:
             "Can't update game in database."
 
 
-class UserTest():
+class UserTest(unittest.TestCase):
 
     def tearDown(self):
         connection = Connection(config["postgres_test"]["user"],
@@ -79,7 +79,7 @@ class UserTest():
         """Get a users's units from the database."""
         game_id = Game.insert(session, 1, True)
         user_id = User.insert(session, game_id, True, 0, 0, 0, 0)
-        unit_id = Unit.insert(session, user_id, 0, 100, 0, 0, 0)
+        unit_id = Unit.insert(session, user_id, 1, 0, 100, 0, 0, 0)
         units = User.units(session, user_id)
         assert units == [unit_id], \
             "Can't get user's units from the database."
@@ -115,7 +115,7 @@ class UserTest():
             "Can't update user in database."
 
 
-class TechnologyTest():
+class TechnologyTest(unittest.TestCase):
 
     def tearDown(self):
         connection = Connection(config["postgres_test"]["user"],
@@ -156,7 +156,7 @@ class TechnologyTest():
             "Can't update technology in database."
 
 
-class UnitTest():
+class UnitTest(unittest.TestCase):
 
     def tearDown(self):
         connection = Connection(config["postgres_test"]["user"],
@@ -169,25 +169,25 @@ class UnitTest():
         """Insert a unit to the database."""
         game_id = Game.insert(session, 1, True)
         user_id = User.insert(session, game_id, True, 0, 0, 0, 0)
-        unit_id = Unit.insert(session, user_id, 0, 100, 0, 0, 0)
+        unit_id = Unit.insert(session, user_id, 1, 0, 100, 0, 0, 0)
         assert type(unit_id) is int, "Can't insert game to database."
 
     def test_select_unit(self):
         """Select a unit in the database."""
         game_id = Game.insert(session, 1, True)
         user_id = User.insert(session, game_id, True, 0, 0, 0, 0)
-        unit_id = Unit.insert(session, user_id, 0, 100, 0, 0, 0)
+        unit_id = Unit.insert(session, user_id, 1, 0, 100, 0, 0, 0)
         unit_dict = Unit.select(session, unit_id)
         assert unit_dict == {'user_id': user_id, 'unit_id': unit_id,
-                             'type': 0, 'health': 100, 'x': 0, 'y': 0,
-                             'z': 0}, \
+                             'level': 1, 'type': 0, 'health': 100, 'x': 0,
+                             'y': 0, 'z': 0}, \
             "Can't select unit from database."
 
     def test_units_user(self):
         """Get a unit's user from the database."""
         game_id = Game.insert(session, 1, True)
         user_id = User.insert(session, game_id, True, 0, 0, 0, 0)
-        unit_id = Unit.insert(session, user_id, 0, 100, 0, 0, 0)
+        unit_id = Unit.insert(session, user_id, 1, 0, 100, 0, 0, 0)
         u_id = Unit.user(session, unit_id)
         assert u_id == user_id, \
             "Can't get units's user from the database."
@@ -197,18 +197,18 @@ class UnitTest():
         game_id = Game.insert(session, 1, True)
         user_id1 = User.insert(session, game_id, True, 0, 0, 0, 0)
         user_id2 = User.insert(session, game_id, True, 0, 0, 0, 0)
-        unit_id = Unit.insert(session, user_id1, 0, 100, 0, 0, 0)
+        unit_id = Unit.insert(session, user_id1, 1, 0, 100, 0, 0, 0)
 
-        Unit.update(session, unit_id, user_id=user_id2, type=1,
+        Unit.update(session, unit_id, user_id=user_id2, level=2, type=1,
                     health=90, x=3, y=-2, z=-1)
         unit_dict = Unit.select(session, unit_id)
         assert unit_dict == {'user_id': user_id2, 'unit_id': unit_id,
-                             'type': 1, 'health': 90, 'x': 3, 'y': -2,
-                             'z': -1}, \
+                             'level': 2, 'type': 1, 'health': 90, 'x': 3,
+                             'y': -2, 'z': -1}, \
             "Can't update unit in database."
 
 
-class BuildingTest():
+class BuildingTest(unittest.TestCase):
 
     def tearDown(self):
         connection = Connection(config["postgres_test"]["user"],

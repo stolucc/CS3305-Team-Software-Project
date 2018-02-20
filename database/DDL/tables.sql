@@ -85,6 +85,7 @@ CREATE TABLE public.units
 (
   user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
   unit_id INTEGER NOT NULL DEFAULT nextval('units_unit_id_seq'),
+  level INTEGER NOT NULL CHECK (level >= 0),
   type INTEGER NOT NULL CHECK (type >= 0),
   health INTEGER NOT NULL CHECK (health >= 0),
   x INTEGER NOT NULL,
