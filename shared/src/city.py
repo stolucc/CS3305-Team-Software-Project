@@ -14,7 +14,7 @@ class City():
         self._hex = hexagon
         hexagon.building = self
         self._tiles = []
-        self._type = BuildingType.CITY
+        self._type = False
 
     def __repr__(self):
         """Return string representation of City."""

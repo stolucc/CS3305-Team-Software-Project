@@ -6,7 +6,8 @@ from mapresource import ResourceType
 class Unit:
     """Base class for the units."""
 
-    def __init__(self, health, level, movement_range, cost, hextile):
+    def __init__(self, identifier, health, level, movement_range, cost,
+                 hextile, civilisation):
         """
         Initialise units attributes.
 
@@ -22,6 +23,8 @@ class Unit:
         self._movement_range = movement_range
         self._cost = cost
         self._position = hextile
+        self._id = identifier
+        self._civilisation = civilisation
 
     @property
     def health(self):
@@ -131,6 +134,24 @@ class Unit:
         """
         self._position = hex
 
+    @property
+    def id(self):
+        """
+        ID of the unit.
+
+        :return: int ID of the unit
+        """
+        return self._id
+
+    @property
+    def civilisation(self):
+        """
+        Civilisation the unit belongs to.
+
+        :return: civilisation object
+        """
+        return self._civilisation
+
     def cost_increase(self, food, gold, science):
         """
         Increase cost of resources used per turn.
@@ -184,10 +205,10 @@ class Unit:
 
         :return: string
         """
-        string = "Health: %i, Max Health: %i, " \
+        string = "ID: %i, Health: %i, Max Health: %i, " \
                  "Movement Range: %i, Level: %i, Cost:(Food:%i Gold:%i, " \
                  "Science:%i), Position: %i,%i,%i, " % \
-                 (self._health, self._max_health, self._movement_range,
+                 (self._id, self._health, self._max_health, self._movement_range,
                   self._level, self._cost['food'], self._cost['gold'],
                   self._cost['science'], self._position.x, self._position.y,
                   self._position.z)
@@ -215,7 +236,7 @@ class Unit:
 class Worker(Unit):
     """Worker class, for creating and upgrading buildings."""
 
-    def __init__(self, level, hex):
+    def __init__(self, identifier, level, hex, civilisation):
         """
         Initialise workers attributes.
 
@@ -226,7 +247,8 @@ class Worker(Unit):
         health = 100 + 10 * increment
         movement = 4 + increment
         cost = {'food': level, 'gold': 0, 'science': 0}
-        super().__init__(health, level, movement, cost, hex)
+        super().__init__(identifier, health, level, movement, cost, hex,
+                         civilisation)
         self._build_speed = level
 
     @property
@@ -275,8 +297,8 @@ class Worker(Unit):
 class Soldier(Unit):
     """Soldier unit, for attacking other units and buildings."""
 
-    def __init__(self, health, level, movement_range, strength, attack_range,
-                 cost, hex):
+    def __init__(self, identifier, health, level, movement_range, strength,
+                 attack_range, cost, hex, civilisation):
         """
         Initialise soldiers attributes.
 
@@ -290,7 +312,8 @@ class Soldier(Unit):
         """
         self._strength = strength
         self._attack_range = attack_range
-        super().__init__(health, level, movement_range, cost, hex)
+        super().__init__(identifier, health, level, movement_range, cost, hex,
+                         civilisation)
 
     @property
     def strength(self):
@@ -341,7 +364,7 @@ class Soldier(Unit):
 class Swordsman(Soldier):
     """Close range soldier."""
 
-    def __init__(self, level, hex):
+    def __init__(self, identifier, level, hex, civilisation):
         """
         Set Swordsman attributes according to level.
 
@@ -353,8 +376,8 @@ class Swordsman(Soldier):
         movement_range = 4 + increment
         strength = 30 + 20 * increment
         cost = {'food': level, 'gold': level-1, 'science': 0}
-        super().__init__(health, level, movement_range, strength,
-                         attack_range=1, cost=cost, hex=hex)
+        super().__init__(identifier, health, level, movement_range, strength,
+                         1, cost, hex, civilisation)
 
     def level_up(self):
         """Level up Swordsman."""
@@ -391,7 +414,7 @@ class Swordsman(Soldier):
 class Archer(Soldier):
     """Long range Soldier class."""
 
-    def __init__(self, level, hex):
+    def __init__(self, identifier, level, hex, civilisation):
         """
         Set Archers attributes according to level.
 
@@ -404,8 +427,8 @@ class Archer(Soldier):
         strength = 20 + 10 * increment
         attack_range = 2 + increment
         cost = {'food': 2, 'gold': 0, 'science': level-1}
-        super().__init__(health, level, movement_range, strength, attack_range,
-                         cost, hex)
+        super().__init__(identifier, health, level, movement_range, strength,
+                         attack_range, cost, hex, civilisation)
 
     def level_up(self):
         """Level up Archer."""

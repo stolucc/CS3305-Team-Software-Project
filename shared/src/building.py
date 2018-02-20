@@ -9,7 +9,6 @@ class BuildingType(Enum):
     FARM = 0
     TRADE_POST = 1
     UNIVERSITY = 2
-    CITY = 3
 
 
 class Building():
@@ -48,11 +47,6 @@ class Building():
                 CurrencyType.GOLD: -2,
                 CurrencyType.FOOD: -3,
                 CurrencyType.SCIENCE: 5,
-            },
-            BuildingType.CITY: {
-                CurrencyType.GOLD: 0,
-                CurrencyType.FOOD: 0,
-                CurrencyType.SCIENCE: 0,
             }
         }
         return values[self._type]
