@@ -208,10 +208,10 @@ class Unit:
         string = "ID: %i, Health: %i, Max Health: %i, " \
                  "Movement Range: %i, Level: %i, Cost:(Food:%i Gold:%i, " \
                  "Science:%i), Position: %i,%i,%i, " % \
-                 (self._id, self._health, self._max_health, self._movement_range,
-                  self._level, self._cost['food'], self._cost['gold'],
-                  self._cost['science'], self._position.x, self._position.y,
-                  self._position.z)
+                 (self._id, self._health, self._max_health,
+                  self._movement_range, self._level, self._cost['food'],
+                  self._cost['gold'], self._cost['science'], self._position.x,
+                  self._position.y, self._position.z)
         return string
 
     @staticmethod
