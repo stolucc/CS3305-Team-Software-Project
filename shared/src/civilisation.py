@@ -3,6 +3,7 @@
 from unit import Worker, Archer, Swordsman
 from city import City
 from building import Building, BuildingType
+from currency import CurrencyType
 
 
 class Civilisation(object):
@@ -284,6 +285,14 @@ class Civilisation(object):
         else:
             print("Unable to purchase archer.")
 
+    def currency_per_turn(self):
+        """Update Gold, Food, and Science per turn."""
+        currency = self.currency_of_buildings()
+        cost = self.cost_of_units()
+        self.gold += currency['gold'] - cost['gold']
+        self.food += currency['food'] - cost['food']
+        self.science += currency['science'] - cost['science']
+
     def cost_of_units(self):
         """
         Cost of all units per turn.
@@ -307,5 +316,8 @@ class Civilisation(object):
         for city in self.cities:
             for building in city.buildings:
                 if building._type != BuildingType.CITY:
-                    print(building)
-                    print(building.currency)
+                    currency['gold'] += building.currency[CurrencyType.GOLD]
+                    currency['food'] += building.currency[CurrencyType.FOOD]
+                    currency['science'] += \
+                        building.currency[CurrencyType.SCIENCE]
+        return currency
