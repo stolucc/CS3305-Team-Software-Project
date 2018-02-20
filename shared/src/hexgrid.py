@@ -2,7 +2,7 @@
 
 from queue import PriorityQueue
 from terrain import Terrain, TerrainType, BiomeType
-
+from random import choice
 
 class Hex:
     """A class for a Hexagonal shape."""
@@ -19,9 +19,8 @@ class Hex:
         self._y = y
         self._z = z
         self._claimed = False
-        self._terrain = Terrain(TerrainType.FLAT, BiomeType.GRASSLAND)
-        self._unit = None
-        self._building = None
+        self._terrain = Terrain(choice(list(TerrainType)),
+                                choice(list(BiomeType)))
 
     @property
     def x(self):

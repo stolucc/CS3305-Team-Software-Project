@@ -5,11 +5,13 @@ import sys
 import time
 from layout import Layout
 from hexgrid import Grid, Hex
+from unit import Archer
 from enum import Enum
 from math import floor
 import math
 
 IMAGE_PATH = "../resources/images/"
+UNIT_LIST = [Archer(3, Hex(0, 0, 0))]
 
 
 class Resolution(Enum):
@@ -74,6 +76,7 @@ class Game:
                               (self._window_size[0] / 2,
                                self._window_size[1] / 2))
         self._terrain_images = {
+            "move-highlight": load_image("tiles/move-highlight.png"),
             (0, 0): load_image("tiles/tundra_flat.png"),
             (0, 1): load_image("tiles/grassland_flat.png"),
             (0, 2): load_image("tiles/desert_flat.png"),
@@ -89,10 +92,13 @@ class Game:
         }
         self._scaled_terrain_images = self._terrain_images.copy()
         self._sprite_images = {
-            "archer": load_image("units/archers3.png"),
+            "Archer": load_image("units/archers3.png"),
             "health_bar": load_image("health/health_bar_75.png")
         }
         self._scaled_sprite_images = self._sprite_images.copy()
+        self._currently_selected_unit = None
+        self._currently_selected_tile = None
+        self._current_available_moves = {}
 
     def start(self):
         """Initialize the game."""
@@ -105,6 +111,8 @@ class Game:
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     self.mouse_button_down(event)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    self.mouse_button_up(event)
             time.sleep(0.001)
 
     def mouse_button_down(self, event):
@@ -123,6 +131,19 @@ class Game:
             self.zoom_in()
         elif event.button == 5:  # Scroll down
             self.zoom_out()
+
+    def mouse_button_up(self, event):
+        """
+        Perform an action depending on the mouse event taking place.
+
+        :param event: a user inputted event.
+        """
+        if event.button == 1:  # Left click
+            pass
+        elif event.button == 2:  # Middle click
+            pass
+        elif event.button == 3:  # Right click
+            self.highlight_new_movement(self._layout)
 
     def panning(self):
         """
@@ -176,6 +197,49 @@ class Game:
             self.scale_images_to_hex_size()
             self.scale_sprites_to_hex_size()
             self.draw_map()
+
+    def highlight_new_movement(self, layout):
+        click = pygame.mouse.get_pos()
+        c_hex = layout.pixel_to_hex(click)
+        c_hex_coords = self._grid.hex_round((c_hex.x, c_hex.y, c_hex.z))
+        hexagon = self._grid.get_hextile(c_hex_coords)
+        if self._currently_selected_tile != c_hex_coords:
+            if self._currently_selected_unit is not None:
+                if hexagon in self._current_available_moves:
+                    self.move_unit(self._currently_selected_unit, hexagon)
+                    self._currently_selected_tile = None
+                    self._currently_selected_unit = None
+                    self._current_available_moves = {}
+            else:
+                self._currently_selected_tile = c_hex_coords
+                self._current_available_moves = {}
+                for unit in UNIT_LIST:
+                    unit_position = (unit.position.x,
+                                     unit.position.y,
+                                     unit.position.z)
+                    self._currently_selected_unit = unit
+                    if unit_position == c_hex_coords:
+                        self._current_available_moves = self._grid.dijkstra(
+                            hexagon,
+                            unit.movement_range)
+        else:
+            self._currently_selected_tile = None
+            self._currently_selected_unit = None
+        # print(self._currently_selected_tile)
+        self.draw_map()
+
+    def highlight_selected_movement(self, layout):
+        for k in self._current_available_moves:
+            hexagon_coords = layout.hex_to_pixel(k)
+            self._screen.blit(
+                self._scaled_terrain_images["move-highlight"],
+                (hexagon_coords[0]
+                 - math.ceil(layout.size * (math.sqrt(3) / 2)),
+                 hexagon_coords[1] - layout.size))
+
+    def move_unit(self, unit, hexagon):
+        unit.position = hexagon
+        print(unit.position)
 
     def scale_images_to_hex_size(self):
         """
@@ -237,7 +301,7 @@ class Game:
             hexagon = self._grid.get_hextile(hex_point)
             hexagon_coords = layout.hex_to_pixel(hexagon)
             if (size[0] + 100 > hexagon_coords[0] > -100 and
-               size[1] + 100 > hexagon_coords[1] > -100):
+                                size[1] + 100 > hexagon_coords[1] > -100):
                 terrain = hexagon.terrain
                 terrain_image = self._scaled_terrain_images[
                     (terrain.terrain_type.value, terrain.biome.value)]
@@ -246,22 +310,24 @@ class Game:
                     (hexagon_coords[0]
                      - math.ceil(self._layout.size * (math.sqrt(3) / 2)),
                      hexagon_coords[1] - self._layout.size))
-                self.draw_sprite(hexagon_coords,
-                                 self._scaled_sprite_images["archer"])
-                self.draw_sprite(hexagon_coords,
-                                 self._scaled_sprite_images["health_bar"])
+        for unit in UNIT_LIST:
+            hexagon_coords = layout.hex_to_pixel(unit.position)
+            self.draw_sprite(hexagon_coords,
+                             self._scaled_sprite_images[unit.__class__.__name__])
+            self.draw_sprite(hexagon_coords,
+                             self._scaled_sprite_images["health_bar"])
 
     def get_mirrors(self):
-            """Store each hexgrid mirror layout in a list."""
-            mirror_centers = self._grid.mirrors
-            layouts = []
-            for mirror in mirror_centers:
-                layout = Layout(self._layout.size,
-                                self._layout.hex_to_pixel(Hex(mirror[0],
-                                                              mirror[1],
-                                                              mirror[2])))
-                layouts.append(layout)
-            return layouts
+        """Store each hexgrid mirror layout in a list."""
+        mirror_centers = self._grid.mirrors
+        layouts = []
+        for mirror in mirror_centers:
+            layout = Layout(self._layout.size,
+                            self._layout.hex_to_pixel(Hex(mirror[0],
+                                                          mirror[1],
+                                                          mirror[2])))
+            layouts.append(layout)
+        return layouts
 
     def draw_map(self):
         """
@@ -274,6 +340,9 @@ class Game:
         layouts = self.get_mirrors()
         for layout in layouts:
             self.draw_hex_grid(layout)
+        self.highlight_selected_movement(self._layout)
+        for layout in layouts:
+            self.highlight_selected_movement(layout)
         pygame.display.flip()
 
 
