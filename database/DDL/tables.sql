@@ -112,7 +112,7 @@ CREATE TABLE public.logs
   file_name VARCHAR(256) NOT NULL,
   line_number INTEGER NOT NULL CHECK (line_number >= 0),
   function_name VARCHAR(256) NOT NULL,
-  log VARCHAR(2048) NOT NULL,
+  log TEXT NOT NULL,
   created_at TIMESTAMP NOT NULL,
   created_by VARCHAR(256) NOT NULL,
   process_id BIGINT NOT NULL CHECK (process_id >= 0),

@@ -4,6 +4,9 @@ import ssl
 import os
 import json
 from message import Message
+from action import UpgradeAction
+from unit import Worker
+from hexgrid import Hex
 
 
 class Connection:
@@ -115,7 +118,10 @@ def main():
         config = json.load(config_file)
     con = Connection(config["server"]["ip"], config["server"]["port"])
     con.open()
-    message = Message([1, 2], 1)
+    hex = Hex(1, 2, -3)
+    worker = Worker(1, hex)
+    upgrade_action = UpgradeAction(worker)
+    message = Message(upgrade_action, 1)
     con.send(message.serialise())
     message = con.recv()
     print(str(Message.deserialise(message)))

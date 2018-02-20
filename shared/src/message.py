@@ -26,7 +26,8 @@ class Message:
 
     def __str__(self):
         """Return a String representation of a Message object."""
-        return ("<obj: '%s' player_id: '%s' type: '%s' timestamp: '%s'>" %
+        return ("<Message obj: '%s' player_id: '%s' type: '%s' timestamp: "
+                "'%s'>" %
                 (str(self._obj), str(self._id), str(self._type),
                  str(self._timestamp)))
 

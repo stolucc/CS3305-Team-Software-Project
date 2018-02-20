@@ -1,7 +1,7 @@
 """Server Database API."""
 from sqlalchemy import Column, Integer, Boolean, ForeignKey, \
     Sequence, create_engine, MetaData, CheckConstraint, String, TIMESTAMP, \
-    BIGINT
+    BIGINT, TEXT
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
@@ -632,7 +632,7 @@ class Log(Base):
     line_number = Column(Integer, CheckConstraint('line_number>=0'),
                          nullable=False)
     function_name = Column(String(256), nullable=False)
-    log = Column(String(2048), nullable=False)
+    log = Column(TEXT(), nullable=False)
     created_at = Column(TIMESTAMP, CheckConstraint('created_at>=0'),
                         nullable=False)
     created_by = Column(String(256), nullable=False)
@@ -660,7 +660,7 @@ class Log(Base):
             made. Must be >= 0.
         :param function_name: name of function where the logging call was
             made. (limit is 256 characters)
-        :param log: log message of the log (limit is 2048 characters)
+        :param log: log message of the log
         :param created_at: timestamp of when the log was created
         :param created_by: what created the log (limit is 256 characters)
         :param process_id: id of the process that created the log.

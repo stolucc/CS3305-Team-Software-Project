@@ -14,6 +14,11 @@ class MovementAction():
         self.unit = unit
         self.destination = hexagon
 
+    def __str__(self):
+        """Return a String representation of a MovementAction object."""
+        return ("<MovementAction unit: '%s' destination: '%s'>" %
+                (str(self.unit), str(self.destination)))
+
 
 class CombatAction():
     """An action causing one unit to attack another."""
@@ -28,6 +33,11 @@ class CombatAction():
         self.attacker = attacker
         self.defender = defender
 
+    def __str__(self):
+        """Return a String representation of a CombatAction object."""
+        return ("<CombatAction attacker: '%s' defender: '%s'>" %
+                (str(self.attacker), str(self.defender)))
+
 
 class UpgradeAction():
     """An action which upgrades a unit to the nect level."""
@@ -39,6 +49,11 @@ class UpgradeAction():
         :param unit: The unit to be upgraded
         """
         self.unit = unit
+
+    def __str__(self):
+        """Return a String representation of a UpgradeAction object."""
+        return ("<UpgradeAction unit: '%s'>" %
+                (str(self.unit)))
 
 
 class BuildAction():
@@ -54,6 +69,11 @@ class BuildAction():
         self.unit = unit
         self.building_type = building_type
 
+    def __str__(self):
+        """Return a String representation of a BuildAction object."""
+        return ("<BuildAction unit: '%s' building_type: '%s'>" %
+                (str(self.unit), str(self.building_type)))
+
 
 class PurchaseAction():
     """An action which purchases a new unit."""
@@ -68,3 +88,8 @@ class PurchaseAction():
         self.building = city
         self.unit_type = unit_type
         self.level = level
+
+    def __str__(self):
+        """Return a String representation of a PurchaseAction object."""
+        return ("<PurchaseAction building: '%s' unit_type: '%s' level: '%s'>" %
+                (str(self.building), str(self.unit_type), str(self.level)))
