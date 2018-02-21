@@ -1,6 +1,6 @@
 """Civilisation representation."""
 
-from unit import Worker, Archer, Swordsman
+from unit import Worker, Swordsman, Unit
 from city import City
 from building import Building
 from currency import CurrencyType
@@ -9,12 +9,13 @@ from currency import CurrencyType
 class Civilisation(object):
     """Civilisation class."""
 
-    def __init__(self, grid):
+    def __init__(self, identifier, grid):
         """
         Initialise Civilisation attributes.
 
         :param grid: hex grid that game is using
         """
+        self._id = identifier
         self._grid = grid
         self._units = {}
         self._cities = {}
@@ -28,6 +29,11 @@ class Civilisation(object):
                  % (len(self.cities), len(self.units), self._gold, self._food,
                     self._science)
         return string
+
+    @property
+    def id(self):
+        """Return civilisation unique ID."""
+        return self._id
 
     @property
     def units(self):
@@ -128,14 +134,30 @@ class Civilisation(object):
         """
         return self._grid
 
+    def set_up(self, start_tile, city_id, worker_id):
+        """
+        Start civilisation.
+
+        Build city on start hex. Create Worker.
+        """
+        city = City(city_id, start_tile)
+        tiles = self.grid.spiral_ring(start_tile, City.RANGE)
+        city.tiles = tiles
+        self.cities[city.id] = city
+        worker = Worker(worker_id, 1, city.no_unit_tile(), self)
+        worker.position.unit = worker
+        self.units[worker_id] = worker
+
     def build_city_on_tile(self, identifier, tile):
         """
         Build city on given tile.
 
         :param tile: hex tile to build city on
         """
+        cost_of_city = 25
         if not tile.claimed and isinstance(tile.unit, Worker)\
-                or len(self.cities) == 0:
+                and self.gold >= cost_of_city:
+            self.gold -= cost_of_city
             city = City(identifier, tile)
             tiles = self.grid.spiral_ring(tile, City.RANGE)
             city.tiles = tiles
@@ -152,10 +174,9 @@ class Civilisation(object):
         if tile.building is None and isinstance(tile.unit, Worker) \
                 and tile.claimed is True:
             #TODO Need to check if tile is claimed by your civilisation
-            cost_of_building = 10
-            if self.gold >= cost_of_building:
-                self.gold -= cost_of_building
-                building = Building(identifier, building_type, tile)
+            building = Building(identifier, building_type, tile)
+            if self.gold >= building.buy_cost:
+                self.gold -= building.buy_cost
                 tile.building = building
             else:
                 print("Not enough money.")
@@ -222,12 +243,15 @@ class Civilisation(object):
         :param city: city to spawn worker at
         :param unit_type: Worker, Archer, or Swordsman class
         """
-        position = city.no_unit_tile()
-        unit = unit_type(identifier, level, position, self)
-        if self.gold >= unit.buy_cost and position is not None:
-            self.gold -= unit.buy_cost
-            position.unit = unit
-            self.units[unit.id] = unit
+        if issubclass(unit_type, Unit):
+            position = city.no_unit_tile()
+            unit = unit_type(identifier, level, position, self)
+            if self.gold >= unit.buy_cost and position is not None:
+                self.gold -= unit.buy_cost
+                position.unit = unit
+                self.units[unit.id] = unit
+            else:
+                print("Unable to purchase worker.")
         else:
             print("Unable to purchase worker.")
 

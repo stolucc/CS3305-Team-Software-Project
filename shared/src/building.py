@@ -23,7 +23,7 @@ class Building():
         :param building_type: The type of the building to be created.
         :param hexagon: The hexagon tile the building is created on.
         """
-        self._identifier = identifier
+        self._id = identifier
         self._location = hexagon
         self._type = building_type
 
@@ -33,7 +33,7 @@ class Building():
         return string
 
     @property
-    def identifier(self):
+    def id(self):
         """Return unique id."""
         return self._identifier
 

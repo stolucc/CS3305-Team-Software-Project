@@ -67,7 +67,7 @@ class Hex:
 
         :param unit: a Unit object, or None
         """
-        self._unit = unit
+        self._unit = new_unit
 
     @property
     def coords(self):
