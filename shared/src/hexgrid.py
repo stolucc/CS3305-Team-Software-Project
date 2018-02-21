@@ -2,7 +2,6 @@
 
 from queue import PriorityQueue
 from terrain import Terrain, TerrainType, BiomeType
-from random import choice
 import unit
 
 

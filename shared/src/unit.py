@@ -1,7 +1,7 @@
 """Unit representation."""
 
-from hexgrid import Hex
 from mapresource import ResourceType
+
 
 class Unit:
     """Base class for the units."""
