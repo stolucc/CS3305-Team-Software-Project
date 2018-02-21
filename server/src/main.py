@@ -17,8 +17,12 @@ class Server():
         logger = Logger(session, "Server Connection Handler",
                         config["logging"]["log_level"])
         self._log = logger.get_logger()
-        self._connection_handler = ConnectionHandler(self.handle_message, self._log)
-        self._connection_handler.start(config["server"]["port"])
+        self._connection_handler = ConnectionHandler(self.handle_message,
+                                                     self._log)
+        try:
+            self._connection_handler.start(config["server"]["port"])
+        except KeyboardInterrupt:
+            self._connection_handler.stop()
 
     def handle_message(self, connection):
         info = connection.recv()
