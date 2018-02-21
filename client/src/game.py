@@ -314,7 +314,7 @@ class Game:
             hexagon = self._grid.get_hextile(hex_point)
             hexagon_coords = layout.hex_to_pixel(hexagon)
             if (size[0] + 100 > hexagon_coords[0] > -100 and
-                                size[1] + 100 > hexagon_coords[1] > -100):
+               size[1] + 100 > hexagon_coords[1] > -100):
                 terrain = hexagon.terrain
                 terrain_image = self._scaled_terrain_images[
                     (terrain.terrain_type.value, terrain.biome.value)]
