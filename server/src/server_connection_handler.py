@@ -5,31 +5,21 @@ import threading
 import ssl
 import os
 from connections import Connection
-import database_API
 import json
-from database_logger import Logger
-from message import Message
 
 
 class ConnectionHandler:
     """Class to handle incoming tcp connections."""
 
-    def __init__(self, function, game):
+    def __init__(self, function, log):
         """
         Create base ConnectionHandler.
 
         :param function: callback function, called with arguments (addr, Conn)
-        :param game: list containing the civilizations (users) in the game
         """
         with open(os.path.join("..", "config", "config.json")) as config_file:
             config = json.load(config_file)
-        db_connection = database_API.Connection(config["postgres"]["user"],
-                                                config["postgres"]["password"],
-                                                config["postgres"]["database"])
-        session = db_connection.get_session()
-        logger = Logger(session, "Server Connection Handler",
-                        config["logging"]["log_level"])
-        self._log = logger.get_logger()
+        self._log = log
         self._config = config
         self._function = function
         self._socket = socket(AF_INET, SOCK_STREAM)
@@ -39,7 +29,6 @@ class ConnectionHandler:
         self._context.load_cert_chain(
             certfile=config["paths"]["cert"],
             keyfile=config["paths"]["key"])
-        self._game = game
 
     def start(self, port):
         """
@@ -74,8 +63,7 @@ class ConnectionHandler:
                 client_conn = Connection(addr[0], addr[1], connection=conn)
                 thread = threading.Thread(name="worker",
                                           target=self._function,
-                                          args=(addr, client_conn, self._log,
-                                                self._game))
+                                          args=(client_conn,))
                 thread.start()
                 self._threads.append(thread)
 
@@ -86,27 +74,3 @@ class ConnectionHandler:
             thread.join()
         self._socket.close()
         self._socket = socket(AF_INET, SOCK_STREAM)
-
-
-def main():
-    """Test function."""
-    with open(os.path.join("..", "config", "config.json")) as config_file:
-        config = json.load(config_file)
-    game = []
-    ser = ConnectionHandler(test, game)
-    ser.start(config["server"]["port"])
-    # ser.stop()
-
-
-def test(addr, connection, log, game):
-    """Test handler function."""
-    info = connection.recv()
-    message = Message.deserialise(info)
-    print(message)
-    log.debug(str(message))
-    bytestream = message.serialise()
-    connection.send(bytestream)
-
-
-if __name__ == "__main__":
-    main()
