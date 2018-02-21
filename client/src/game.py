@@ -327,7 +327,8 @@ class Game:
                 unit = hexagon.unit
                 hexagon_coords = layout.hex_to_pixel(unit.position)
                 self.draw_sprite(hexagon_coords,
-                                 self._scaled_sprite_images[unit.__class__.__name__])
+                                 self._scaled_sprite_images[
+                                     unit.__class__.__name__])
                 self.draw_sprite(hexagon_coords,
                                  self._scaled_sprite_images["health_bar"])
 
