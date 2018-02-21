@@ -1,7 +1,6 @@
 """City representation."""
 from currency import CurrencyType
 from mapresource import Resource
-from building import BuildingType
 
 
 class City():
