@@ -51,6 +51,10 @@ class Menu:
             self._options += [MenuOption(i[0], i[1])]
         self._screen_width = self._screen.get_width()
         self._screen_height = self._screen.get_height()
+        self._background_colour = (74, 74, 74)
+        self._border = (63, 142, 252)
+        self._text_colour = (0, 0, 0)
+        self._text_size = 30
 
     def text_objects(self, text, font, colour):
         """
@@ -94,19 +98,15 @@ class Menu:
 
     def display_menu(self):
         """Display the menu and save it to the object."""
-        background_colour1 = (63, 142, 252)
-        background_colour2 = (73, 163, 26)
         main_background = pygame.Surface((self._screen_width,
                                          self._screen_height),
                                          pygame.SRCALPHA, 16)
-        main_background.fill((100, 100, 100))
+        main_background.fill((50, 50, 50))
         self._screen.blit(main_background, (0, 0))
-        text_colour = (0, 0, 0)
-        text_size = 30
         option_space = 40
+        heading_space = 140
         option_width, option_height = self.size_of_option(self._screen_width)
         y_coordinate = 0
-        heading_space = 140
         # Coordinates for where menu display starts.
         y_coordinate += heading_space
         x_coordinate = self._screen_width / 2 - option_width/2
@@ -118,15 +118,25 @@ class Menu:
             option_block = pygame.Rect(
                 x_coordinate, y_coordinate,
                 option_width, option_height)
-            pygame.draw.rect(self._screen, background_colour2, option_block)
-            pygame.draw.rect(self._screen, background_colour1, option_block, 3)
-            self.message_display(i.name, text_size, x_coordinate +
-                                 option_width/2, y_coordinate+5, text_colour)
+            self.draw_option(option_block, i.name)
             self._start += [(x_coordinate, y_coordinate)]
             self._end += [(x_coordinate + option_width,
                            y_coordinate + option_height)]
             y_coordinate += option_height + option_space
         pygame.display.flip()
+
+    def draw_option(self, block, name):
+        """
+        Draw a block for a menu option.
+
+        :param block: The block to be drawn.
+        :param name: The name the block displays.
+        """
+        pygame.draw.rect(self._screen, self._background_colour, block)
+        pygame.draw.rect(self._screen, self._border, block, 3)
+        self.message_display(name, self._text_size, block.x +
+                             block.width/2, block.y+5,
+                             self._text_colour)
 
     def menu_click(self, pos):
         """
@@ -139,6 +149,8 @@ class Menu:
             if pos[0] >= self._start[i][0] and pos[0] <= self._end[i][0]:
                 if pos[1] >= self._start[i][1] and pos[1] <= self._end[i][1]:
                     self._options[i].menu_function
+                    return True
+        return False
 
 
 if __name__ == "__main__":
