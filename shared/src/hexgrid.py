@@ -234,7 +234,7 @@ class Grid:
         if coordinates_sum is not 0:
             raise KeyError
         elif should_wrap:
-            return self._hextiles[self.wrap_around(coordinates)]
+            return self.get_hextile[self.wrap_around(coordinates)]
         else:
             return self._hextiles[coordinates]
 
