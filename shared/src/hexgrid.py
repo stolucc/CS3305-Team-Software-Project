@@ -2,7 +2,6 @@
 
 from queue import PriorityQueue
 from terrain import Terrain, TerrainType, BiomeType
-import unit
 
 
 class Hex:

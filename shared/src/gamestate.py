@@ -17,6 +17,8 @@ class GameState:
         self._grid = grid
         self._civs = {}
         self._my_id = None
+        self._turn_count = 1
+        self._current_player = None
 
     @property
     def game_id(self):
@@ -53,10 +55,9 @@ class GameState:
         """
         return self._civs[civ_id]
 
-    # TODO Remove redundant civ_id when id has been added to Civilization.
-    def add_civ(self, civ_id, civ):
+    def add_civ(self, civ):
         """Add the civ to the list of civs playing."""
-        self._civs[civ_id] = civ
+        self._civs[civ.id] = civ
 
     @property
     def my_id(self):
@@ -71,3 +72,17 @@ class GameState:
     def my_id(self, my_id):
         """Setter for my_id."""
         self._my_id = my_id
+
+    @property
+    def turn_count(self):
+        """
+        Getter for turn_count.
+
+        :return: turn_count
+        """
+        return self._turn_count
+
+    @turn_count.setter
+    def turn_count(self, turn_count):
+        """Setter for turn_count."""
+        self._turn_count = turn_count

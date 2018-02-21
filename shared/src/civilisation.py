@@ -173,7 +173,7 @@ class Civilisation(object):
         """
         if tile.building is None and isinstance(tile.unit, Worker) \
                 and tile.claimed is True:
-            #TODO Need to check if tile is claimed by your civilisation
+            # TODO Need to check if tile is claimed by your civilisation
             building = Building(identifier, building_type, tile)
             if self.gold >= building.buy_cost:
                 self.gold -= building.buy_cost
