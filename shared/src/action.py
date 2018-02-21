@@ -1,6 +1,18 @@
 """Module to represent a variety of specific game actions."""
 
 
+class JoinGameAction():
+    """An action to join a game."""
+
+    def __init__(self):
+        """Initialise a new join game action."""
+        pass
+
+    def __str__(self):
+        """Return a String representation of a JoinGameAction object."""
+        return "<JoinGameAction>"
+
+
 class MovementAction():
     """An action causing a unit to move."""
 
