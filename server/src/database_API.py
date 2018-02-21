@@ -428,8 +428,8 @@ class Unit(Base):
         :param z: specifies the location (z coordinate) of unit.
             x + y + z must equal 0.
         """
-        unit = Unit(user_id=user_id, level=level, type=type, health=health, x=x, y=y,
-                    z=z)
+        unit = Unit(user_id=user_id, level=level, type=type, health=health,
+                    x=x, y=y, z=z)
         session = session()
         session.add(unit)
         session.commit()
