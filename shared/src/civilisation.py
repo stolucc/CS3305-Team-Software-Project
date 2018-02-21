@@ -128,35 +128,34 @@ class Civilisation(object):
         """
         return self._grid
 
-    def build_city_on_tile(self, tile, worker):
+    def build_city_on_tile(self, identifier, tile):
         """
         Build city on given tile.
 
         :param tile: hex tile to build city on
-        :param grid: grid that is being used
         """
-        if not tile.claimed and isinstance(worker, Worker)\
-                or len(self.cities[0]) == 0:
-            city = City(tile)
+        if not tile.claimed and isinstance(tile.unit, Worker)\
+                or len(self.cities) == 0:
+            city = City(identifier, tile)
             tiles = self.grid.spiral_ring(tile, City.RANGE)
             city.tiles = tiles
-            self.cities += [city]
+            self.cities[city.id] = city
         else:
             print("Unable to build city.")
 
-    def build_structure(self, worker, building_type):
+    def build_structure(self, identifier, tile, building_type):
         """
-        Build building at workers position.
+        Build building at tiles position.
 
-        :param worker: worker unit
+        :param tile: hex object
         """
-        tile = worker.position
-        if tile.building is None and tile.claimed is True:
-            # Need to check if tile is claimed by your civilisation
+        if tile.building is None and isinstance(tile.unit, Worker) \
+                and tile.claimed is True:
+            #TODO Need to check if tile is claimed by your civilisation
             cost_of_building = 10
             if self.gold >= cost_of_building:
                 self.gold -= cost_of_building
-                building = Building(building_type, tile)
+                building = Building(identifier, building_type, tile)
                 tile.building = building
             else:
                 print("Not enough money.")
@@ -175,6 +174,7 @@ class Civilisation(object):
                                            unit.movement_range)
             movement_cost = self.movement_cost_of_path(path)
             if unit.movement_range >= movement_cost:
+                unit.movement -= movement_cost
                 unit.position = tile
                 tile.unit = unit
             else:
@@ -210,64 +210,26 @@ class Civilisation(object):
         """Check if unit is dead and remove references if True."""
         if unit.health == 0:
             unit.position.unit = None
-            self.units.remove(unit)
+            del unit.civilisation.units[unit.id]
 
-    def buy_worker(self, level, city):
+    def buy_unit(self, identifier, level, city, unit_type):
         """
-        Buy Worker.
+        Buy unit.
 
-        Worker will be placed on first tile near city that has no unit.
+        Unit will be placed on first tile near city that has no unit.
 
         :param level: int level of unit
         :param city: city to spawn worker at
+        :param unit_type: Worker, Archer, or Swordsman class
         """
-        cost_of_worker = 10 * level
         position = city.no_unit_tile()
-        if self.gold >= cost_of_worker and position is not None:
-            self.gold -= cost_of_worker
-            worker = Worker(level, position)
-            position.unit = worker
-            self.units += [worker]
+        unit = unit_type(identifier, level, position, self)
+        if self.gold >= unit.buy_cost and position is not None:
+            self.gold -= unit.buy_cost
+            position.unit = unit
+            self.units[unit.id] = unit
         else:
             print("Unable to purchase worker.")
-
-    def buy_swordsman(self, level, city):
-        """
-        Buy Swordsman.
-
-        Swordsman will be placed on first tile near city that has no unit.
-
-        :param level: int level of unit
-        :param city: city to spawn swordsman at
-        """
-        cost_of_swordsman = 20 * level
-        position = city.no_unit_tile()
-        if self.gold >= cost_of_swordsman and position is not None:
-            self.gold -= cost_of_swordsman
-            swordsman = Swordsman(level, position)
-            position.unit = swordsman
-            self.units += [swordsman]
-        else:
-            print("Unable to purchase swordsman.")
-
-    def buy_archer(self, level, city):
-        """
-        Buy Archer.
-
-        Archer will be placed on first tile near city that has no unit.
-
-        :param level: int level of unit
-        :param city: city to spawn archer at
-        """
-        cost_of_archer = 15 * level
-        position = city.no_unit_tile()
-        if self.gold >= cost_of_archer and position is not None:
-            self.gold -= cost_of_archer
-            archer = Archer(level, position)
-            position.unit = archer
-            self.units += [archer]
-        else:
-            print("Unable to purchase archer.")
 
     def currency_per_turn(self):
         """Update Gold, Food, and Science per turn."""
@@ -284,7 +246,8 @@ class Civilisation(object):
         :return: dict of costs
         """
         cost = {'gold': 0, 'food': 0, 'science': 0}
-        for unit in self.units:
+        for unit_id in self.units:
+            unit = self.units[unit_id]
             cost['gold'] += unit.cost['gold']
             cost['food'] += unit.cost['food']
             cost['science'] += unit.cost['science']
@@ -297,8 +260,9 @@ class Civilisation(object):
         :return: dict of currency
         """
         currency = {'gold': 0, 'food': 0, 'science': 0}
-        for city in self.cities:
-            for building in city.buildings:
+        for city_id in self.cities:
+            buildings = self.cities[city_id].buildings
+            for building in buildings:
                 if building._type is not False:
                     currency['gold'] += building.currency[CurrencyType.GOLD]
                     currency['food'] += building.currency[CurrencyType.FOOD]

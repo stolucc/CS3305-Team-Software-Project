@@ -8,12 +8,13 @@ class City():
 
     RANGE = 4
 
-    def __init__(self, hexagon):
+    def __init__(self, identifier, hexagon):
         """Instantiate new City object."""
         self._hex = hexagon
         hexagon.building = self
         self._tiles = []
         self._type = False
+        self._id = identifier
 
     def __repr__(self):
         """Return string representation of City."""
@@ -21,6 +22,11 @@ class City():
         string += "Amount of buildings: %i, Hex: " % (len(self.buildings))
         string += str(self._hex)
         return string
+
+    @property
+    def id(self):
+        """Return id of civilisation."""
+        return self._id
 
     @property
     def tiles(self):

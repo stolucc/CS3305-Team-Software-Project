@@ -16,13 +16,14 @@ class BuildingType(Enum):
 class Building():
     """A single resource-producing building."""
 
-    def __init__(self, building_type, hexagon):
+    def __init__(self, identifier, building_type, hexagon):
         """
         Instantiate a new building.
 
         :param building_type: The type of the building to be created.
         :param hexagon: The hexagon tile the building is created on.
         """
+        self._identifier = identifier
         self._location = hexagon
         self._type = building_type
 
@@ -30,6 +31,11 @@ class Building():
         """Return string represention of building."""
         string = str(self._type) + " Position: " + str(self._location)
         return string
+
+    @property
+    def identifier(self):
+        """Return unique id."""
+        return self._identifier
 
     @property
     def currency(self):
@@ -50,6 +56,16 @@ class Building():
                 CurrencyType.FOOD: -3,
                 CurrencyType.SCIENCE: 5,
             }
+        }
+        return values[self._type]
+
+    @property
+    def buy_cost(self):
+        """Cost in gold to purchase building."""
+        values = {
+            BuildingType.FARM: 10,
+            BuildingType.TRADE_POST: 10,
+            BuildingType.UNIVERSITY: 10
         }
         return values[self._type]
 
