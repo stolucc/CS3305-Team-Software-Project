@@ -1,9 +1,7 @@
 """Unit representation."""
 
-from hexgrid import Hex
 
-
-class Unit():
+class Unit:
     """Base class for the units."""
 
     def __init__(self, health, level, movement_range, cost, hextile):
@@ -400,11 +398,11 @@ class Archer(Soldier):
         return string
 
 
-if __name__ == "__main__":
-    hex = Hex(1, -1, 0)
-    worker = Worker(3, hex)
-    sword = Swordsman(3, hex)
-    archer = Archer(3, hex)
-    print(worker)
-    print(sword)
-    print(archer)
+# if __name__ == "__main__":
+    # hex = Hex(1, -1, 0)
+    # worker = Worker(3, hex)
+    # sword = Swordsman(3, hex)
+    # archer = Archer(3, hex)
+    # print(worker)
+    # print(sword)
+    # print(archer)

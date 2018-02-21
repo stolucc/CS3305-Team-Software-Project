@@ -3,6 +3,8 @@
 from queue import PriorityQueue
 from terrain import Terrain, TerrainType, BiomeType
 from random import choice
+import unit
+
 
 class Hex:
     """A class for a Hexagonal shape."""
@@ -18,6 +20,7 @@ class Hex:
         self._x = x
         self._y = y
         self._z = z
+        self._unit = (choice([None, None, None, None, unit.Archer(3, self)]))
         self._claimed = False
         self._terrain = Terrain(choice(list(TerrainType)),
                                 choice(list(BiomeType)))
@@ -48,6 +51,24 @@ class Hex:
         :return: a z coordinate
         """
         return self._z
+
+    @property
+    def unit(self):
+        """
+        Property for unit.
+
+        :return: a unit
+        """
+        return self._unit
+
+    @unit.setter
+    def unit(self, new_unit):
+        """
+        Setter for terrain.
+
+        :param unit: a Unit object, or None
+        """
+        self._unit = unit
 
     @property
     def terrain(self):
@@ -166,7 +187,7 @@ class Hex:
 
 
 class Grid:
-    """A class for the Grid."""
+    """Class for the Grid."""
 
     def __init__(self, size):
         """
@@ -494,7 +515,7 @@ class Grid:
             for raytile in range(len(ray)):
                 if(view):
                     result = result | {ray[raytile]}
-                    if(not ray[raytile].vision):
+                    if not ray[raytile].vision:
                         view = False
         return list(result)
 
@@ -513,7 +534,7 @@ class Grid:
         while opn.qsize() > 0:
             current_hex = opn.get()
             prev = previous_tiles[current_hex[1]]
-            if(prev[0] > movement):
+            if prev[0] > movement:
                 break
             current_cost = current_hex[0]
             current_hex = current_hex[1]
@@ -559,7 +580,7 @@ class Grid:
         """
         Move the unit along the path to their destination.
 
-        :param path: start_hex: the hex the path begins from
+        :param start_hex: the hex the path begins from
         :param end_hex: the hex the path ends at
         :param movement: the total movement cost available
         """

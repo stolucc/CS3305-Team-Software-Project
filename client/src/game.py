@@ -5,13 +5,11 @@ import sys
 import time
 from layout import Layout
 from hexgrid import Grid, Hex
-from unit import Archer
 from enum import Enum
 from math import floor
 import math
 
 IMAGE_PATH = "../resources/images/"
-UNIT_LIST = [Archer(3, Hex(0, 0, 0))]
 
 
 class Resolution(Enum):
@@ -199,6 +197,11 @@ class Game:
             self.draw_map()
 
     def highlight_new_movement(self, layout):
+        """
+        Highlight tiles which can be moved to by newly selected unit.
+
+        :param layout: the layout object being drawn on.
+        """
         click = pygame.mouse.get_pos()
         c_hex = layout.pixel_to_hex(click)
         c_hex_coords = self._grid.hex_round((c_hex.x, c_hex.y, c_hex.z))
@@ -207,13 +210,14 @@ class Game:
             if self._currently_selected_unit is not None:
                 if hexagon in self._current_available_moves:
                     self.move_unit(self._currently_selected_unit, hexagon)
-                    self._currently_selected_tile = None
-                    self._currently_selected_unit = None
-                    self._current_available_moves = {}
+                self._currently_selected_tile = None
+                self._currently_selected_unit = None
+                self._current_available_moves = {}
             else:
                 self._currently_selected_tile = c_hex_coords
                 self._current_available_moves = {}
-                for unit in UNIT_LIST:
+                if hexagon.unit is not None:
+                    unit = hexagon.unit
                     unit_position = (unit.position.x,
                                      unit.position.y,
                                      unit.position.z)
@@ -222,13 +226,18 @@ class Game:
                         self._current_available_moves = self._grid.dijkstra(
                             hexagon,
                             unit.movement_range)
-        else:
-            self._currently_selected_tile = None
-            self._currently_selected_unit = None
-        # print(self._currently_selected_tile)
+                        for tile in list(self._current_available_moves):
+                            if tile.unit is not None:
+                                del self._current_available_moves[tile]
         self.draw_map()
 
     def highlight_selected_movement(self, layout):
+        """
+        Highlight tiles that can be moved to by currently selected unit.
+
+        :param layout: The Layout object being drawn on
+        :return:
+        """
         for k in self._current_available_moves:
             hexagon_coords = layout.hex_to_pixel(k)
             self._screen.blit(
@@ -238,8 +247,15 @@ class Game:
                  hexagon_coords[1] - layout.size))
 
     def move_unit(self, unit, hexagon):
+        """
+        Move a unit to another hexagon.
+
+        :param unit: Unit to be moved.
+        :param hexagon: Hexagon to move to.
+        """
+        unit.position.unit = None
         unit.position = hexagon
-        print(unit.position)
+        hexagon.unit = unit
 
     def scale_images_to_hex_size(self):
         """
@@ -310,12 +326,13 @@ class Game:
                     (hexagon_coords[0]
                      - math.ceil(self._layout.size * (math.sqrt(3) / 2)),
                      hexagon_coords[1] - self._layout.size))
-        for unit in UNIT_LIST:
-            hexagon_coords = layout.hex_to_pixel(unit.position)
-            self.draw_sprite(hexagon_coords,
-                             self._scaled_sprite_images[unit.__class__.__name__])
-            self.draw_sprite(hexagon_coords,
-                             self._scaled_sprite_images["health_bar"])
+            if hexagon.unit is not None:
+                unit = hexagon.unit
+                hexagon_coords = layout.hex_to_pixel(unit.position)
+                self.draw_sprite(hexagon_coords,
+                                 self._scaled_sprite_images[unit.__class__.__name__])
+                self.draw_sprite(hexagon_coords,
+                                 self._scaled_sprite_images["health_bar"])
 
     def get_mirrors(self):
         """Store each hexgrid mirror layout in a list."""
