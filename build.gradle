@@ -114,7 +114,7 @@ ext.createScripts = {directory ->
   File batfile = file(directory+'/activate.bat')
   if (file(directory+'/src/'+launchFile).exists()){
     try{
-      bashfile.text = "#!/bin/bash\n"+pythonCommand.replace(" ","\\ ")+" "+'src/'+ launchFile
+      bashfile.text = "#!/bin/bash\n cd src\n"+pythonCommand.replace(" ","\\ ")+" "+ launchFile + "\n cd .."
       if(!Os.isFamily(Os.FAMILY_WINDOWS)){
         exec{
           workingDir directory
