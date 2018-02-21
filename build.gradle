@@ -283,7 +283,7 @@ task document(){
 task lint(){
   dependsOn installDependencies
   doLast{
-    if(!Os.isFamily(Os.FAMILY_WINDOWS)){
+    if(Os.isFamily(Os.FAMILY_WINDOWS)){
       File iniFile = file("pylama.ini")
       iniFile.text = iniFile.text.replace("/", "\\")
     }
