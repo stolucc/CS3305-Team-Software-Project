@@ -42,6 +42,7 @@ class Menu:
         """
         Create a new Menu.
 
+        :param screen: A surface object that the menu will be displayed on
         :param options: A list of tuples that have a name and a function
         """
         self._options = []
@@ -79,7 +80,7 @@ class Menu:
         TextRect.center = (x_cord, y_cord + text_size/2)
         self._screen.blit(TextSurf, TextRect)
 
-    def size_of_option(self, width):
+    def size_of_option(self, width=100, height=40):
         """
         Calculate the size of the menu options.
 
@@ -87,14 +88,12 @@ class Menu:
         :return: return the width of the menu option (option_width)
                 and the height (option_height)
         """
-        option_height_space = 40
-        option_height = 40
+        option_height = height
         option_width = width/4
-        return option_width, option_height, option_height_space
+        return option_width, option_height
 
     def display_menu(self):
         """Display the menu and save it to the object."""
-        pygame.font.init()
         background_colour1 = (63, 142, 252)
         background_colour2 = (73, 163, 26)
         main_background = pygame.Surface((self._screen_width,
@@ -104,8 +103,8 @@ class Menu:
         self._screen.blit(main_background, (0, 0))
         text_colour = (0, 0, 0)
         text_size = 30
-        option_width, option_height, option_space = self.size_of_option(
-                                                        self._screen_width)
+        option_space = 40
+        option_width, option_height = self.size_of_option(self._screen_width)
         y_coordinate = 0
         heading_space = 140
         # Coordinates for where menu display starts.
@@ -144,6 +143,7 @@ class Menu:
 
 if __name__ == "__main__":
     screen = pygame.display.set_mode((1280, 720))
+    pygame.font.init()
 
     def test():
         """Test Function."""
