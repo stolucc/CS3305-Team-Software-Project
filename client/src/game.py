@@ -3,12 +3,20 @@
 import pygame
 import sys
 import time
+
+import mapresource
+from civilisation import Civilisation
 from layout import Layout
 from hexgrid import Grid, Hex
 import building
 from enum import Enum
 from math import floor
+from terrain import Terrain, TerrainType
 import math
+
+from terrain import BiomeType
+from unit import *
+from building import *
 
 IMAGE_PATH = "../resources/images/"
 
@@ -96,12 +104,19 @@ class Game:
         }
         self._scaled_sprite_images = self._sprite_images.copy()
         self._building_images = {
-            building.BuildingType.CITY: load_image("buildings/city.png"),
-            building.BuildingType.FARM: load_image("buildings/farm.png"),
-            building.BuildingType.TRADE_POST: load_image("buildings/trading_post.png"),
-            building.BuildingType.UNIVERSITY: load_image("buildings/university.png")
+            "CITY": load_image("buildings/city.png"),
+            "FARM": load_image("buildings/farm.png"),
+            "TRADE_POST": load_image("buildings/trading_post.png"),
+            "UNIVERSITY": load_image("buildings/university.png")
+        }
+        self._resource_images = {
+            "COAL": load_image("map_resources/coal.png"),
+            "IRON": load_image("map_resources/iron.png"),
+            "GEMS": load_image("map_resources/gems.png"),
+            "LOGS": load_image("map_resources/logs.png")
         }
         self._scaled_building_images = self._building_images.copy()
+        self._scaled_resource_images = self._resource_images.copy()
         self._currently_selected_unit = None
         self._currently_selected_tile = None
         self._current_available_moves = {}
@@ -111,7 +126,9 @@ class Game:
         self.scale_images_to_hex_size()
         self.scale_sprites_to_hex_size()
         self.scale_buildings_to_hex_size()
-        self.draw_map()
+        self.scale_resources_to_hex_size()
+        #self.draw_map()
+        self.static_map() #originally draw_map
         while True:
             for event in pygame.event.get():  # something happened
                 if event.type in [pygame.QUIT, pygame.KEYDOWN]:
@@ -172,7 +189,7 @@ class Game:
                 change = (self._camera_position[0] - pix_change[0],
                           self._camera_position[1] - pix_change[1])
             self._layout.change_origin(change)
-            self.draw_map()
+            self.static_map() #originally draw_map
             holding = pygame.mouse.get_pressed()[0]
 
     def zoom_in(self):
@@ -189,6 +206,7 @@ class Game:
             self.scale_images_to_hex_size()
             self.scale_sprites_to_hex_size()
             self.scale_buildings_to_hex_size()
+            self.scale_resources_to_hex_size()
             self.draw_map()
 
     def zoom_out(self):
@@ -205,6 +223,7 @@ class Game:
             self.scale_images_to_hex_size()
             self.scale_sprites_to_hex_size()
             self.scale_buildings_to_hex_size()
+            self.scale_resources_to_hex_size()
             self.draw_map()
 
     def highlight_new_movement(self, layout):
@@ -295,6 +314,20 @@ class Game:
                 self._sprite_images[k],
                 (adjusted_size, adjusted_size))
 
+    def scale_resources_to_hex_size(self):
+
+        """
+        Takes each sprite in the sprite_images dictionary,
+        scales it to the current hex_size, then stores the
+        new image in a copy of the dictionary to preserve
+        image quality.
+        """
+        adjusted_size = math.floor(1800 / self._zoom)
+        for k in self._resource_images:
+            self._scaled_resource_images[k] = pygame.transform.smoothscale(
+                self._resource_images[k],
+                (adjusted_size, adjusted_size))
+
     def scale_buildings_to_hex_size(self):
         """
         Scale sprites.
@@ -362,10 +395,17 @@ class Game:
                      hexagon_coords[1] - self._layout.size))
                 if hexagon.building is not None:
                     building = hexagon.building
-                    hexagon_coords = layout.hex_to_pixel(building.position)
+                    hexagon_coords = layout.hex_to_pixel(hexagon)
                     self.draw_building(hexagon_coords,
                                      self._scaled_building_images[
-                                         building.building_type])
+                                         building.name])
+                if hexagon._terrain._resource is not None:
+                    print(hexagon._terrain._resource.name)
+                    resource = hexagon._terrain._resource
+                    hexagon_coords = layout.hex_to_pixel(hexagon)
+                    self.draw_sprite(hexagon_coords,
+                                       self._scaled_resource_images[
+                                           resource.name])
                 if hexagon.unit is not None:
                     unit = hexagon.unit
                     hexagon_coords = layout.hex_to_pixel(unit.position)
@@ -393,6 +433,79 @@ class Game:
 
         Also draws the hexgrid mirrors.
         """
+        for hex_point in self._grid.get_hextiles():
+            hexagon = self._grid.get_hextile(hex_point)
+            self._grid.randomize_terrain(hexagon)
+        self._screen.fill((0, 0, 0))
+        self.draw_hex_grid(self._layout)
+        layouts = self.get_mirrors()
+        for layout in layouts:
+            self.draw_hex_grid(layout)
+        pygame.display.flip()
+
+
+    def static_map(self):
+        for hex_point in self._grid.get_hextiles():
+            hexagon = self._grid.get_hextile(hex_point)
+            terraintype = hexagon._terrain._terrain_type
+            if abs(hexagon._x) == (self._grid_size // 2) or abs(hexagon._y) == (self._grid_size // 2) \
+                    or abs(hexagon._z) == (self._grid_size // 2):
+                terraintype = TerrainType.OCEAN
+            elif hexagon._x % 3 == 1 and hexagon._y % 2 == 1:
+                terraintype = TerrainType.OCEAN
+            elif hexagon._y % 3 != 1 and hexagon._z % 2 == 1:
+                terraintype = TerrainType.HILL
+            elif hexagon._z % 3 == 1 and hexagon._y % 3 != 0:
+                terraintype = TerrainType.MOUNTAIN
+            else:
+                terraintype = TerrainType.FLAT
+
+            if abs(hexagon._x) == self._grid_size // 4 or abs(hexagon._y) == self._grid_size // 4:
+                terraintype = TerrainType.FLAT
+
+            if abs(hexagon._y) < (self._grid_size // 6):
+                biometype = BiomeType.DESERT
+            elif abs(hexagon._y) > (self._grid_size // 3):
+                biometype = BiomeType.TUNDRA
+            else:
+                biometype = BiomeType.GRASSLAND
+
+            hexagon._terrain = Terrain(terraintype, biometype)
+
+            resource = None
+            building = None
+
+            if hexagon._terrain.terrain_type != TerrainType.OCEAN and hexagon._terrain.terrain_type != TerrainType.MOUNTAIN:
+                if hexagon._x % 4 == 3 and hexagon._y % 4 == 2:
+                    # unit
+                    print("unit")
+                    hexagon.unit = Archer(1, 1, hexagon, Civilisation(1, self._grid))
+                if hexagon._y % 3 == 1 and hexagon._z % 4 == 1:
+                    # resources
+                    print("resource")
+                    if hexagon._y % 6 == 1 and hexagon._z % 8 == 1:
+                        resource = ResourceType.COAL
+                    elif hexagon._y % 6 == 4 and hexagon._z % 8 == 1:
+                        resource = ResourceType.IRON
+                    elif hexagon._y % 6 == 1 and hexagon._z % 8 == 5:
+                        resource = ResourceType.LOGS
+                    elif hexagon._y % 6 == 4 and hexagon._z % 8 == 5:
+                        resource = ResourceType.GEMS
+                if hexagon._z % 4 == 3 and hexagon._x % 4 == 2:
+                    # buildings
+                    if hexagon._z % 8 == 3 and hexagon._x % 8 == 2:
+                        building = BuildingType.CITY
+                    if hexagon._z % 8 == 3 and hexagon._x % 8 == 6:
+                        building = BuildingType.FARM
+                    if hexagon._z % 8 == 7 and hexagon._x % 8 == 2:
+                        building = BuildingType.UNIVERSITY
+                    if hexagon._z % 8 == 7 and hexagon._x % 8 == 6:
+                        building = BuildingType.TRADE_POST
+
+
+            hexagon.building = building
+            hexagon._terrain._resource = resource
+
         self._screen.fill((0, 0, 0))
         self.draw_hex_grid(self._layout)
         layouts = self.get_mirrors()

@@ -1,5 +1,5 @@
 """Hex map representation."""
-
+import random
 from queue import PriorityQueue
 from terrain import Terrain, TerrainType, BiomeType
 from building import BuildingType, Building
@@ -629,3 +629,13 @@ class Grid:
             path[tile].unit = unit
             if tile > 0:
                 path[tile - 1].unit = None
+
+    def randomize_terrain(self, hex):
+        """
+        Pick a random terrain type for the hex tile
+
+        :param hex: the hex tile to be randomized
+        """
+        terraintype = random.choice(list(TerrainType))
+        biometype = hex.terrain._biome
+        hex._terrain = Terrain(terraintype, biometype)
