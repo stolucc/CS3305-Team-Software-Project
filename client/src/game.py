@@ -226,9 +226,6 @@ class Game:
                         self._current_available_moves = self._grid.dijkstra(
                             hexagon,
                             unit.movement_range)
-                        for tile in list(self._current_available_moves):
-                            if tile.unit is not None:
-                                del self._current_available_moves[tile]
         self.draw_map()
 
     def highlight_selected_movement(self, layout):

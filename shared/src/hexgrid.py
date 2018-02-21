@@ -555,6 +555,9 @@ class Grid:
                 if neighbour not in visited:
                     opn.put((current_cost +
                              neighbour.movement_cost, neighbour))
+        for tile in list(result):
+            if tile.unit is not None:
+                del result[tile]
         return result
 
     def shortest_path(self, start_hex, end_hex, movement):
