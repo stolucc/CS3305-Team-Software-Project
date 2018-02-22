@@ -84,28 +84,12 @@ class Menu:
         TextRect.center = (x_cord, y_cord + text_size/2)
         self._screen.blit(TextSurf, TextRect)
 
-    def size_of_option(self, width=100, height=40):
-        """
-        Calculate the size of the menu options.
-
-        :param width: The width of the surface
-        :return: return the width of the menu option (option_width)
-                and the height (option_height)
-        """
-        option_height = height
-        option_width = width/4
-        return option_width, option_height
-
     def display_menu(self):
         """Display the menu and save it to the object."""
-        main_background = pygame.Surface((self._screen_width,
-                                         self._screen_height),
-                                         pygame.SRCALPHA, 16)
-        main_background.fill((50, 50, 50))
-        self._screen.blit(main_background, (0, 0))
+        self.draw_background()
         option_space = 40
         heading_space = 140
-        option_width, option_height = self.size_of_option(self._screen_width)
+        option_width, option_height = self._screen_width/4, 40
         y_coordinate = 0
         y_coordinate += heading_space
         x_coordinate = self._screen_width / 2 - option_width/2
@@ -124,6 +108,14 @@ class Menu:
             y_coordinate += option_height + option_space
         pygame.display.flip()
 
+    def draw_background(self):
+        """Draw the background of the menu."""
+        main_background = pygame.Surface((self._screen_width,
+                                         self._screen_height),
+                                         pygame.SRCALPHA, 16)
+        main_background.fill((50, 50, 50))
+        self._screen.blit(main_background, (0, 0))
+
     def draw_option(self, block, name):
         """
         Draw a block for a menu option.
@@ -134,7 +126,8 @@ class Menu:
         pygame.draw.rect(self._screen, self._background_colour, block)
         pygame.draw.rect(self._screen, self._border, block, 3)
         self.message_display(name, self._text_size, block.x +
-                             block.width/2, block.y+5,
+                             block.width/2, block.y +
+                             ((block.height-self._text_size)/2),
                              self._text_colour)
 
     def menu_click(self, pos):
