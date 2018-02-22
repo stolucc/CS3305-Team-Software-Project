@@ -107,7 +107,6 @@ class Menu:
         heading_space = 140
         option_width, option_height = self.size_of_option(self._screen_width)
         y_coordinate = 0
-        # Coordinates for where menu display starts.
         y_coordinate += heading_space
         x_coordinate = self._screen_width / 2 - option_width/2
         # Stores locations of where menu option is drawn.
@@ -129,7 +128,7 @@ class Menu:
         """
         Draw a block for a menu option.
 
-        :param block: The block to be drawn.
+        :param block: A Rect object.
         :param name: The name the block displays.
         """
         pygame.draw.rect(self._screen, self._background_colour, block)
