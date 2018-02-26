@@ -14,6 +14,7 @@ class ResearchTree(object):
         self._win_node = None
         self._civilisation = civilisation
         self._tier = {'worker': 0, 'swordsman': 0, 'archer': 0}
+        self.tree_setup()
 
     @property
     def branches(self):

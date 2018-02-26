@@ -24,7 +24,6 @@ class Civilisation(object):
         self._food = 100
         self._science = 100
         self._tree = ResearchTree(self)
-        self._tree.tree_setup()
 
     def __repr__(self):
         """Return string representation of Civilisation."""
