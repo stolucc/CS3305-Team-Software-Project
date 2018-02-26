@@ -2,6 +2,7 @@ from server_connection_handler import ConnectionHandler
 from database_logger import Logger
 import database_API
 import os
+import sys
 import json
 from message import Message
 
@@ -23,11 +24,13 @@ class Server():
             self._connection_handler.start(config["server"]["port"])
         except KeyboardInterrupt:
             self._connection_handler.stop()
+            sys.exit()
 
     def handle_message(self, connection):
         info = connection.recv()
         message = Message.deserialise(info)
-        print(message)
+        if message.type == "JoinGameAction":
+            pass
 
 if __name__=="__main__":
     s = Server()

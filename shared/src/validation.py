@@ -30,9 +30,9 @@ class ActionValidatior():
         elif type(action) == UpgradeAction:
             return self.validate_upgrade(action)
         elif type(action) == BuildAction:
-            self.validate_build(action)
+            return self.validate_build(action)
         elif type(action) == PurchaseAction:
-            self.validate_purchase(action)
+            return self.validate_purchase(action)
 
     def valid_hex(self, tile):
         """
