@@ -5,6 +5,8 @@ import math
 from enum import Enum
 from layout import Layout
 from hexgrid import Grid
+from gamestate import GameState
+from civilisation import Civilisation
 
 
 class InfoType(Enum):
@@ -14,40 +16,27 @@ class InfoType(Enum):
     FOOD = 1
     SCIENCE = 2
     PRODUCTION = 3
-    TURN = 4
-    TURN_TIME = 5
-    TURN_INDICATIOR = 6
-    PING = 7
-    MAP = 8
 
 
 class HudOverlay:
     """Class to represent a HUD Overlay."""
 
-    def __init__(self, info_ref, screen_surface, resolution):
+    def __init__(self, game_state, screen_surface, resolution, zoom_level):
         """
         Construct hud_overlay.
 
-        :param info_ref: dictonary containing ref to info to be displayed.
+        :param game_state: ref to current game state object.
         :param screen_surface: pygame display surface.
         :param resolution: tuple or screen resolution (w, h).
         """
-        self._info_references = {InfoType.GOLD: None,
-                                 InfoType.FOOD: None,
-                                 InfoType.SCIENCE: None,
-                                 InfoType.PRODUCTION: None,
-                                 InfoType.TURN: None,
-                                 InfoType.TURN_TIME: None,
-                                 InfoType.TURN_INDICATIOR: None,
-                                 InfoType.PING: None,
-                                 InfoType.MAP: None}
-        for key in info_ref:
-            self._info_references[key] = info_ref[key]
-
+        self._game_state = game_state
+        self._grid = game_state.grid
+        self._myciv = game_state.get_civ(self._game_state.my_id)
         self._screen = screen_surface
         self._resolution = resolution
+        self._zoom_level = zoom_level
         self.font = pygame.font.Font('freesansbold.ttf', 12)
-        path = "../resources/images/hud/"
+        path = "resources/images/hud/"
         x, y = 50, 50
         self._hud_images = {
             InfoType.GOLD: self._load_img(path+"gold_logo.png", x, y),
@@ -56,8 +45,8 @@ class HudOverlay:
             InfoType.PRODUCTION: self._load_img(path+"production_logo.png", x,
                                                 y)
             }
-        path = "../resources/images/tiles/"
-        scale = round(100 / self._info_references[InfoType.MAP].size)
+        path = "resources/images/tiles/"
+        scale = round(100 / self._grid.size)
         x, y = math.ceil((scale * 2 * math.sqrt(3) / 2)), scale * 2
         self._map_layout = Layout(scale, (95, self._resolution[1]-85))
         self.map_imgs = {
@@ -73,6 +62,10 @@ class HudOverlay:
             (3, 0): self._load_img(path+"ocean.png", x, y),
             (3, 1): self._load_img(path+"ocean.png", x, y),
             (3, 2): self._load_img(path+"ocean.png", x, y)}
+        self._background = (74, 74, 74)
+        self._color1 = (0, 0, 0)
+        self._color2 = (255, 255, 255)
+        self._color3 = (124, 252, 0)
 
     def _load_img(self, img, size_w, size_h):
         image = pygame.image.load(img).convert_alpha()
@@ -90,44 +83,40 @@ class HudOverlay:
 
     def draw_resource_panel(self):
         """Draw resource panel."""
-        resources = [InfoType.GOLD,
-                     InfoType.FOOD,
-                     InfoType.SCIENCE,
-                     InfoType.PRODUCTION]
+        resources = {InfoType.GOLD: self._myciv.gold,
+                     InfoType.FOOD: self._myciv.food,
+                     InfoType.SCIENCE: self._myciv.science,
+                     InfoType.PRODUCTION: None}
         offset = 10
         for resource in resources:
-            value = self._info_references[resource]
+            value = resources[resource]
             if value is not None:
                 logo = self._hud_images[resource]
                 self._screen.blit(logo, (offset, 5))
-                self.draw_text(value, (offset+5, 30), (0, 0, 0))
+                self.draw_text(value, (offset+5, 30), self._color1)
                 offset += 60
 
     def draw_info_panel(self):
         """Draw info panel containing turn details and ping."""
-        points = [(self._resolution[0] - 380, 0),
+        points = [(self._resolution[0] - 260, 0),
                   (self._resolution[0], 0),
                   (self._resolution[0], 40),
-                  (self._resolution[0] - 360, 40),
-                  (self._resolution[0] - 380, 20)]
-        pygame.draw.polygon(self._screen, (74, 74, 74), points, 0)
-        info = [(InfoType.TURN, "Turn: "),
-                (InfoType.TURN_TIME, "Time left: "),
-                (InfoType.PING, "Ping: ")]
-        offset = self._resolution[0] - 360
-        for detail in info:
-            value = self._info_references[detail[0]]
-            if value is not None:
-                self.draw_text(detail[1] + str(value),
-                               (offset, 20),
-                               (255, 255, 255))
-                offset += 80
-        value = self._info_references[InfoType.TURN_INDICATIOR]
-        if value[1]:
-            color = (124, 252, 0)
+                  (self._resolution[0] - 220, 40),
+                  (self._resolution[0] - 260, 20)]
+        pygame.draw.polygon(self._screen, self._background, points, 0)
+        offset = self._resolution[0] - 200
+        turn_count = self._game_state.turn_count
+        self.draw_text("Turn: {}".format(turn_count),
+                       (offset, 20),
+                       self._color2)
+        offset += 80
+        current_player = 1  # self._game_state.current_player
+        my_turn = True  # self._game_state.my_turn()
+        if my_turn:
+            color = self._color3
         else:
-            color = (255, 255, 255)
-        value = value[0] + "\'s Turn"
+            color = self._color2
+        value = "Player{}\'s Turn".format(current_player)
         self.draw_text(value,
                        (offset + 20, 20),
                        color)
@@ -135,10 +124,10 @@ class HudOverlay:
     def draw_minimap(self):
         """Draw minimap."""
         lay = Layout(105, (95, self._resolution[1]-85), False)
-        points = lay.polygon_corners(map_ref.get_hextile((0, 0, 0)))
+        points = lay.polygon_corners(map_ref.get_hextile(self._color1))
         x, y = 0, self._resolution[1] - 176
-        pygame.draw.rect(self._screen, (74, 74, 74), (x, y, 50, 180), 0)
-        pygame.draw.polygon(self._screen, (74, 74, 74), points, 0)
+        pygame.draw.rect(self._screen, self._background, (x, y, 50, 180), 0)
+        pygame.draw.polygon(self._screen, self._background, points, 0)
         self.draw_hex_grid()
 
     def draw_text(self, text, position, color):
@@ -156,7 +145,7 @@ class HudOverlay:
 
     def draw_hex_grid(self):
         """Draw the hexgrid."""
-        grid = self._info_references[InfoType.MAP]
+        grid = self._grid
         for hex_point in grid.get_hextiles():
             hexagon = grid.get_hextile(hex_point)
             hexagon_coords = self._map_layout.hex_to_pixel(hexagon)
@@ -180,17 +169,11 @@ if __name__ == "__main__":
              pygame.HWSURFACE)
     window_size = (1024, 576)
     screen = pygame.display.set_mode(window_size, flags, 0)
-    hud = HudOverlay({InfoType.GOLD: 9,
-                      InfoType.FOOD: 12,
-                      InfoType.SCIENCE: 980,
-                      InfoType.PRODUCTION: 1200,
-                      InfoType.TURN: 56,
-                      InfoType.TURN_TIME: 30,
-                      InfoType.TURN_INDICATIOR: ("Alessia", True),
-                      InfoType.PING: 32,
-                      InfoType.MAP: map_ref
-                      },
-                     screen, window_size)
+    civ = Civilisation(map_ref)
+    game_state = GameState(1, 1, map_ref)
+    game_state.add_civ(civ)
+    game_state.my_id = 1
+    hud = HudOverlay(game_state, screen, window_size, 50)
     hud.draw()
     while True:
         time.sleep(10)

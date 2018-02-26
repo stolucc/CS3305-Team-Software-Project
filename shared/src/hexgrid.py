@@ -218,6 +218,11 @@ class Grid:
         """Getter for mirrors."""
         return self._mirrors
 
+    @property
+    def size(self):
+        """Getter for size."""
+        return self._size
+
     def get_hextile(self, coordinates):
         """
         Get hex at coordinates.
