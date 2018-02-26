@@ -36,7 +36,7 @@ class HudOverlay:
         self._resolution = resolution
         self._zoom_level = zoom_level
         self.font = pygame.font.Font('freesansbold.ttf', 12)
-        path = "resources/images/hud/"
+        path = "../resources/images/hud/"
         x, y = 50, 50
         self._hud_images = {
             InfoType.GOLD: self._load_img(path+"gold_logo.png", x, y),
@@ -45,7 +45,7 @@ class HudOverlay:
             InfoType.PRODUCTION: self._load_img(path+"production_logo.png", x,
                                                 y)
             }
-        path = "resources/images/tiles/"
+        path = "../resources/images/tiles/"
         scale = round(100 / self._grid.size)
         x, y = math.ceil((scale * 2 * math.sqrt(3) / 2)), scale * 2
         self._map_layout = Layout(scale, (95, self._resolution[1]-85))
@@ -169,7 +169,7 @@ if __name__ == "__main__":
              pygame.HWSURFACE)
     window_size = (1024, 576)
     screen = pygame.display.set_mode(window_size, flags, 0)
-    civ = Civilisation(map_ref)
+    civ = Civilisation(1, map_ref)
     game_state = GameState(1, 1, map_ref)
     game_state.add_civ(civ)
     game_state.my_id = 1
