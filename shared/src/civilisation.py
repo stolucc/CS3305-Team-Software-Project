@@ -21,7 +21,7 @@ class Civilisation(object):
         self._cities = {}
         self._gold = 100
         self._food = 100
-        self._science = 0
+        self._science = 100
 
     def __repr__(self):
         """Return string representation of Civilisation."""
