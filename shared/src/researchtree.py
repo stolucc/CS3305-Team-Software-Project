@@ -15,20 +15,39 @@ class ResearchTree(object):
         self._civilisation = civilisation
         self._tier = {'worker': 0, 'swordsman': 0, 'archer': 0}
 
-    def next_unlock_node(self, branch):
-        """
-        Get node of certain branch that is next to be unlocked.
+    @property
+    def branches(self):
+        """Return dict of all branches in tree and reference to the first node
+        of each branch."""
+        return self._branches
 
-        :param branch: string name of branch
-        :return: ResearchNode to be unlocked
-        """
-        if branch in self._branches:
-            node = self._branches[branch]
-            while node._unlocked is True:
-                node = node._child
-            return node
-        else:
-            print("Branch does not exist.")
+    @property
+    def win_node(self):
+        """Return win node."""
+        return self._win_node
+
+    @property
+    def civilisation(self):
+        """Return civilisation object."""
+        return self._civilisation
+
+    @property
+    def tier(self):
+        """Return dict of branches and what tier each branch is unlocked to."""
+        return self._tier
+
+    def tree_setup(self):
+        """Set up tree."""
+        self.add_node('worker')
+        self.add_node('worker')
+        self.add_node('worker')
+        self.add_node('archer')
+        self.add_node('archer')
+        self.add_node('archer')
+        self.add_node('swordsman')
+        self.add_node('swordsman')
+        self.add_node('swordsman')
+        self.add_end_node()
 
     def add_node(self, branch):
         """
@@ -37,20 +56,18 @@ class ResearchTree(object):
         :param branch: string branch to add node
         """
         if branch in self._branches:
-            unlock_cost = self._tier[branch] * 10
             node = self._branches[branch]
             if node is None:
                 self._tier[branch] = 1
-                self._branches[branch] = ResearchNode(self, None, unlock_cost,
-                                                      1, True)
+                self._branches[branch] = ResearchNode(self, None, 0, 1, True)
             else:
-                node.add_child(unlock_cost, 2)
+                node.add_child(10, 2)
         else:
             print("Branch does not exist.")
 
     def add_end_node(self):
         """Add end node to tree, after all other nodes have been added."""
-        end_node = ResearchNode(None, None, 40, -1)
+        end_node = ResearchNode(None, None, 40, 4)
         for branch in self._branches:
             node = self._branches[branch]
             while node._child is not None:
@@ -65,9 +82,7 @@ class ResearchTree(object):
         :param branch: string of branch to unlock next tier
         """
         if branch in self._branches:
-            node = self._branches[branch]
-            while node._unlocked is True:
-                node = node._child
+            node = self.next_unlock_node(branch)
             if node != self._win_node\
                     and self._civilisation.science >= node._unlock_cost:
                 self._civilisation.science -= node._unlock_cost
@@ -77,6 +92,18 @@ class ResearchTree(object):
                 self.unlock_end_node()
         else:
             print("Branch does not exist.")
+
+    def next_unlock_node(self, branch):
+        """
+        Get node of certain branch that is next to be unlocked.
+
+        :param branch: string name of branch
+        :return: ResearchNode to be unlocked
+        """
+        node = self._branches[branch]
+        while node._unlocked is True:
+            node = node._child
+        return node
 
     def unlock_end_node(self):
         """Unlock end node."""
@@ -121,6 +148,31 @@ class ResearchNode(object):
         self._tier = tier
         self._unlocked = unlocked
 
+    @property
+    def parent(self):
+        """Return parent node, or tree if first node in branch."""
+        return self._parent
+
+    @property
+    def child(self):
+        """Return child node, None if no child."""
+        return self._child
+
+    @property
+    def unlock_cost(self):
+        """Return amount of science points needed to unlock node."""
+        return self._unlock_cost
+
+    @property
+    def tier(self):
+        """Return tier that the node is on in the Tree."""
+        return self._tier
+
+    @property
+    def unlocked(self):
+        """Return True if node is unlocked, False otherwise."""
+        return self._unlocked
+
     def add_child(self, unlock_cost, tier):
         """
         Add child node to node.
@@ -132,7 +184,7 @@ class ResearchNode(object):
             node = ResearchNode(self, None, unlock_cost, tier)
             self._child = node
         else:
-            self._child.add_child(unlock_cost, tier + 1)
+            self._child.add_child(unlock_cost*2, tier + 1)
 
     def __repr__(self):
         """String representation of Research Node."""
