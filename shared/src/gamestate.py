@@ -3,6 +3,8 @@
 import database_API
 from civilisation import Civilisation
 from action import ServerError, GAME_FULL_ERROR, UNKNOWN_ACTION
+from unit import Worker
+import random
 
 
 class GameState:
@@ -94,6 +96,9 @@ class GameState:
         self._turn_count = turn_count
 
     def handle_action(self, message):
+        civ_actions = ["MovementAction", "CombatAction", "UpgradeAction",
+                       "BuildAction", "PurchaseAction"]
+        start_locations = [(0,0,0),(50,-25,-25),(-50,25,25), (25,-50,25)]
         self._logger.debug(message)
         if message.type == "JoinGameAction":
             if len(self._civs) < 4:
@@ -105,11 +110,27 @@ class GameState:
                 self.add_civ(Civilisation(user_id, self._grid))
                 self._logger.info("New Civilisation joined with id " +
                                   str(user_id))
+                # NOTE: Not needed when loading from db
+                location = random.choice(start_locations)
+                del start_locations(location)
+                unit_id = database_API.Unit.insert(session, user_id, 1, type=0,
+                                                   Worker.get_health(1),
+                                                   *location)
+                self._civs[user_id].set_up(self._grid.get_hextile(location),
+                                           unit_id)
+                # TODO: Inform client of worker
                 return user_id
             else:
                 err = ServerError(GAME_FULL_ERROR)
                 self._logger.error(err)
                 return err
+        elif message.type == "LeaveGameAction":
+            user_id = message.id
+            del self._civs[user_id]
+            database_API.User.update(self._session, user_id, active=False)
+            return True
+        elif message.type in civ_actions:
+            pass
         err = ServerError(UNKNOWN_ACTION)
         self._logger.error(err)
         return err

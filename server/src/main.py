@@ -24,7 +24,7 @@ class Server():
         self._log = logger.get_logger()
         self._connection_handler = ConnectionHandler(self.handle_message,
                                                      self._log)
-        grid = Grid(100)
+        grid = Grid(103)
         game_id = database_API.Game.insert(self._session, 1, True)
         self._gamestate = GameState(game_id, 1, grid, self._log, self._session)
         try:
