@@ -10,7 +10,7 @@ class BuildingType(Enum):
     TRADE_POST = 1
     UNIVERSITY = 2
     CITY = 3
-    RESOURCE_IMPROVEMENT = 4
+    # RESOURCE_IMPROVEMENT = 4
 
 
 class Building():
@@ -73,3 +73,8 @@ class Building():
     def position(self):
         """Location of the building."""
         return self._location
+
+    @property
+    def building_type(self):
+        """Location of the building."""
+        return self._type

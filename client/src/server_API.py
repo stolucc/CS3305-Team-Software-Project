@@ -42,9 +42,9 @@ class ServerAPI:
         :param unit: unit to be moved.
         :param hexagon: the hex that the unit is to be moved to.
         """
-        upgrade_action = action.MovementAction(unit, hexagon)
+        move_action = action.MovementAction(unit, hexagon)
         # TODO Add code to handle response
-        return self.send_action(upgrade_action)
+        return self.send_action(move_action)
 
     def attack(self, attacker, defender):
         """

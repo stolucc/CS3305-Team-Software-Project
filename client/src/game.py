@@ -5,6 +5,7 @@ import sys
 import time
 from layout import Layout
 from hexgrid import Grid, Hex
+import building
 from enum import Enum
 from math import floor
 import math
@@ -94,6 +95,13 @@ class Game:
             "health_bar": load_image("health/health_bar_75.png")
         }
         self._scaled_sprite_images = self._sprite_images.copy()
+        self._building_images = {
+            building.BuildingType.CITY: load_image("buildings/city.png"),
+            building.BuildingType.FARM: load_image("buildings/farm.png"),
+            building.BuildingType.TRADE_POST: load_image("buildings/trading_post.png"),
+            building.BuildingType.UNIVERSITY: load_image("buildings/university.png")
+        }
+        self._scaled_building_images = self._building_images.copy()
         self._currently_selected_unit = None
         self._currently_selected_tile = None
         self._current_available_moves = {}
@@ -102,6 +110,7 @@ class Game:
         """Initialize the game."""
         self.scale_images_to_hex_size()
         self.scale_sprites_to_hex_size()
+        self.scale_buildings_to_hex_size()
         self.draw_map()
         while True:
             for event in pygame.event.get():  # something happened
@@ -179,6 +188,7 @@ class Game:
             self._layout.size = self._hex_size(self._zoom)
             self.scale_images_to_hex_size()
             self.scale_sprites_to_hex_size()
+            self.scale_buildings_to_hex_size()
             self.draw_map()
 
     def zoom_out(self):
@@ -194,6 +204,7 @@ class Game:
             self._layout.size = self._hex_size(self._zoom)
             self.scale_images_to_hex_size()
             self.scale_sprites_to_hex_size()
+            self.scale_buildings_to_hex_size()
             self.draw_map()
 
     def highlight_new_movement(self, layout):
@@ -206,7 +217,7 @@ class Game:
         c_hex = layout.pixel_to_hex(click)
         c_hex_coords = self._grid.hex_round((c_hex.x, c_hex.y, c_hex.z))
         hexagon = self._grid.get_hextile(c_hex_coords)
-        if self._currently_selected_tile != c_hex_coords:
+        if self._currently_selected_tile != hexagon:
             if self._currently_selected_unit is not None:
                 if hexagon in self._current_available_moves:
                     self.move_unit(self._currently_selected_unit, hexagon)
@@ -214,18 +225,16 @@ class Game:
                 self._currently_selected_unit = None
                 self._current_available_moves = {}
             else:
-                self._currently_selected_tile = c_hex_coords
+                self._currently_selected_tile = hexagon
                 self._current_available_moves = {}
                 if hexagon.unit is not None:
                     unit = hexagon.unit
-                    unit_position = (unit.position.x,
-                                     unit.position.y,
-                                     unit.position.z)
                     self._currently_selected_unit = unit
-                    if unit_position == c_hex_coords:
+                    if unit.position == hexagon:
                         self._current_available_moves = self._grid.dijkstra(
                             hexagon,
                             unit.movement_range)
+                        print(self._current_available_moves)
         self.draw_map()
 
     def highlight_selected_movement(self, layout):
@@ -286,6 +295,34 @@ class Game:
                 self._sprite_images[k],
                 (adjusted_size, adjusted_size))
 
+    def scale_buildings_to_hex_size(self):
+        """
+        Scale sprites.
+
+        Takes each sprite in the sprite_images dictionary,
+        scales it to the current hex_size, then stores the
+        new image in a copy of the dictionary to preserve
+        image quality.
+        """
+        adjusted_size = math.floor(1800 / self._zoom)
+        for k in self._building_images:
+            self._scaled_building_images[k] = pygame.transform.smoothscale(
+                self._building_images[k],
+                (adjusted_size, adjusted_size))
+
+    def draw_building(self, hexagon_coords, sprite):
+        """
+        Draw sprite on hextile terrain.
+
+        :param hexagon_coords: the coordinates of the center of the hexagon.
+        :param sprite: the sprite image to draw.
+        """
+        center_x, center_y = hexagon_coords
+        offset = 1800 / (self._zoom * 2)
+        self._screen.blit(sprite,
+                          (floor(center_x - offset),
+                           floor(center_y - offset)))
+
     def draw_sprite(self, hexagon_coords, sprite):
         """
         Draw sprite on hextile terrain.
@@ -323,14 +360,20 @@ class Game:
                     (hexagon_coords[0]
                      - math.ceil(self._layout.size * (math.sqrt(3) / 2)),
                      hexagon_coords[1] - self._layout.size))
-            if hexagon.unit is not None:
-                unit = hexagon.unit
-                hexagon_coords = layout.hex_to_pixel(unit.position)
-                self.draw_sprite(hexagon_coords,
-                                 self._scaled_sprite_images[
-                                     unit.__class__.__name__])
-                self.draw_sprite(hexagon_coords,
-                                 self._scaled_sprite_images["health_bar"])
+                if hexagon.building is not None:
+                    building = hexagon.building
+                    hexagon_coords = layout.hex_to_pixel(building.position)
+                    self.draw_building(hexagon_coords,
+                                     self._scaled_building_images[
+                                         building.building_type])
+                if hexagon.unit is not None:
+                    unit = hexagon.unit
+                    hexagon_coords = layout.hex_to_pixel(unit.position)
+                    self.draw_sprite(hexagon_coords,
+                                     self._scaled_sprite_images[
+                                         unit.__class__.__name__])
+                    self.draw_sprite(hexagon_coords,
+                                     self._scaled_sprite_images["health_bar"])
 
     def get_mirrors(self):
         """Store each hexgrid mirror layout in a list."""

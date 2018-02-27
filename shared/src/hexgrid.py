@@ -2,6 +2,9 @@
 
 from queue import PriorityQueue
 from terrain import Terrain, TerrainType, BiomeType
+from building import BuildingType, Building
+import unit
+from random import choice
 
 
 class Hex:
@@ -22,6 +25,17 @@ class Hex:
         self._terrain = Terrain(TerrainType.FLAT, BiomeType.GRASSLAND)
         self._unit = None
         self._building = None
+    #     self._unit = (choice([None, None, None, None, None, None, None, None, None, None, None,
+    #                           None, None, None, None, None, None, unit.Archer(3, 3, self, "Meh")]))
+    #     self._claimed = False
+    #     self._terrain = Terrain(choice(list(TerrainType)),
+    #                             choice(list(BiomeType)))
+    #     self._building = choice([self.choose_building(), None, None])
+    #
+    # def choose_building(self):
+    #     if self._terrain.terrain_type in [TerrainType.MOUNTAIN, TerrainType.OCEAN]:
+    #         return None
+    #     return Building("1", choice(list(BuildingType)), self)
 
     @property
     def x(self):
@@ -170,6 +184,8 @@ class Hex:
         :return: a boolean. True if the two Hex shapes are the same,
         False otherwise
         """
+        if type(other) != type(self):
+            return False
         return self.x == other.x and self.y == other.y and self.z == other.z
 
     def __lt__(self, other):
@@ -237,7 +253,7 @@ class Grid:
         if coordinates_sum is not 0:
             raise KeyError
         elif should_wrap:
-            return self.get_hextile[self.wrap_around(coordinates)]
+            return self.get_hextile(self.wrap_around(coordinates))
         else:
             return self._hextiles[coordinates]
 
@@ -508,6 +524,7 @@ class Grid:
         :param coordinates: tuple (x, y, z)
         :return: tuple (x, y, z)
         """
+
         for mirror in self._mirrors:
             distance = self.hex_distance_coordinates(coordinates, mirror)
             if distance <= self._radius:
