@@ -273,12 +273,22 @@ class Worker(Unit):
         :param hex: Current hex tile the unit is on
         """
         increment = level - 1
-        health = 100 + 10 * increment
+        health = self.get_health(level)
         movement = 4 + increment
         cost = {'food': level, 'gold': 0, 'science': 0}
         super().__init__(identifier, health, level, movement, cost,
                          10*level, hex, civilisation)
         self._build_speed = level
+
+    @staticmethod
+    def get_health(level):
+        """
+        Set health of worker.
+
+        :param level: int Level of the unit
+        """
+        increment = level - 1
+        return 100 + 10 * increment
 
     @property
     def build_speed(self):
@@ -401,12 +411,22 @@ class Swordsman(Soldier):
         :param hex: Hex
         """
         increment = level - 1
-        health = 130 + 30 * increment
+        health = self.get_health(level)
         movement_range = 4 + increment
         strength = 30 + 20 * increment
         cost = {'food': level, 'gold': level-1, 'science': 0}
         super().__init__(identifier, health, level, movement_range,
                          strength, 1, cost, 20*level, hex, civilisation)
+
+    @staticmethod
+    def get_health(level):
+        """
+        Set health of soldier.
+
+        :param level: int Level of the unit
+        """
+        increment = level - 1
+        return 130 + 30 * increment
 
     def level_up(self):
         """Level up Swordsman."""
@@ -451,7 +471,7 @@ class Archer(Soldier):
         :param hex: Hex
         """
         increment = level - 1
-        health = 110 + 20 * increment
+        health = self.get_health(level)
         movement_range = 5 + increment
         strength = 20 + 10 * increment
         attack_range = 2 + increment
@@ -459,6 +479,16 @@ class Archer(Soldier):
         super().__init__(identifier, health, level, movement_range,
                          strength, attack_range, cost, 15*level, hex,
                          civilisation)
+
+    @staticmethod
+    def get_health(level):
+        """
+        Set health of archer.
+
+        :param level: int Level of the unit
+        """
+        increment = level - 1
+        return 110 + 20 * increment
 
     def level_up(self):
         """Level up Archer."""

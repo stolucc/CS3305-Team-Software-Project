@@ -4,6 +4,7 @@ import os
 import json
 import action
 from message import Message
+from file_logger import Logger
 
 
 class ServerAPI:
@@ -19,6 +20,9 @@ class ServerAPI:
             config = json.load(config_file)
         self.con = Connection(config["server"]["ip"], config["server"]["port"])
         self.id = player_id
+        logger = Logger("client.log", "Client Server API",
+                           config["logging"]["log_level"])
+        self._log = logger.get_logger()
 
     def send_action(self, action):
         """
@@ -40,9 +44,18 @@ class ServerAPI:
         join_game_action = action.JoinGameAction()
         reply = self.send_action(join_game_action)
         if reply.type == "ServerError":
+            self._log.error(reply.obj)
             raise action.ServerError(action.GAME_FULL_ERROR)
         else:
+            self._log.info("Joined game player id = " + str(reply.obj))
             self.id = reply.obj
+
+    def leave_game(self):
+        """Ask the server to leave a game."""
+        leave_game_action = action.LeaveGameAction()
+        reply = self.send_action(leave_game_action)
+        self._log.info("Left game = " + str(reply.obj))
+        return reply.obj
 
     def move_unit(self, unit, hexagon):
         """

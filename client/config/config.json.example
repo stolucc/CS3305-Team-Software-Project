@@ -6,5 +6,8 @@
   },
   "paths":{
     "ca-bundle":"../config/ca-bundle.crt"
+  },
+  "logging":{
+    "log_level":"DEBUG"
   }
 }

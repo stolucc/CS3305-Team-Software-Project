@@ -23,14 +23,19 @@ class Client:
         """Ask the server to join a game."""
         self._server_API.join_game()
 
+    def leave_game(self):
+        """Ask the server to leave a game."""
+        self._server_API.leave_game()
+
 
 def main():
     """Start main program."""
     client = Client()
     try:
         client.join_game()
+        # client.leave_game()
     except action.ServerError as e:
-        print("Server error occurred with error code " + e.error_code)
+        print("Server error occurred with error code " + str(e.error_code))
         sys.exit(1)
 
 
