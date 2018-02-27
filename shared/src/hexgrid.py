@@ -1,6 +1,9 @@
 """Hex map representation."""
 import random
 from queue import PriorityQueue
+
+import mapresource
+from civilisation import Civilisation
 from terrain import Terrain, TerrainType, BiomeType
 from building import BuildingType, Building
 import unit
@@ -639,3 +642,38 @@ class Grid:
         terraintype = random.choice(list(TerrainType))
         biometype = hex.terrain._biome
         hex._terrain = Terrain(terraintype, biometype)
+
+    def static_map(self):
+        for hex_point in self.get_hextiles():
+            hexagon = self.get_hextile(hex_point)
+            if abs(hexagon._x) == (self._size // 2) or abs(hexagon._y) == (self._size // 2) \
+                    or abs(hexagon._z) == (self._size // 2):
+                if abs(hexagon._x) == (self._size // 6) or abs(hexagon._y) == (self._size // 6)\
+                        or abs(hexagon._z) == (self._size // 6):
+                    terraintype = TerrainType.FLAT
+                else:
+                    terraintype = TerrainType.OCEAN
+            elif hexagon._x % 3 == 1 and hexagon._y % 2 == 1:
+                terraintype = TerrainType.OCEAN
+            elif hexagon._y % 3 != 1 and hexagon._z % 2 == 1:
+                terraintype = TerrainType.HILL
+            elif hexagon._z % 3 == 2 and hexagon._x % 2 == 0:
+                terraintype = TerrainType.MOUNTAIN
+            else:
+                terraintype = TerrainType.FLAT
+
+            if abs(hexagon._y) < (self._size // 6):
+                biometype = BiomeType.DESERT
+            elif abs(hexagon._y) > (self._size // 3):
+                biometype = BiomeType.TUNDRA
+            else:
+                biometype = BiomeType.GRASSLAND
+
+            resource = None
+            if terraintype != TerrainType.OCEAN:
+                if hexagon._x % 6 == 1 and hexagon._y % 4 == 0:
+                    hexagon._unit = unit.Archer(1, 3, hexagon, Civilisation(1, self))
+                if hexagon._y % 2 == 1 and hexagon._z % 3 == 1:
+                    resource = mapresource.ResourceType.COAL
+
+            hexagon._terrain = Terrain(terraintype, biometype, resource)
