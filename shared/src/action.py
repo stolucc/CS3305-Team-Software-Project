@@ -1,5 +1,21 @@
 """Module to represent a variety of specific game actions."""
 
+GAME_FULL_ERROR = 0
+VALIDATION_ERROR = 1
+DATABASE_ERROR = 2
+
+
+class ServerError(Exception):
+    """An exception to represent a server error."""
+
+    def __init__(self, error_code):
+        super(ServerError, self).__init__(str(error_code))
+        self.error_code = error_code
+
+    def __str__(self):
+        """Return a String representation of a server error exception."""
+        return "<Error '%s'>" % str(self.error_code)
+
 
 class JoinGameAction():
     """An action to join a game."""
@@ -11,6 +27,18 @@ class JoinGameAction():
     def __str__(self):
         """Return a String representation of a JoinGameAction object."""
         return "<JoinGameAction>"
+
+
+class EndTurnAction():
+    """An action to end a turn."""
+
+    def __init__(self):
+        """Initialise a new end turn action."""
+        pass
+
+    def __str__(self):
+        """Return a String representation of a EndTurnAction object."""
+        return "<EndTurnAction>"
 
 
 class MovementAction():

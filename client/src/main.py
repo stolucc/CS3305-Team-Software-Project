@@ -3,8 +3,9 @@
 from connections import Connection
 import os
 import json
-from message import Message
-from action import JoinGameAction
+from server_API import ServerAPI
+import action
+import sys
 
 
 class Client:
@@ -16,23 +17,21 @@ class Client:
             config = json.load(config_file)
         self._con = Connection(config["server"]["ip"],
                                config["server"]["port"])
-        self._player_id = None
+        self._server_API = ServerAPI(None)
 
     def join_game(self):
         """Ask the server to join a game."""
-        self._con.open()
-        join_game_action = JoinGameAction()
-        message = Message(join_game_action, None)
-        self._con.send(message.serialise())
-        message = Message.deserialise(self._con.recv())
-        print(str(message))
-        self._con.close()
+        self._server_API.join_game()
 
 
 def main():
     """Start main program."""
     client = Client()
-    client.join_game()
+    try:
+        client.join_game()
+    except action.ServerError as e:
+        print("Server error occurred with error code " + e.error_code)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

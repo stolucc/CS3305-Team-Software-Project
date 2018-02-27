@@ -21,7 +21,7 @@ class Message:
         """
         self._obj = obj
         self._id = player_id
-        self._type = str(obj.__class__)
+        self._type = obj.__class__.__name__
         self._timestamp = datetime.now()
 
     def __str__(self):

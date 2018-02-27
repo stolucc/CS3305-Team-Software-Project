@@ -35,6 +35,15 @@ class ServerAPI:
         reply_message = Message.deserialise(reply)
         return reply_message
 
+    def join_game(self):
+        """Ask the server to join a game."""
+        join_game_action = action.JoinGameAction()
+        reply = self.send_action(join_game_action)
+        if reply.type == "ServerError":
+            raise action.ServerError(action.GAME_FULL_ERROR)
+        else:
+            self.id = reply.obj
+
     def move_unit(self, unit, hexagon):
         """
         Create and send an action causing a unit to move.
