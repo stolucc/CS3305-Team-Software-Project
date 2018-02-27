@@ -5,9 +5,7 @@ from queue import PriorityQueue
 import mapresource
 from civilisation import Civilisation
 from terrain import Terrain, TerrainType, BiomeType
-from building import BuildingType, Building
 import unit
-from random import choice
 
 
 class Hex:
@@ -527,7 +525,6 @@ class Grid:
         :param coordinates: tuple (x, y, z)
         :return: tuple (x, y, z)
         """
-
         for mirror in self._mirrors:
             distance = self.hex_distance_coordinates(coordinates, mirror)
             if distance <= self._radius:
@@ -635,7 +632,7 @@ class Grid:
 
     def randomize_terrain(self, hex):
         """
-        Pick a random terrain type for the hex tile
+        Pick a random terrain type for the hex tile.
 
         :param hex: the hex tile to be randomized
         """
