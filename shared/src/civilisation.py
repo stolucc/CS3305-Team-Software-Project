@@ -149,7 +149,7 @@ class Civilisation(object):
 
         Create Worker.
         """
-        worker = Worker(worker_id, 1, start_tile, self)
+        worker = Worker(worker_id, 1, start_tile, self._id)
         start_tile.unit = worker
         self.units[worker_id] = worker
 
