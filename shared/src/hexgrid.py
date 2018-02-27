@@ -1,11 +1,10 @@
 """Hex map representation."""
-import random
-from queue import PriorityQueue
 
-import mapresource
-from civilisation import Civilisation
+from queue import PriorityQueue
 from terrain import Terrain, TerrainType, BiomeType
+from building import BuildingType, Building
 import unit
+from random import choice
 
 
 class Hex:
@@ -22,21 +21,21 @@ class Hex:
         self._x = x
         self._y = y
         self._z = z
+        # self._claimed = False
+        # self._terrain = Terrain(TerrainType.FLAT, BiomeType.GRASSLAND)
+        # self._unit = None
+        # self._building = None
+        self._unit = (choice([None, None, None, None, None, None, None, None, None, None, None,
+                              None, None, None, None, None, None, unit.Archer(3, 3, self, "Meh")]))
         self._claimed = False
-        self._terrain = Terrain(TerrainType.FLAT, BiomeType.GRASSLAND)
-        self._unit = None
-        self._building = None
-    #     self._unit = (choice([None, None, None, None, None, None, None, None, None, None, None,
-    #                           None, None, None, None, None, None, unit.Archer(3, 3, self, "Meh")]))
-    #     self._claimed = False
-    #     self._terrain = Terrain(choice(list(TerrainType)),
-    #                             choice(list(BiomeType)))
-    #     self._building = choice([self.choose_building(), None, None])
-    #
-    # def choose_building(self):
-    #     if self._terrain.terrain_type in [TerrainType.MOUNTAIN, TerrainType.OCEAN]:
-    #         return None
-    #     return Building("1", choice(list(BuildingType)), self)
+        self._terrain = Terrain(choice(list(TerrainType)),
+                                choice(list(BiomeType)))
+        self._building = choice([self.choose_building(), None, None])
+
+    def choose_building(self):
+        if self._terrain.terrain_type in [TerrainType.MOUNTAIN, TerrainType.OCEAN]:
+            return None
+        return Building("1", choice(list(BuildingType)), self)
 
     @property
     def x(self):
@@ -403,7 +402,7 @@ class Grid:
 
         :param first_coord: coordinates (x, y, z)
         :param second_coord: coordinates (x, y, z)
-        :return: the distance betweenq first_hex and second_hex,
+        :return: the distance between first_hex and second_hex,
         in the form of an int
         """
         distance = 0
@@ -525,11 +524,14 @@ class Grid:
         :param coordinates: tuple (x, y, z)
         :return: tuple (x, y, z)
         """
-        for mirror in self._mirrors:
+        min_mirror = self._mirrors[0]
+        last_distance = self.hex_distance_coordinates(coordinates, min_mirror)
+        for mirror in self._mirrors[1:]:
             distance = self.hex_distance_coordinates(coordinates, mirror)
-            if distance <= self._radius:
+            if distance <= last_distance:
                 min_mirror = mirror
-                break
+                last_distance = self.hex_distance_coordinates(coordinates,
+                                                              min_mirror)
         return (round(coordinates[0] - min_mirror[0]),
                 round(coordinates[1] - min_mirror[1]),
                 round(coordinates[2] - min_mirror[2]))
@@ -636,7 +638,7 @@ class Grid:
 
         :param hex: the hex tile to be randomized
         """
-        terraintype = random.choice(list(TerrainType))
+        terraintype = choice(list(TerrainType))
         biometype = hex.terrain._biome
         hex._terrain = Terrain(terraintype, biometype)
 

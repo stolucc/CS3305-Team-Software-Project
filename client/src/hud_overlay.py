@@ -4,9 +4,6 @@ import pygame
 import math
 from enum import Enum
 from layout import Layout
-from hexgrid import Grid
-from gamestate import GameState
-from civilisation import Civilisation
 
 
 class InfoType(Enum):
@@ -76,10 +73,10 @@ class HudOverlay:
 
     def draw(self):
         """Draw all HUD elements."""
+        self._screen.fill((0, 0, 0, 0))
         self.draw_resource_panel()
         self.draw_info_panel()
         self.draw_minimap()
-        pygame.display.flip()
 
     def draw_resource_panel(self):
         """Draw resource panel."""
@@ -124,7 +121,7 @@ class HudOverlay:
     def draw_minimap(self):
         """Draw minimap."""
         lay = Layout(105, (95, self._resolution[1]-85), False)
-        points = lay.polygon_corners(map_ref.get_hextile(self._color1))
+        points = lay.polygon_corners(self._grid.get_hextile(self._color1))
         x, y = 0, self._resolution[1] - 176
         pygame.draw.rect(self._screen, self._background, (x, y, 50, 180), 0)
         pygame.draw.polygon(self._screen, self._background, points, 0)
@@ -157,23 +154,3 @@ class HudOverlay:
                     (hexagon_coords[0]
                      - math.ceil(self._map_layout.size * (math.sqrt(3) / 2)),
                      hexagon_coords[1] - self._map_layout.size))
-
-
-if __name__ == "__main__":
-    import time
-    pygame.init()
-    pygame.font.init()
-    map_ref = Grid(26)
-    map_ref.create_grid()
-    flags = (pygame.DOUBLEBUF |
-             pygame.HWSURFACE)
-    window_size = (1024, 576)
-    screen = pygame.display.set_mode(window_size, flags, 0)
-    civ = Civilisation(1, map_ref)
-    game_state = GameState(1, 1, map_ref)
-    game_state.add_civ(civ)
-    game_state.my_id = 1
-    hud = HudOverlay(game_state, screen, window_size, 50)
-    hud.draw()
-    while True:
-        time.sleep(10)

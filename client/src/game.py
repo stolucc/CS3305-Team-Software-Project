@@ -4,8 +4,13 @@ import pygame
 import math
 import sys
 import time
+import threading
+import building
 from layout import Layout
 from hexgrid import Grid, Hex
+from hud_overlay import HudOverlay
+from gamestate import GameState
+from civilisation import Civilisation
 from enum import Enum
 from math import floor
 
@@ -46,33 +51,46 @@ def load_image(image):
 class Game:
     """Class to represent client-side rendering of the game."""
 
-    def __init__(self):
+    def __init__(self, game_state):
         """Initialise display surface."""
         pygame.init()
         pygame.font.init()
+        self._threads = []
+        self._game_state = game_state
         self._flags = (pygame.DOUBLEBUF |
                        pygame.HWSURFACE |
                        pygame.FULLSCREEN)
         self.infoObject = pygame.display.Info()
-        self._window_size = Resolution.get_resolution(Resolution.FULLHD)
+        self._window_size = Resolution.get_resolution(Resolution.DEFAULT)
         self._camera_position = (self._window_size[0] / 2,
                                  self._window_size[1] / 2)
         self._screen = pygame.display.set_mode(self._window_size,
                                                self._flags,
                                                0)
+        hud_flags = (pygame.HWSURFACE | pygame.SRCALPHA)
+        self._hud_surface = pygame.Surface(self._window_size, hud_flags)
         self._font = 'freesansbold.ttf'
         self._font_size = 115
-        self._grid_size = 25
         self._zoom = 50
         self._zoom_interval = 5
         self._min_zoom = 1
         self._max_zoom = 1000
         self._hex_size = lambda x: (self.infoObject.current_w // x)
-        self._grid = Grid(self._grid_size)
-        self._grid.create_grid()
+        self._grid = self._game_state.grid
         self._layout = Layout(self._hex_size(self._zoom),
                               (self._window_size[0] / 2,
                                self._window_size[1] / 2))
+        self._hud = HudOverlay(self._game_state,
+                               self._hud_surface,
+                               self._window_size,
+                               self._zoom)
+        t = threading.Thread(group=None,
+                             target=self.render_hud,
+                             name="HUD_render",
+                             args=(),
+                             daemon=True)
+        self._threads.append(t)
+        t.start()
         self._terrain_images = {
             "move-highlight": load_image("tiles/move-highlight.png"),
             (0, 0): load_image("tiles/tundra_flat.png"),
@@ -130,6 +148,9 @@ class Game:
         while True:
             for event in pygame.event.get():  # something happened
                 if event.type in [pygame.QUIT, pygame.KEYDOWN]:
+                    for thread in self._threads:
+                        thread.shutdown = True
+                        thread.join()
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     self.mouse_button_down(event)
@@ -251,7 +272,6 @@ class Game:
                         self._current_available_moves = self._grid.dijkstra(
                             hexagon,
                             unit.movement_range)
-                        print(self._current_available_moves)
         self.draw_map()
 
     def highlight_selected_movement(self, layout):
@@ -455,10 +475,24 @@ class Game:
         layouts = self.get_mirrors()
         for layout in layouts:
             self.draw_hex_grid(layout)
+        self.highlight_selected_movement(self._layout)
+        for layout in layouts:
+            self.highlight_selected_movement(layout)
+        self._screen.blit(self._hud_surface, (0, 0))
         pygame.display.flip()
+
+    def render_hud(self):
+        """Render heads up display."""
+        self._hud.draw()
+        time.sleep(4)
 
 
 if __name__ == "__main__":
-    game = Game()
-    game._grid.static_map()
+    map_ref = Grid(26)
+    map_ref.create_grid()
+    civ = Civilisation(1, map_ref)
+    game_state = GameState(1, 1, map_ref)
+    game_state.add_civ(civ)
+    game_state.my_id = 1
+    game = Game(game_state)
     game.start()
