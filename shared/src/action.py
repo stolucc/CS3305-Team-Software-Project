@@ -3,6 +3,7 @@
 GAME_FULL_ERROR = 0
 VALIDATION_ERROR = 1
 DATABASE_ERROR = 2
+UNKNOWN_ACTION = 3
 
 
 class ServerError(Exception):
