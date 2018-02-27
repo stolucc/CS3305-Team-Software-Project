@@ -25,18 +25,8 @@ class Hex:
         # self._claimed = False
         # self._terrain = Terrain(TerrainType.FLAT, BiomeType.GRASSLAND)
         self._unit = None
-        # # self._building = None
-        # self._unit = (choice([None, None, None, None, None, None, None, None, None, None, None,
-        #                       None, None, None, None, None, None, unit.Archer(3, 3, self, "Meh")]))
-        self._claimed = False
-        self._terrain = Terrain(choice(list(TerrainType)),
-                                choice(list(BiomeType)))
-        self._building = choice([self.choose_building(), None, None])
-
-    def choose_building(self):
-        if self._terrain.terrain_type in [TerrainType.MOUNTAIN, TerrainType.OCEAN]:
-            return None
-        return Building("1", choice(list(BuildingType)), self)
+        self._building = None
+        self._civ_id = None
 
     @property
     def x(self):
@@ -176,6 +166,16 @@ class Hex:
         :param building: building object
         """
         self._building = building
+
+    @property
+    def civ_id(self):
+        """Return civilisation that owns tile."""
+        return self._civ_id
+
+    @civ_id.setter
+    """Set civilisation ID of tile."""
+    def civ_id(self, civilisation_id):
+        self._civ_id = civilisation_id
 
     def __eq__(self, other):
         """

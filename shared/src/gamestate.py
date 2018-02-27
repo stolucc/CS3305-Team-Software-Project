@@ -4,6 +4,7 @@ import database_API
 from civilisation import Civilisation
 from action import ServerError, GAME_FULL_ERROR, UNKNOWN_ACTION
 
+
 class GameState:
     """Game state class."""
 

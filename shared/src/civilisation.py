@@ -10,7 +10,7 @@ from researchtree import ResearchTree
 class Civilisation(object):
     """Civilisation class."""
 
-    def __init__(self, identifier, grid):
+    def __init__(self, identifier, grid, logger):
         """
         Initialise Civilisation attributes.
 
@@ -23,8 +23,9 @@ class Civilisation(object):
         self._tiles = {}
         self._gold = 100
         self._food = 100
-        self._science = 100
+        self._science = 0
         self._tree = ResearchTree(self)
+        self._logger = logger
 
     def __repr__(self):
         """Return string representation of Civilisation."""
@@ -137,6 +138,7 @@ class Civilisation(object):
         """
         return self._grid
 
+    def set_up(self, start_tile, worker_id):
     @property
     def tiles(self):
         return self._tiles
@@ -145,23 +147,11 @@ class Civilisation(object):
         """
         Start civilisation.
 
-        Build city on start hex. Create Worker.
+        Create Worker.
         """
-        city = City(city_id, start_tile)
-        tiles = self.grid.spiral_ring(start_tile, City.RANGE)
-        city.tiles = tiles
-        for tile in tiles:
-            self._tiles[tile] = self._id
-        self.cities[city.id] = city
-        worker = Worker(worker_id, 1, city.no_unit_tile(), self)
-        worker.position.unit = worker
+        worker = Worker(worker_id, 1, start_tile, self)
+        start_tile.unit = worker
         self.units[worker_id] = worker
-        archer = Archer(2, 2, city.no_unit_tile(), self)
-        archer.position.unit = archer
-        self.units[archer.id] = archer
-        soldier = Swordsman(1, 3, city.no_unit_tile(), self)
-        soldier.position.unit = soldier
-        self.units[soldier.id] = soldier
 
     def build_city_on_tile(self, identifier, tile):
         """
@@ -180,25 +170,25 @@ class Civilisation(object):
                 self._tiles[tile]= self._id
             self.cities[city.id] = city
         else:
-            print("Unable to build city.")
+            self._logger.debug("Unable to build city.")
 
-    def build_structure(self, identifier, tile, building_type):
+    def build_structure(self, identifier, worker, building_type):
         """
         Build building at tiles position.
 
         :param tile: hex object
         """
-        if tile.building is None and isinstance(tile.unit, Worker) \
-                and tile.claimed is True:
-            # TODO Need to check if tile is claimed by your civilisation
-            building = Building(identifier, building_type, tile)
-            # if self.gold >= building.buy_cost:
-            #     self.gold -= building.buy_cost
-            tile.building = building
-            # else:
-            #     print("Not enough money.")
+        tile = worker.position
+        if tile.building is None and isinstance(worker, Worker) \
+                and tile.claimed is True and tile.civ_id == worker.civ_id:
+            building = Building(identifier, building_type, tile, worker.civ_id)
+            if self.gold >= building.buy_cost:
+                self.gold -= building.buy_cost
+                tile.building = building
+            else:
+                self._logger.debug("Not enough money.")
         else:
-            print("Cannot build here.")
+            self._logger.debug("Cannot build here.")
 
     def move_unit_to_hex(self, unit, tile):
         """
@@ -217,9 +207,9 @@ class Civilisation(object):
                 unit.position = tile
                 tile.unit = unit
             else:
-                print("Units movement range is not enough.")
+                self._logger.debug("Movement Range not enough.")
         else:
-            print("Tile already has unit.")
+            self._logger.debug("Tile already has unit.")
 
     def movement_cost_of_path(self, path):
         """Calculate movement cost of list of hex tiles."""
@@ -251,7 +241,7 @@ class Civilisation(object):
             unit.position.unit = None
             del unit.civilisation.units[unit.id]
 
-    def buy_unit(self, identifier, level, city, unit_type):
+    def buy_unit(self, identifier, city, unit_type, level):
         """
         Buy unit.
 
@@ -269,9 +259,9 @@ class Civilisation(object):
                 position.unit = unit
                 self.units[unit.id] = unit
             else:
-                print("Unable to purchase worker.")
+                self._logger.debug("Unable to purchase worker.")
         else:
-            print("Unable to purchase worker.")
+            self._logger.debug("Unable to purchase worker.")
 
     def currency_per_turn(self):
         """Update Gold, Food, and Science per turn."""
