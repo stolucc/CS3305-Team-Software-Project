@@ -405,7 +405,7 @@ class Grid:
 
         :param first_coord: coordinates (x, y, z)
         :param second_coord: coordinates (x, y, z)
-        :return: the distance between first_hex and second_hex,
+        :return: the distance betweenq first_hex and second_hex,
         in the form of an int
         """
         distance = 0
@@ -674,6 +674,16 @@ class Grid:
                 if hexagon._x % 6 == 1 and hexagon._y % 4 == 0:
                     hexagon._unit = unit.Archer(1, 3, hexagon, Civilisation(1, self))
                 if hexagon._y % 2 == 1 and hexagon._z % 3 == 1:
-                    resource = mapresource.ResourceType.COAL
+                    print(hexagon._x, hexagon._y, hexagon._z)
+                    if hexagon._y % 4 == 1:
+                        if hexagon._z % 6 == 1:
+                            resource = mapresource.ResourceType.COAL
+                        elif hexagon._z % 6 == 4:
+                            resource = mapresource.ResourceType.GEMS
+                    elif hexagon._y % 4 == 3:
+                        if hexagon._z % 6 == 1:
+                            resource = mapresource.ResourceType.LOGS
+                        if hexagon._z % 6 == 4:
+                            resource = mapresource.ResourceType.IRON
 
             hexagon._terrain = Terrain(terraintype, biometype, resource)

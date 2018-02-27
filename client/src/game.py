@@ -107,7 +107,10 @@ class Game:
             "health_bar": load_image("health/health_bar_75.png")
         }
         self._resource_images = {
-            "COAL": load_image("map_resources/coal.png")
+            "COAL": load_image("map_resources/coal.png"),
+            "IRON": load_image("map_resources/iron.png"),
+            "GEMS": load_image("map_resources/gems.png"),
+            "LOGS": load_image("map_resources/logs.png")
         }
         self._scaled_sprite_images = self._sprite_images.copy()
         self._building_images = {
