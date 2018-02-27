@@ -22,8 +22,8 @@ class Hex:
         self._x = x
         self._y = y
         self._z = z
-        # self._claimed = False
-        # self._terrain = Terrain(TerrainType.FLAT, BiomeType.GRASSLAND)
+        self._claimed = False
+        self._terrain = Terrain(TerrainType.FLAT, BiomeType.GRASSLAND)
         self._unit = None
         self._building = None
         self._civ_id = None
@@ -173,8 +173,8 @@ class Hex:
         return self._civ_id
 
     @civ_id.setter
-    """Set civilisation ID of tile."""
     def civ_id(self, civilisation_id):
+        """Set civilisation ID of tile."""
         self._civ_id = civilisation_id
 
     def __eq__(self, other):
