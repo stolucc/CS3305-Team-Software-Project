@@ -1,10 +1,13 @@
 """Game state representation."""
 
+import database_API
+from civilisation import Civilisation
+from action import ServerError, GAME_FULL_ERROR, UNKNOWN_ACTION
 
 class GameState:
     """Game state class."""
 
-    def __init__(self, game_id, seed, grid):
+    def __init__(self, game_id, seed, grid, logger, session):
         """
         Initialise GameState attributes.
 
@@ -12,6 +15,8 @@ class GameState:
         :param seed: hex grid that game is using
         :param grid: hex grid that game is using
         """
+        self._logger = logger
+        self._session = session
         self._game_id = game_id
         self._seed = seed
         self._grid = grid
@@ -86,3 +91,24 @@ class GameState:
     def turn_count(self, turn_count):
         """Setter for turn_count."""
         self._turn_count = turn_count
+
+    def handle_action(self, message):
+        self._logger.debug(message)
+        if message.type == "JoinGameAction":
+            if len(self._civs) < 4:
+                user_id = database_API.User.insert(self._session,
+                                                   self._game_id,
+                                                   active=True, gold=100,
+                                                   food=100, science=0,
+                                                   production=0)
+                self.add_civ(Civilisation(user_id, self._grid))
+                self._logger.info("New Civilisation joined with id " +
+                                  str(user_id))
+                return user_id
+            else:
+                err = ServerError(GAME_FULL_ERROR)
+                self._logger.error(err)
+                return err
+        err = ServerError(UNKNOWN_ACTION)
+        self._logger.error(err)
+        return err

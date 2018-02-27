@@ -29,6 +29,18 @@ class JoinGameAction():
         return "<JoinGameAction>"
 
 
+class LeaveGameAction():
+    """An action to leave a game."""
+
+    def __init__(self):
+        """Initialise a new join game action."""
+        pass
+
+    def __str__(self):
+        """Return a String representation of a LeaveGameAction object."""
+        return "<LeaveGameAction>"
+
+
 class EndTurnAction():
     """An action to end a turn."""
 
