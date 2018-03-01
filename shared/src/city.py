@@ -1,6 +1,7 @@
 """City representation."""
 from currency import CurrencyType
 from mapresource import Resource
+from building import BuildingType
 
 
 class City():
@@ -13,7 +14,7 @@ class City():
         self._hex = hexagon
         hexagon.building = self
         self._tiles = []
-        self._type = False
+        self._type = BuildingType.CITY
         self._id = identifier
 
     def __repr__(self):
@@ -80,3 +81,12 @@ class City():
             if building is not None:
                 buildings += [building]
         return buildings
+
+    @property
+    def position(self):
+        return self._hex
+
+    @property
+    def building_type(self):
+        return self._type
+

@@ -7,11 +7,14 @@ import time
 import threading
 from layout import Layout
 from hexgrid import Grid, Hex
+from load_resources import LoadImages
+import building
 from hud_overlay import HudOverlay
 from gamestate import GameState
-from civilisation import Civilisation
 from enum import Enum
 from math import floor
+import math
+from civilisation import Civilisation
 from building import BuildingType
 from mapresource import ResourceType
 
@@ -37,16 +40,6 @@ class Resolution(Enum):
                        Resolution.HD: (1280, 720),
                        Resolution.FULLHD: (1920, 1080)}
         return resolutions[index]
-
-
-def load_image(image):
-    """
-    Load and convert images.
-
-    :param image: The image to be loaded.
-    :return: a loaded and converted image.
-    """
-    return pygame.image.load(IMAGE_PATH + image).convert_alpha()
 
 
 class Game:
@@ -78,6 +71,9 @@ class Game:
         self._max_zoom = 1000
         self._hex_size = lambda x: (self.infoObject.current_w // x)
         self._grid = self._game_state.grid
+        self._civ1 = Civilisation("Player 1", self._grid)
+        self._civs = [self._civ1]
+        self._grid.create_grid()
         self._layout = Layout(self._hex_size(self._zoom),
                               (self._window_size[0] / 2,
                                self._window_size[1] / 2))
@@ -92,48 +88,18 @@ class Game:
                              daemon=True)
         self._threads.append(t)
         t.start()
-        self._terrain_images = {
-            "move-highlight": load_image("tiles/move-highlight.png"),
-            (0, 0): load_image("tiles/tundra_flat.png"),
-            (0, 1): load_image("tiles/grassland_flat.png"),
-            (0, 2): load_image("tiles/desert_flat.png"),
-            (1, 0): load_image("tiles/tundra_hill.png"),
-            (1, 1): load_image("tiles/grassland_hill.png"),
-            (1, 2): load_image("tiles/desert_hill.png"),
-            (2, 0): load_image("tiles/tundra_mountain.png"),
-            (2, 1): load_image("tiles/grassland_mountain.png"),
-            (2, 2): load_image("tiles/desert_mountain.png"),
-            (3, 0): load_image("tiles/ocean.png"),
-            (3, 1): load_image("tiles/ocean.png"),
-            (3, 2): load_image("tiles/ocean.png")
-        }
-        self._scaled_terrain_images = self._terrain_images.copy()
-        self._sprite_images = {
-            "Archer": load_image("units/archers3.png"),
-            "health_bar": load_image("health/health_bar_75.png")
-        }
-        self._resource_images = {
-            ResourceType.COAL: load_image("map_resources/coal.png"),
-            ResourceType.IRON: load_image("map_resources/iron.png"),
-            ResourceType.GEMS: load_image("map_resources/gems.png"),
-            ResourceType.LOGS: load_image("map_resources/logs.png")
-        }
-        self._scaled_sprite_images = self._sprite_images.copy()
-        self._building_images = {
-            BuildingType.CITY: load_image("buildings/city.png"),
-            BuildingType.FARM: load_image("buildings/farm.png"),
-            BuildingType.TRADE_POST: load_image("buildings/trading_post.png"),
-            BuildingType.UNIVERSITY: load_image("buildings/university.png")
-        }
-        self._scaled_building_images = self._building_images.copy()
-
-        self._scaled_resource_images = self._resource_images.copy()
+        self._load_images = LoadImages()
+        self._scaled_terrain_images = self._load_images.load_terrain_images().copy()
+        self._scaled_sprite_images = self._load_images.load_sprite_images().copy()
+        self._scaled_building_images = self._load_images.load_building_images().copy()
+        self._scaled_health_bar_images = self._load_images.load_health_bar_images().copy()
         self._currently_selected_unit = None
         self._currently_selected_tile = None
         self._current_available_moves = {}
 
     def start(self):
         """Initialize the game."""
+        self._civ1.set_up(self._grid.get_hextile((0,0,0)), 1, 1)
         self.scale_images_to_hex_size()
         self.scale_sprites_to_hex_size()
         self.scale_buildings_to_hex_size()
@@ -142,7 +108,7 @@ class Game:
 
         while True:
             for event in pygame.event.get():  # something happened
-                if event.type in [pygame.QUIT, pygame.KEYDOWN]:
+                if event.type in [pygame.QUIT]:
                     for thread in self._threads:
                         thread.shutdown = True
                         thread.join()
@@ -179,7 +145,7 @@ class Game:
         if event.button == 1:  # Left click
             pass
         elif event.button == 2:  # Middle click
-            pass
+            self.build_structure(self._layout)
         elif event.button == 3:  # Right click
             self.highlight_new_movement(self._layout)
 
@@ -295,6 +261,15 @@ class Game:
         unit.position = hexagon
         hexagon.unit = unit
 
+    def build_structure(self, layout):
+        click = pygame.mouse.get_pos()
+        c_hex = layout.pixel_to_hex(click)
+        c_hex_coords = self._grid.hex_round((c_hex.x, c_hex.y, c_hex.z))
+        hexagon = self._grid.get_hextile(c_hex_coords)
+        if self._currently_selected_unit == hexagon.unit and self._currently_selected_unit.__class__.__name__ == "Worker":
+            hexagon.unit.civilisation.build_city_on_tile(4, hexagon)
+        self.draw_map()
+
     def scale_images_to_hex_size(self):
         """
         Scale images.
@@ -304,9 +279,9 @@ class Game:
         new image in a copy of the dictionary to preserve
         image quality.
         """
-        for k in self._terrain_images:
+        for k in self._load_images.load_terrain_images():
             self._scaled_terrain_images[k] = pygame.transform.smoothscale(
-                self._terrain_images[k],
+                self._load_images.load_terrain_images()[k],
                 (math.ceil(
                     (self._hex_size(self._zoom) * 2)
                     * math.sqrt(3) / 2),
@@ -322,9 +297,13 @@ class Game:
         image quality.
         """
         adjusted_size = math.floor(1800 / self._zoom)
-        for k in self._sprite_images:
+        for k in self._load_images.load_sprite_images():
             self._scaled_sprite_images[k] = pygame.transform.smoothscale(
-                self._sprite_images[k],
+                self._load_images.load_sprite_images()[k],
+                (adjusted_size, adjusted_size))
+        for k in self._load_images.load_health_bar_images():
+            self._scaled_health_bar_images[k] = pygame.transform.smoothscale(
+                self._load_images.load_health_bar_images()[k],
                 (adjusted_size, adjusted_size))
         for l in self._resource_images:
             self._scaled_resource_images[l] = pygame.transform.smoothscale(
@@ -355,9 +334,9 @@ class Game:
         image quality.
         """
         adjusted_size = math.floor(1800 / self._zoom)
-        for k in self._building_images:
+        for k in self._load_images.load_building_images():
             self._scaled_building_images[k] = pygame.transform.smoothscale(
-                self._building_images[k],
+                self._load_images.load_building_images()[k],
                 (adjusted_size, adjusted_size))
 
     def draw_building(self, hexagon_coords, sprite):
@@ -396,12 +375,13 @@ class Game:
         :param layout: The layout of the grid to draw. Either the
                        main layout or one of it's mirrors.
         """
+        civ1_tiles = self._civ1.tiles
         size = pygame.display.get_surface().get_size()
         for hex_point in self._grid.get_hextiles():
             hexagon = self._grid.get_hextile(hex_point)
             hexagon_coords = layout.hex_to_pixel(hexagon)
             if (size[0] + 100 > hexagon_coords[0] > -100 and
-               size[1] + 100 > hexagon_coords[1] > -100):
+                                size[1] + 100 > hexagon_coords[1] > -100):
                 terrain = hexagon.terrain
                 terrain_image = self._scaled_terrain_images[
                     (terrain.terrain_type.value, terrain.biome.value)]
@@ -411,13 +391,18 @@ class Game:
                      - math.ceil(self._layout.size * (math.sqrt(3) / 2)),
                      hexagon_coords[1] - self._layout.size))
 
+                if hexagon in civ1_tiles:
+                    self._screen.blit(
+                        self._scaled_terrain_images["civ2_border"],
+                        (hexagon_coords[0]
+                         - math.ceil(self._layout.size * (math.sqrt(3) / 2)),
+                         hexagon_coords[1] - self._layout.size))
                 if hexagon.building is not None:
                     build = hexagon.building
                     hexagon_coords = layout.hex_to_pixel(hexagon)
                     self.draw_building(hexagon_coords,
-                                       self._scaled_building_images[
-                                            build.building_type])
-                if hexagon._terrain._resource is not None:
+                                     self._scaled_building_images[
+                                         build.building_type])if hexagon._terrain._resource is not None:
                     resource = hexagon._terrain._resource
                     hexagon_coords = layout.hex_to_pixel(hexagon)
                     self.draw_sprite(hexagon_coords,
@@ -425,12 +410,15 @@ class Game:
                                           resource.resource_type])
                 if hexagon.unit is not None:
                     unit = hexagon.unit
+                    unit_level = unit.level
+                    unit_health = unit.get_health_percentage()
                     hexagon_coords = layout.hex_to_pixel(unit.position)
                     self.draw_sprite(hexagon_coords,
                                      self._scaled_sprite_images[
-                                         unit.__class__.__name__])
+                                         unit.__class__.__name__
+                                         + str(unit_level)])
                     self.draw_sprite(hexagon_coords,
-                                     self._scaled_sprite_images["health_bar"])
+                                     self._scaled_health_bar_images[unit_health])
 
     def get_mirrors(self):
         """Store each hexgrid mirror layout in a list."""

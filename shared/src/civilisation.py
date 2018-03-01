@@ -20,6 +20,7 @@ class Civilisation(object):
         self._grid = grid
         self._units = {}
         self._cities = {}
+        self._tiles = {}
         self._gold = 100
         self._food = 100
         self._science = 100
@@ -136,6 +137,10 @@ class Civilisation(object):
         """
         return self._grid
 
+    @property
+    def tiles(self):
+        return self._tiles
+
     def set_up(self, start_tile, city_id, worker_id):
         """
         Start civilisation.
@@ -145,6 +150,8 @@ class Civilisation(object):
         city = City(city_id, start_tile)
         tiles = self.grid.spiral_ring(start_tile, City.RANGE)
         city.tiles = tiles
+        for tile in tiles:
+            self._tiles[tile] = self._id
         self.cities[city.id] = city
         worker = Worker(worker_id, 1, city.no_unit_tile(), self)
         worker.position.unit = worker
@@ -163,6 +170,8 @@ class Civilisation(object):
             city = City(identifier, tile)
             tiles = self.grid.spiral_ring(tile, City.RANGE)
             city.tiles = tiles
+            for tile in tiles:
+                self._tiles[tile]= self._id
             self.cities[city.id] = city
         else:
             print("Unable to build city.")
@@ -177,11 +186,11 @@ class Civilisation(object):
                 and tile.claimed is True:
             # TODO Need to check if tile is claimed by your civilisation
             building = Building(identifier, building_type, tile)
-            if self.gold >= building.buy_cost:
-                self.gold -= building.buy_cost
-                tile.building = building
-            else:
-                print("Not enough money.")
+            # if self.gold >= building.buy_cost:
+            #     self.gold -= building.buy_cost
+            tile.building = building
+            # else:
+            #     print("Not enough money.")
         else:
             print("Cannot build here.")
 

@@ -1,4 +1,5 @@
 """Unit representation."""
+import math
 
 from mapresource import ResourceType
 
@@ -223,6 +224,9 @@ class Unit:
             self._health = self.max_health
         else:
             self._health = health
+
+    def get_health_percentage(self):
+        return int(math.ceil(self.health/self.max_health * 20) * 5)
 
     def __repr__(self):
         """
