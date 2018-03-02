@@ -67,8 +67,12 @@ class ServerAPI:
         :param hexagon: the hex that the unit is to be moved to.
         """
         move_action = action.MovementAction(unit, hexagon)
-        # TODO Add code to handle response
-        return self.send_action(move_action)
+        reply = self.send_action(move_action)
+        if reply.type == "ServerError":
+            self._log.error(reply.obj)
+            raise action.ServerError(action.VALIDATION_ERROR)
+        else:
+            unit.position = hexagon
 
     def attack(self, attacker, defender):
         """
@@ -78,8 +82,13 @@ class ServerAPI:
         :param defender: unit that is being attacked.
         """
         combat_action = action.CombatAction(attacker, defender)
-        # TODO Add code to handle response
-        return self.send_action(combat_action)
+        reply = self.send_action(combat_action)
+        if reply.type == "ServerError":
+            self._log.error(reply.obj)
+            raise action.ServerError(action.VALIDATION_ERROR)
+        else:
+            # TODO Add code to handle response
+            pass
 
     def upgrade(self, unit):
         """
@@ -88,8 +97,13 @@ class ServerAPI:
         :param unit: unit that is being upgraded.
         """
         upgrade_action = action.UpgradeAction(unit)
-        # TODO Add code to handle response
-        return self.send_action(upgrade_action)
+        reply = self.send_action(upgrade_action)
+        if reply.type == "ServerError":
+            self._log.error(reply.obj)
+            raise action.ServerError(action.VALIDATION_ERROR)
+        else:
+            # TODO Add code to handle response
+            pass
 
     def build(self, unit, building_type):
         """
@@ -99,8 +113,13 @@ class ServerAPI:
         :param building_type: the type of building that is being built.
         """
         build_action = action.BuildAction(unit, building_type)
-        # TODO Add code to handle response
-        return self.send_action(build_action)
+        reply = self.send_action(build_action)
+        if reply.type == "ServerError":
+            self._log.error(reply.obj)
+            raise action.ServerError(action.VALIDATION_ERROR)
+        else:
+            # TODO Add code to handle response
+            pass
 
     def purchase(self, city, unit_type, level):
         """
@@ -111,5 +130,10 @@ class ServerAPI:
         :param level: the level of unit being bought.
         """
         purchase_action = action.PurchaseAction(city, unit_type, level)
-        # TODO Add code to handle response
-        return self.send_action(purchase_action)
+        reply = self.send_action(purchase_action)
+        if reply.type == "ServerError":
+            self._log.error(reply.obj)
+            raise action.ServerError(action.VALIDATION_ERROR)
+        else:
+            # TODO Add code to handle response
+            pass
