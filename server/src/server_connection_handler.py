@@ -1,5 +1,5 @@
 """Server Connection Handler."""
-from socket import socket, gethostname, gethostbyname, AF_INET, SOCK_STREAM, \
+from socket import socket, AF_INET, SOCK_STREAM, \
     timeout
 import threading
 import ssl
