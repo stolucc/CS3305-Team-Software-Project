@@ -391,8 +391,7 @@ class Civilisation(object):
         return currency
 
     def calculate_vision(self):
-        """
-        """
+        """Determine the tiles visible to the civilisation."""
         vision = set()
         for unit in self._units:
             vision_range = 2  # TODO: Replace with unit vision range
@@ -408,7 +407,6 @@ class Civilisation(object):
                 building_vision = self._grid.vision(tile, vision_range)
                 vision |= set(building_vision)
         self._vision = vision
-
 
     def handle_action(self, action):
         """
