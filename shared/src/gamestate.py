@@ -107,15 +107,20 @@ class GameState:
         """
         civ_actions = ["MovementAction", "CombatAction", "UpgradeAction",
                        "BuildAction", "PurchaseAction"]
-        self._logger.debug(message)
-        if message.type == "JoinGameAction":
-            return self.add_player(message)
-        elif message.type == "LeaveGameAction":
-            return self.remove_player(message)
-        elif message.type == "CheckForUpdates":
+
+        if message.type == "CheckForUpdates":
             return self.update_player(message)
-        elif message.type in civ_actions:
-            self._civs[message.id].handle_action(message.obj)
+
+        if message.id == self._current_player:
+            self._logger.debug(message)
+            if message.type == "JoinGameAction":
+                return self.add_player(message)
+            elif message.type == "LeaveGameAction":
+                return self.remove_player(message)
+            elif message.type == "EndTurnAction":
+                return self.end_turn(message)
+            elif message.type in civ_actions:
+                self._civs[message.id].handle_action(message.obj)
         err = ServerError(UNKNOWN_ACTION)
         self._logger.error(err)
         return err
@@ -152,6 +157,7 @@ class GameState:
 
             if(len(self._civs) == 4):
                 self._game_started = True
+                self._turn_count = 1
                 self._current_player = list(self._civs.keys())[0]
                 # TODO: Tell Clients game has begun and who's turn it is
 
@@ -186,3 +192,17 @@ class GameState:
         while not self._queues[user_id].empty():
             updates.append(self._queues[user_id].get())
         return updates
+
+    def end_turn(self, message):
+        """
+        End a player's turn and move on to the next.
+
+        :param message: The message object sent from the client.
+        """
+        civs = list(self._civs.keys())
+        current_civ_index = civs.index(self._current_player)
+        next_civ_index = (current_civ_index + 1) % 4
+        next_civ = civs[next_civ_index]
+        self._current_player = next_civ
+        if next_civ_index == 0:
+            self.turn_count += 1
