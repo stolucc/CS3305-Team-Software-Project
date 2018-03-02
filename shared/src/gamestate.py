@@ -5,6 +5,7 @@ from civilisation import Civilisation
 from action import ServerError, GAME_FULL_ERROR, UNKNOWN_ACTION
 from unit import Worker
 import random
+from queue import Queue
 
 
 class GameState:
@@ -27,6 +28,7 @@ class GameState:
         self._my_id = None
         self._turn_count = 1
         self._current_player = None
+        self._queues = {}
 
     @property
     def game_id(self):
@@ -103,6 +105,8 @@ class GameState:
             return self.add_player(message)
         elif message.type == "LeaveGameAction":
             return self.remove_player(message)
+        elif message.type == "CheckForUpdates":
+            return self.update_player(message)
         elif message.type in civ_actions:
             self._civs[message.id].handle_action(message.obj)
         err = ServerError(UNKNOWN_ACTION)
@@ -130,6 +134,7 @@ class GameState:
                                                *location)
             self._civs[user_id].set_up(self._grid.get_hextile(location),
                                        unit_id)
+            self._queues[user_id] = Queue()
             # TODO: Inform client of worker
             return user_id
         else:
@@ -140,5 +145,13 @@ class GameState:
     def remove_player(self, message):
         user_id = message.id
         del self._civs[user_id]
+        del self._queues[user_id]
         database_API.User.update(self._session, user_id, active=False)
         return True
+
+    def update_player(self, message):
+        user_id = message.id
+        updates = []
+        while not self._queues[user_id].empty():
+            updates.append(self._queues[user_id].get())
+        return updates

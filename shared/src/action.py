@@ -42,6 +42,18 @@ class LeaveGameAction():
         return "<LeaveGameAction>"
 
 
+class CheckForUpdates():
+    """An action to check for updates."""
+
+    def __init__(self):
+        """Initialise a new check for updates action."""
+        pass
+
+    def __str__(self):
+        """Return a String representation of a CheckForUpdates object."""
+        return "<CheckForUpdates>"
+
+
 class EndTurnAction():
     """An action to end a turn."""
 

@@ -56,8 +56,22 @@ class ServerAPI:
         """Ask the server to leave a game."""
         leave_game_action = action.LeaveGameAction()
         reply = self.send_action(leave_game_action)
-        self._log.info("Left game = " + str(reply.obj))
-        return reply.obj
+        if reply.type == "ServerError":
+            self._log.error(reply.obj)
+            raise action.ServerError(action.VALIDATION_ERROR)
+        else:
+            self._log.info("Left game = " + str(reply.obj))
+
+    def check_for_updates(self):
+        """Ask the server to update the game for a client."""
+        check_for_updates_action = action.CheckForUpdates()
+        reply = self.send_action(check_for_updates_action)
+        if reply.type == "ServerError":
+            self._log.error(reply.obj)
+            raise action.ServerError(action.VALIDATION_ERROR)
+        else:
+            # TODO Add code to handle response
+            pass
 
     def move_unit(self, unit, hexagon):
         """
