@@ -163,3 +163,16 @@ class PurchaseAction():
         """Return a String representation of a PurchaseAction object."""
         return ("<PurchaseAction building: '%s' unit_type: '%s' level: '%s'>" %
                 (str(self.building), str(self.unit_type), str(self.level)))
+
+
+class StartTurnUpdate():
+    """An update to start a turn."""
+
+    def __init__(self, current_player, turn_count):
+        """Initialise a new start turn update."""
+        self._current_player = current_player
+        self._turn_count = turn_count
+
+    def __str__(self):
+        """Return a String representation of a StartTurnUpdate object."""
+        return "<StartTurnUpdate '%s'>" % (str(self._current_player))

@@ -72,7 +72,12 @@ class ServerAPI:
         else:
             # TODO Add code to handle response
             print("Check for updates", reply.obj)
-            pass
+            for update in reply.obj:
+                if reply.type == "StartTurnUpdate":
+                    self._game_state.set_player_turn(reply.obj._current_player)
+                    self._game_state.turn_count = reply.obj._turn_count
+                    if reply.obj._current_player == self.id:
+                        self._game_state._civs[self.id].currency_per_turn()
 
     def move_unit(self, unit, hexagon):
         """

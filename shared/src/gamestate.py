@@ -2,7 +2,8 @@
 
 import database_API
 from civilisation import Civilisation
-from action import ServerError, GAME_FULL_ERROR, UNKNOWN_ACTION
+from action import ServerError, GAME_FULL_ERROR, UNKNOWN_ACTION, \
+    StartTurnUpdate
 from unit import Worker
 import random
 from queue import Queue
@@ -159,6 +160,10 @@ class GameState:
                 self._game_started = True
                 self._turn_count = 1
                 self._current_player = list(self._civs.keys())[0]
+                start_turn_update = StartTurnUpdate(self._current_player,
+                                                    self._turn_count)
+                for key in self._queues:
+                    self._queues[key].put(start_turn_update)
                 # TODO: Tell Clients game has begun and who's turn it is
 
             return self.game_id, user_id
@@ -205,4 +210,12 @@ class GameState:
         next_civ = civs[next_civ_index]
         self._current_player = next_civ
         if next_civ_index == 0:
-            self.turn_count += 1
+            self._turn_count += 1
+        start_turn_update = StartTurnUpdate(self._current_player,
+                                            self._turn_count)
+        for key in self._queues:
+            self._queues[key].put(start_turn_update)
+
+    def set_player_turn(self, current_player):
+        """Update the person whose turn it is."""
+        self._current_player = current_player
