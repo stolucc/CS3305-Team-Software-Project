@@ -65,7 +65,7 @@ class Building():
         }
         return values[self._type]
 
-    @property
+    @staticmethod
     def buy_cost(self):
         """Cost in gold to purchase building."""
         values = {
@@ -74,6 +74,20 @@ class Building():
             BuildingType.UNIVERSITY: 10
         }
         return values[self._type]
+
+    @staticmethod
+    def get_type(type):
+        """Return int corresponding to Building type."""
+        if type == BuildingType.FARM:
+            return 0
+        elif type == BuildingType.TRADE_POST:
+            return 1
+        elif type == BuildingType.UNIVERSITY:
+            return 2
+        elif type == BuildingType.CITY:
+            return 3
+        elif type == BuildingType.RESOURCE_IMPROVEMENT:
+            return 4
 
     @property
     def position(self):

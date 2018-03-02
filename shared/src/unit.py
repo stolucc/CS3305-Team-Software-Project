@@ -290,6 +290,11 @@ class Worker(Unit):
         increment = level - 1
         return 100 + 10 * increment
 
+    @staticmethod
+    def get_type():
+        """Return 0 if Worker, 1 if Archer, and 2 if Swordsman."""
+        return 0
+
     @property
     def build_speed(self):
         """
@@ -428,6 +433,11 @@ class Swordsman(Soldier):
         increment = level - 1
         return 130 + 30 * increment
 
+    @staticmethod
+    def get_type():
+        """Return 0 if Worker, 1 if Archer, and 2 if Swordsman."""
+        return 2
+
     def level_up(self):
         """Level up Swordsman."""
         if self._level >= 3:
@@ -489,6 +499,11 @@ class Archer(Soldier):
         """
         increment = level - 1
         return 110 + 20 * increment
+
+    @staticmethod
+    def get_type():
+        """Return 0 if Worker, 1 if Archer, and 2 if Swordsman."""
+        return 1
 
     def level_up(self):
         """Level up Archer."""

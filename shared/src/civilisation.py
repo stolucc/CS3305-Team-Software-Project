@@ -10,7 +10,7 @@ from researchtree import ResearchTree
 class Civilisation(object):
     """Civilisation class."""
 
-    def __init__(self, identifier, grid, logger):
+    def __init__(self, identifier, grid, logger, session):
         """
         Initialise Civilisation attributes.
 
@@ -26,6 +26,7 @@ class Civilisation(object):
         self._science = 0
         self._tree = ResearchTree(self)
         self._logger = logger
+        self._session = session
 
     def __repr__(self):
         """Return string representation of Civilisation."""
@@ -138,22 +139,23 @@ class Civilisation(object):
         """
         return self._grid
 
-    def set_up(self, start_tile, worker_id):
     @property
     def tiles(self):
         return self._tiles
 
-    def set_up(self, start_tile, city_id, worker_id):
+    def set_up(self, tile, worker_id):
         """
         Start civilisation.
 
         Create Worker.
         """
-        worker = Worker(worker_id, 1, start_tile, self._id)
-        start_tile.unit = worker
+        worker_id = self._session.Unit.insert(self._id, 1, 0, 100, tile.x,
+                                              tile.y, tile.z)
+        worker = Worker(worker_id, 1, tile, self._id)
+        tile.unit = worker
         self.units[worker_id] = worker
 
-    def build_city_on_tile(self, identifier, tile):
+    def build_city_on_tile(self, tile):
         """
         Build city on given tile.
 
@@ -162,33 +164,38 @@ class Civilisation(object):
         cost_of_city = 25
         if not tile.claimed and isinstance(tile.unit, Worker)\
                 and self.gold >= cost_of_city:
-            self.gold -= cost_of_city
-            city = City(identifier, tile)
+            city_id = self._session.Building.insert(self._id, True, 3, tile.x,
+                                                    tile.y, tile.z)
+            city = City(city_id, tile)
             tiles = self.grid.spiral_ring(tile, City.RANGE)
             city.tiles = tiles
+            self.gold -= cost_of_city
+            self.cities[city_id] = city
             for tile in tiles:
                 self._tiles[tile]= self._id
             self.cities[city.id] = city
         else:
             self._logger.debug("Unable to build city.")
 
-    def build_structure(self, identifier, worker, building_type):
+    def build_structure(self, worker, building_type):
         """
         Build building at tiles position.
 
         :param tile: hex object
         """
         tile = worker.position
-        if tile.building is None and isinstance(worker, Worker) \
-                and tile.claimed is True and tile.civ_id == worker.civ_id:
-            building = Building(identifier, building_type, tile, worker.civ_id)
-            if self.gold >= building.buy_cost:
-                self.gold -= building.buy_cost
-                tile.building = building
-            else:
-                self._logger.debug("Not enough money.")
+        if tile.building is None and isinstance(worker, Worker)\
+                and tile.civ_id == worker.civ_id\
+                and self.gold >= building_type.buy_cost():
+            bld_id = self._session.Building.insert(self._id, True,
+                                                   Building.get_type
+                                                   (building_type),
+                                                   tile.x, tile.y, tile.z)
+            building = Building(bld_id, building_type, tile, worker.civ_id)
+            self.gold -= building.buy_cost
+            tile.building = building
         else:
-            self._logger.debug("Cannot build here.")
+            self._logger.debug("Unable to build structure.")
 
     def move_unit_to_hex(self, unit, tile):
         """
@@ -241,7 +248,7 @@ class Civilisation(object):
             unit.position.unit = None
             del unit.civilisation.units[unit.id]
 
-    def buy_unit(self, identifier, city, unit_type, level):
+    def buy_unit(self, city, unit_type, level):
         """
         Buy unit.
 
@@ -251,17 +258,20 @@ class Civilisation(object):
         :param city: city to spawn worker at
         :param unit_type: Worker, Archer, or Swordsman class
         """
-        if issubclass(unit_type, Unit):
-            position = city.no_unit_tile()
-            unit = unit_type(identifier, level, position, self)
-            if self.gold >= unit.buy_cost and position is not None:
-                self.gold -= unit.buy_cost
-                position.unit = unit
-                self.units[unit.id] = unit
-            else:
-                self._logger.debug("Unable to purchase worker.")
+        position = city.no_unit_tile()
+        if issubclass(unit_type, Unit) and self.gold >= \
+                unit_type.gold_cost(level) and position is not None:
+            unit_id = self._session.Unit.insert(self._id, level,
+                                                unit_type.get_type(),
+                                                unit_type.get_health(level),
+                                                position.x, position.y,
+                                                position.z)
+            unit = unit_type(unit_id, level, position, self)
+            self.gold -= unit.gold_cost(level)
+            position.unit = unit
+            self.units[unit_id] = unit
         else:
-            self._logger.debug("Unable to purchase worker.")
+            self._logger.debug("Unable to purchase unit.")
 
     def currency_per_turn(self):
         """Update Gold, Food, and Science per turn."""
