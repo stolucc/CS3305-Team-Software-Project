@@ -28,6 +28,25 @@ class Unit:
         self._position = hextile
         self._id = identifier
         self._civ_id = civilisation_id
+        self._actions = 0
+
+    @property
+    def actions(self):
+        """
+        Amount of actions unit has left this turn.
+
+        :return: int
+        """
+        return self._actions
+
+    @actions.setter
+    def actions(self, actions):
+        """
+        Set actions unit has.
+
+        :param actions: int
+        """
+        self._actions = actions
 
     @property
     def health(self):
