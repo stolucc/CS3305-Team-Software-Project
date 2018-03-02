@@ -101,8 +101,7 @@ class ServerAPI:
             self._log.error(reply.obj)
             raise action.ServerError(action.VALIDATION_ERROR)
         else:
-            # TODO Add code to handle response
-            pass
+            self._game_state._civs[self.id].attack_unit(attacker, defender)
 
     def upgrade(self, unit):
         """
@@ -116,8 +115,7 @@ class ServerAPI:
             self._log.error(reply.obj)
             raise action.ServerError(action.VALIDATION_ERROR)
         else:
-            # TODO Add code to handle response
-            pass
+            self._game_state._civs[self.id].upgrade_unit(unit)
 
     def build(self, unit, building_type):
         """
@@ -132,8 +130,9 @@ class ServerAPI:
             self._log.error(reply.obj)
             raise action.ServerError(action.VALIDATION_ERROR)
         else:
-            # TODO Add code to handle response
-            pass
+            #TODO Add ability to build city
+            self._game_state._civs[self.id].build_structure(unit,
+                                                            building_type)
 
     def purchase(self, city, unit_type, level):
         """
@@ -149,5 +148,4 @@ class ServerAPI:
             self._log.error(reply.obj)
             raise action.ServerError(action.VALIDATION_ERROR)
         else:
-            # TODO Add code to handle response
-            pass
+            self._game_state._civs[self.id].attack_unit(city, unit_type, level)
