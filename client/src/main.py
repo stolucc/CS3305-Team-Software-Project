@@ -1,8 +1,4 @@
 """Main client program."""
-
-from connections import Connection
-import os
-import json
 from server_API import ServerAPI
 import action
 import sys
@@ -13,11 +9,7 @@ class Client:
 
     def __init__(self):
         """Create a new Class object."""
-        with open(os.path.join("..", "config", "config.json")) as config_file:
-            config = json.load(config_file)
-        self._con = Connection(config["server"]["ip"],
-                               config["server"]["port"])
-        self._server_API = ServerAPI(None)
+        self._server_API = ServerAPI()
 
     def join_game(self):
         """Ask the server to join a game."""

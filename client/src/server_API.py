@@ -4,25 +4,24 @@ import os
 import json
 import action
 from message import Message
+from hexgrid import Grid
+from gamestate import GameState
 from file_logger import Logger
 
 
 class ServerAPI:
     """Server API class to send and receive messages from the server."""
 
-    def __init__(self, player_id):
-        """
-        Create ServerAPI object.
-
-        :param player_id: id of the player sending messages to the server.
-        """
+    def __init__(self):
+        """Create ServerAPI object."""
         with open(os.path.join("..", "config", "config.json")) as config_file:
             config = json.load(config_file)
         self.con = Connection(config["server"]["ip"], config["server"]["port"])
-        self.id = player_id
-        logger = Logger("client.log", "Client Server API",
-                           config["logging"]["log_level"])
+        logger = Logger("client.log", "Client",
+                        config["logging"]["log_level"])
         self._log = logger.get_logger()
+        self.id = None
+        self._game_state = None
 
     def send_action(self, action):
         """
@@ -48,7 +47,10 @@ class ServerAPI:
             raise action.ServerError(action.GAME_FULL_ERROR)
         else:
             self._log.info("Joined game player id = " + str(reply.obj))
-            self.id = reply.obj
+            game_id, self.id = reply.obj
+            grid = Grid(103)
+            self._game_state = GameState(game_id, 1, grid, self._log,
+                                         None)
 
     def leave_game(self):
         """Ask the server to leave a game."""
