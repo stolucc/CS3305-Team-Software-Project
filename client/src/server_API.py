@@ -7,6 +7,7 @@ from message import Message
 from hexgrid import Grid
 from gamestate import GameState
 from file_logger import Logger
+from civilisation import Civilisation
 
 
 class ServerAPI:
@@ -51,6 +52,19 @@ class ServerAPI:
             grid = Grid(103)
             self._game_state = GameState(game_id, 1, grid, self._log,
                                          None)
+            civ = Civilisation(self.id, self._game_state._grid, self._log,
+                               None)
+            self._game_state.add_civ(civ)
+
+    def end_turn(self):
+        """Ask the server to join a game."""
+        end_turn_action = action.EndTurnAction()
+        reply = self.send_action(end_turn_action)
+        if reply.type == "ServerError":
+            self._log.error(reply.obj)
+            raise action.ServerError(action.GAME_FULL_ERROR)
+        else:
+            self._log.info("Turn ended")
 
     def leave_game(self):
         """Ask the server to leave a game."""
@@ -73,10 +87,12 @@ class ServerAPI:
             # TODO Add code to handle response
             print("Check for updates", reply.obj)
             for update in reply.obj:
-                if reply.type == "StartTurnUpdate":
-                    self._game_state.set_player_turn(reply.obj._current_player)
-                    self._game_state.turn_count = reply.obj._turn_count
-                    if reply.obj._current_player == self.id:
+                if update.__class__.__name__ == "StartTurnUpdate":
+                    print("current_player", update._current_player)
+                    print("turn_count", update._turn_count)
+                    self._game_state.set_player_turn(update._current_player)
+                    self._game_state.turn_count = update._turn_count
+                    if update._current_player == self.id:
                         self._game_state._civs[self.id].currency_per_turn()
 
     def move_unit(self, unit, hexagon):
