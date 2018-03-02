@@ -86,7 +86,7 @@ class ServerAPI:
             self._log.error(reply.obj)
             raise action.ServerError(action.VALIDATION_ERROR)
         else:
-            unit.position = hexagon
+            self._game_state._civs[self.id].move_unit_to_hex(unit, hexagon)
 
     def attack(self, attacker, defender):
         """
