@@ -161,7 +161,7 @@ class GameState:
                 self._current_player = list(self._civs.keys())[0]
                 # TODO: Tell Clients game has begun and who's turn it is
 
-            return user_id
+            return self.game_id, user_id
         else:
             err = ServerError(GAME_FULL_ERROR)
             self._logger.error(err)
