@@ -18,27 +18,49 @@ class ResearchTree(object):
 
     @property
     def branches(self):
-        """Return dict of all branches in tree and reference to the first node
-        of each branch."""
+        """
+        Return dict of all branches in the Research Tree.
+
+        Each key will point to the first node of that branch.
+        :return: dict
+        """
         return self._branches
 
     @property
     def win_node(self):
-        """Return win node."""
+        """
+        Win node of Research Tree.
+
+        This node can only be unlocked after all branches have been unlocked.
+        :return: Research Node
+        """
         return self._win_node
 
     @property
     def civilisation(self):
-        """Return civilisation object."""
+        """
+        Civilisation that the Research Tree belongs to.
+
+        :return: Civilisation object
+        """
         return self._civilisation
 
     @property
     def tier(self):
-        """Return dict of branches and what tier each branch is unlocked to."""
+        """
+        Return dict of branches in the Research Tree.
+
+        Each key will indicate what tier is currently unlocked.
+        :return: dict
+        """
         return self._tier
 
     def tree_setup(self):
-        """Set up tree."""
+        """
+        Set up Research Tree.
+
+        Add correct nodes to Tree and the end node to tie branches together.
+        """
         self.add_node('worker')
         self.add_node('worker')
         self.add_node('worker')
@@ -54,7 +76,7 @@ class ResearchTree(object):
         """
         Add node to tree on specific branch.
 
-        :param branch: string branch to add node
+        :param branch: string branch to add node to
         """
         if branch in self._branches:
             node = self._branches[branch]
@@ -117,6 +139,12 @@ class ResearchTree(object):
             print("Not enough research points.")
 
     def end_node_unlockable(self):
+        """
+        Check if the end node of the Research Tree is unlockable.
+
+        The node only becomes unlockable after all other branches are unlocked.
+        :return: boolean
+        """
         if self._tier['worker'] == 3 and self._tier['archer'] == 3\
                 and self._tier['swordsman'] == 3:
             return True
@@ -155,27 +183,48 @@ class ResearchNode(object):
 
     @property
     def parent(self):
-        """Return parent node, or tree if first node in branch."""
+        """
+        Parent node, or root of tree if first node in branch.
+
+        :return: ResearchNode
+        """
         return self._parent
 
     @property
     def child(self):
-        """Return child node, None if no child."""
+        """
+        Child node, None if no child.
+
+        :return: ResearchNode, or None
+        """
         return self._child
 
     @property
     def unlock_cost(self):
-        """Return amount of science points needed to unlock node."""
+        """
+        Science points needed to unlock node.
+
+        :return: int
+        """
         return self._unlock_cost
 
     @property
     def tier(self):
-        """Return tier that the node is on in the Tree."""
+        """
+        Tier that the node is on in the Tree.
+
+        There are three tiers.
+        :return: int
+        """
         return self._tier
 
     @property
     def unlocked(self):
-        """Return True if node is unlocked, False otherwise."""
+        """
+        True if node is unlocked, False otherwise.
+
+        :return: boolean
+        """
         return self._unlocked
 
     def add_child(self, unlock_cost, tier):
