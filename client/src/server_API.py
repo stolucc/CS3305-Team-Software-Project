@@ -71,6 +71,7 @@ class ServerAPI:
             raise action.ServerError(action.VALIDATION_ERROR)
         else:
             # TODO Add code to handle response
+            print("Check for updates", reply.obj)
             pass
 
     def move_unit(self, unit, hexagon):
