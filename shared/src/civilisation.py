@@ -285,7 +285,8 @@ class Civilisation(object):
             unit.position.unit = None
             del unit.civilisation.units[unit.id]
 
-    def buy_unit(self, city, unit_type, level):
+
+    def buy_unit(self, identifier, city, unit_type, level):
         """
         Buy unit.
 
@@ -348,3 +349,21 @@ class Civilisation(object):
                     currency['science'] += \
                         building.currency[CurrencyType.SCIENCE]
         return currency
+
+    def handle_action(self, action):
+        """
+        Handle incoming client-actions and update game state accordingly.
+
+        :param action: The action to be processed.
+        """
+        # NOTE: Assume validation has already ocurred
+        if action.type == "MovementAction":
+            self.move_unit_to_hex(action.unit, action.destination)
+        elif action.type == "CombatAction":
+            self.attack_unit(action.attacker, action.defender)
+        elif action.type == "UpgradeAction":
+            self.upgrade_unit(action.unit)
+        elif action.type == "BuildAction":
+            self.build_structure(action.unit, action.building_type)
+        elif action.type == "PurchaseAction":
+            self.buy_unit(action.building, action.unit_type, action.level)

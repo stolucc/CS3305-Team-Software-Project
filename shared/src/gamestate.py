@@ -28,6 +28,7 @@ class GameState:
         self._my_id = None
         self._turn_count = 1
         self._current_player = None
+        self._game_started = False
         self._queues = {}
 
     @property
@@ -136,6 +137,12 @@ class GameState:
                                        unit_id)
             self._queues[user_id] = Queue()
             # TODO: Inform client of worker
+
+            if(len(self._civs) == 4):
+                self._game_started = True
+                self._current_player = list(self._civs.keys())[0]
+                # TODO: Tell Clients game has begun and who's turn it is
+
             return user_id
         else:
             err = ServerError(GAME_FULL_ERROR)
