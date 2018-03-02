@@ -130,7 +130,7 @@ class ServerAPI:
             self._log.error(reply.obj)
             raise action.ServerError(action.VALIDATION_ERROR)
         else:
-            #TODO Add ability to build city
+            # TODO Add ability to build city
             self._game_state._civs[self.id].build_structure(unit,
                                                             building_type)
 
