@@ -18,7 +18,8 @@
     "key":"../config/key.pem"
   },
   "server":{
-    "port":10000
+    "port":10000,
+    "ip_address":"127.0.0.1"
   },
   "logging":{
     "log_level":"INFO"

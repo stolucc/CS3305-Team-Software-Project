@@ -20,6 +20,7 @@ class ConnectionHandler:
         with open(os.path.join("..", "config", "config.json")) as config_file:
             config = json.load(config_file)
         self._log = log
+        self._ip = config["server"]["ip_address"]
         self._config = config
         self._function = function
         self._socket = socket(AF_INET, SOCK_STREAM)
@@ -37,8 +38,8 @@ class ConnectionHandler:
         :param port: port for connection handler to listen on
         """
         self._stop_flag = False
-        print(gethostbyname(gethostname()))
-        self._socket.bind((gethostbyname(gethostname()), port))
+        print(self._ip)
+        self._socket.bind((self._ip, port))
         self._socket.listen(10)
         thread = threading.Thread(name="handler", target=self.handler, args=())
         thread.start()
