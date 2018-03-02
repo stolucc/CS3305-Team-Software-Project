@@ -28,6 +28,7 @@ class Civilisation(object):
         self._tree = ResearchTree(self)
         self._logger = logger
         self._session = session
+        self._vision = []
 
     def __repr__(self):
         """Return string representation of Civilisation."""
@@ -139,6 +140,15 @@ class Civilisation(object):
         :return: grid object.
         """
         return self._grid
+
+    @property
+    def vision(self):
+        """
+        List of tiles that the civ can see.
+
+        :return: list of hex object
+        """
+        return self._vision
 
     @property
     def tiles(self):
@@ -366,6 +376,26 @@ class Civilisation(object):
                     currency['science'] += \
                         building.currency[CurrencyType.SCIENCE]
         return currency
+
+    def calculate_vision(self):
+        """
+        """
+        vision = set()
+        for unit in self._units:
+            vision_range = 2  # TODO: Replace with unit vision range
+            tile = unit.location
+            unit_vision = self._grid.vision(tile, vision_range)
+            vision |= set(unit_vision)
+
+        for city_id in self.cities:
+            buildings = self.cities[city_id].buildings
+            for building in buildings:
+                vision_range = 2
+                tile = building.location
+                building_vision = self._grid.vision(tile, vision_range)
+                vision |= set(building_vision)
+        self._vision = vision
+
 
     def handle_action(self, action):
         """
