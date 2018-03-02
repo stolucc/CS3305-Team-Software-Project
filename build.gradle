@@ -127,7 +127,7 @@ ext.createScripts = {directory ->
     }
 
     try{
-      batfile.text = pythonCommand.replace(" ","\\ ")+" "+'src/'+ launchFile
+      batfile.text = "cd src\n" + pythonCommand.replace(" ","\\ ")+" "+ launchFile + "\n cd .."
       successPrint "Created bat launch script"
     }catch(Exception e){
       failPrint "Failed to build bat launch Script"
