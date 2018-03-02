@@ -197,6 +197,39 @@ class Civilisation(object):
         else:
             self._logger.debug("Unable to build structure.")
 
+    def unlock_research(self, branch):
+        """
+        Unlock next node on research branch.
+
+        branches = 'worker', 'archer', 'swordsman'.
+        """
+        if branch in self.tree.branches:
+            if self.tree.next_unlock_node(branch).unlock_cost <= self.science:
+                self.tree.unlock_tier(branch)
+            else:
+                print("Not enough Science points.")
+        else:
+            self._logger.debug("Branch not in research tree.")
+
+    def unlock_research_win(self):
+        """Unlock last node of researchh to win game."""
+        if self.tree.end_node_unlockable():
+            if self.science >= self.tree.win_node._unlock_cost:
+                self.tree.unlock_end_node()
+
+    def upgrade_unit(self, unit):
+        """Upgrade unit."""
+        if unit.level < self.tree.tier[unit.get_string()]:
+            cost = unit.level * 10
+            if self.gold >= cost:
+                unit.level_up()
+                self._session.Unit.update(unit._id, level=unit.level,
+                                          health=unit.health)
+            else:
+                self._logger.debug("Not enough gold.")
+        else:
+            self._logger.debug("Unable to upgrade unit.")
+
     def move_unit_to_hex(self, unit, tile):
         """
         Move unit to tile.
@@ -213,6 +246,8 @@ class Civilisation(object):
                 unit.position.unit = None
                 unit.position = tile
                 tile.unit = unit
+                self._session.Unit.update(unit.id, x=tile.x, y=tile.y,
+                                          z=tile.z)
             else:
                 self._logger.debug("Movement Range not enough.")
         else:
@@ -237,10 +272,12 @@ class Civilisation(object):
             damage = soldier.attack_power()
             enemy.receive_damage(damage)
             self.is_dead(enemy)
+            self._session.Unit.update(enemy.id, health=enemy.health)
             if distance == 1 and isinstance(enemy, Swordsman):
                 damage = enemy.attack_power()
                 soldier.receive_damage(damage)
                 self.is_dead(soldier)
+                self._session.Unit.update(soldier.id, health=soldier.health)
 
     def is_dead(self, unit):
         """Check if unit is dead and remove references if True."""

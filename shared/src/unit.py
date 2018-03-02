@@ -295,6 +295,11 @@ class Worker(Unit):
         """Return 0 if Worker, 1 if Archer, and 2 if Swordsman."""
         return 0
 
+    @staticmethod
+    def get_string():
+        """Return string."""
+        return "worker"
+
     @property
     def build_speed(self):
         """
@@ -447,6 +452,11 @@ class Swordsman(Soldier):
             self.cost_increase(food=1, gold=1, science=0)
             self.strength += 20
 
+    @staticmethod
+    def get_string():
+        """Return string."""
+        return "swordsman"
+
     def __repr__(self):
         """
         Return string representation of Swordsman.
@@ -525,6 +535,11 @@ class Archer(Soldier):
         string += "Strength: %i, Attack Range: %i" % (self.strength,
                                                       self.attack_range)
         return string
+
+    @staticmethod
+    def get_string():
+        """Return string."""
+        return "archer"
 
     @staticmethod
     def resource_cost(level):

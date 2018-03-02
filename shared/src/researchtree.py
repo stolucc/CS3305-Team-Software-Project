@@ -84,13 +84,15 @@ class ResearchTree(object):
         """
         if branch in self._branches:
             node = self.next_unlock_node(branch)
-            if node != self._win_node\
-                    and self._civilisation.science >= node._unlock_cost:
-                self._civilisation.science -= node._unlock_cost
-                node._unlocked = True
-                self._tier[branch] += 1
+            if node != self._win_node:
+                if self._civilisation.science >= node._unlock_cost:
+                    self._civilisation.science -= node._unlock_cost
+                    node._unlocked = True
+                    self._tier[branch] += 1
+                else:
+                    print("Not enough Science points.")
             else:
-                self.unlock_end_node()
+                print("This branch is complete.")
         else:
             print("Branch does not exist.")
 
@@ -108,15 +110,17 @@ class ResearchTree(object):
 
     def unlock_end_node(self):
         """Unlock end node."""
+        if self._civilisation.science >= self._win_node._unlock_cost:
+            self._civilisation.science -= self._win_node._unlock_cost
+            self._win_node._unlocked = True
+        else:
+            print("Not enough research points.")
+
+    def end_node_unlockable(self):
         if self._tier['worker'] == 3 and self._tier['archer'] == 3\
                 and self._tier['swordsman'] == 3:
-            if self._civilisation.science >= self._win_node._unlock_cost:
-                self._civilisation.science -= self._win_node._unlock_cost
-                self._win_node._unlocked = True
-            else:
-                print("Not enough research points.")
-        else:
-            print("Cannot unlock end node. Not all branches fully unlocked.")
+            return True
+        return False
 
     def __repr__(self):
         """String representation of Research Tree."""
