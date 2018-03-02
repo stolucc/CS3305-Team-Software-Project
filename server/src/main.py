@@ -1,3 +1,5 @@
+"""A module for launching a server instance."""
+
 from server_connection_handler import ConnectionHandler
 from database_logger import Logger
 from hexgrid import Grid
@@ -10,8 +12,10 @@ from message import Message
 
 
 class Server():
+    """A class encapsulating all server implementation."""
 
     def __init__(self):
+        """Initialise a new Server object."""
         with open(os.path.join("..", "config", "config.json")) as config_file:
             config = json.load(config_file)
         db_connection = database_API.Connection(config["postgres"]["user"],
@@ -35,6 +39,11 @@ class Server():
             sys.exit()
 
     def handle_message(self, connection):
+        """
+        Handle an incoming message sent to the server.
+
+        :param connection: The initiated connection
+        """
         try:
             info = connection.recv()
             message = Message.deserialise(info)
@@ -44,7 +53,8 @@ class Server():
         except TypeError as t:
             self._log.error(str(t))
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     s = Server()
 
 """

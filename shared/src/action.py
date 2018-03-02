@@ -10,6 +10,11 @@ class ServerError(Exception):
     """An exception to represent a server error."""
 
     def __init__(self, error_code):
+        """
+        Initialise a new error with a given error code.
+
+        :param error_code: The error code relating to the given error
+        """
         super(ServerError, self).__init__(str(error_code))
         self.error_code = error_code
 

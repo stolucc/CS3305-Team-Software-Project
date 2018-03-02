@@ -99,6 +99,12 @@ class GameState:
         self._turn_count = turn_count
 
     def handle_action(self, message):
+        """
+        Handle an action sent by a client.
+
+        :param messag: The message object received from the client
+        :return: The value to be sent back to the client
+        """
         civ_actions = ["MovementAction", "CombatAction", "UpgradeAction",
                        "BuildAction", "PurchaseAction"]
         self._logger.debug(message)
@@ -115,6 +121,12 @@ class GameState:
         return err
 
     def add_player(self, message):
+        """
+        Add a new player to the game.
+
+        :param message: The message object sent from the client.
+        :return: The id of the new player
+        """
         start_locations = [(0, 0, 0), (50, -25, -25),
                            (-50, 25, 25), (25, -50, 25)]
         if len(self._civs) < 4:
@@ -150,6 +162,12 @@ class GameState:
             return err
 
     def remove_player(self, message):
+        """
+        Remove a player to the game.
+
+        :param message: The message object sent from the client.
+        :return: The boolean success value of the function
+        """
         user_id = message.id
         del self._civs[user_id]
         del self._queues[user_id]
@@ -157,6 +175,12 @@ class GameState:
         return True
 
     def update_player(self, message):
+        """
+        Convert the updates available to the player to a list to be sent.
+
+        :param message: The message object sent from the client.
+        :return: The list of updates for that client.
+        """
         user_id = message.id
         updates = []
         while not self._queues[user_id].empty():
