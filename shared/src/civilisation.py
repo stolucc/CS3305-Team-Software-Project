@@ -183,6 +183,8 @@ class Civilisation(object):
             city = City(city_id, tile)
             tiles = self.grid.spiral_ring(tile, City.RANGE)
             city.tiles = tiles
+            for tile in tiles:
+                tile.city_id = city_id
             self.gold -= cost_of_city
             unit.actions -= 1
             for tile in tiles:
@@ -202,13 +204,16 @@ class Civilisation(object):
                 and tile.civ_id == worker.civ_id\
                 and self.gold >= building_type.buy_cost()\
                 and worker.actions > 0:
+            city_id = tile.city_id
             bld_id = database_API.Building.insert(self._session, self._id,
                                                   True, Building.get_type
                                                   (building_type),
                                                   tile.x, tile.y, tile.z)
-            building = Building(bld_id, building_type, tile, worker.civ_id)
+            building = Building(bld_id, building_type, tile, worker.civ_id,
+                                city_id)
             self.gold -= building.buy_cost
             tile.building = building
+            self.cities[city_id].buildings[bld_id] = building
             worker.actions -= 1
         else:
             self._logger.debug("Unable to build structure.")
@@ -332,11 +337,18 @@ class Civilisation(object):
         else:
             self._logger.debug("Unable to purchase unit.")
 
-    def reset_unit_actions(self):
+    def per_turn(self):
+        """Action to be taken per turn."""
+        self.reset_unit_actions()
+        self.currency_per_turn()
+
+    def reset_unit_actions_and_movement(self):
         """Reset the actions units can take per turn."""
         actions_per_turn = 2
         for unit in self._units:
-            self._units[unit].actions = actions_per_turn
+            unit = self._units[unit]
+            unit.actions = actions_per_turn
+            unit.movement = unit.movement_range
 
     def currency_per_turn(self):
         """Update Gold, Food, and Science per turn."""
@@ -370,6 +382,7 @@ class Civilisation(object):
         for city_id in self.cities:
             buildings = self.cities[city_id].buildings
             for building in buildings:
+                building = buildings[building]
                 if building._type is not False:
                     currency['gold'] += building.currency[CurrencyType.GOLD]
                     currency['food'] += building.currency[CurrencyType.FOOD]

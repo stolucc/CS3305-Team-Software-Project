@@ -16,6 +16,7 @@ class City():
         self._tiles = []
         self._type = BuildingType.CITY
         self._id = identifier
+        self._buildings = {}
 
     def __repr__(self):
         """Return string representation of City."""
@@ -74,13 +75,13 @@ class City():
 
     @property
     def buildings(self):
-        """Property to give list of buildings in this city."""
-        buildings = []
-        for tile in self._tiles:
-            building = tile.building
-            if building is not None:
-                buildings += [building]
-        return buildings
+        """Property to give dict of buildings in this city."""
+        return self._buildings
+
+    @buildings.setter
+    def buildings(self, building):
+        """Add building to dict of buildings."""
+        self._buildings += building
 
     @property
     def position(self):

@@ -16,7 +16,8 @@ class BuildingType(Enum):
 class Building():
     """A single resource-producing building."""
 
-    def __init__(self, identifier, building_type, hexagon, civilisation_id):
+    def __init__(self, identifier, building_type, hexagon, civilisation_id,
+                 city_id):
         """
         Instantiate a new building.
 
@@ -26,6 +27,7 @@ class Building():
         self._id = identifier
         self._location = hexagon
         self._type = building_type
+        self._city_id = city_id
         self._civ_id = civilisation_id
 
     def __repr__(self):
@@ -42,6 +44,11 @@ class Building():
     def civ_id(self):
         """Return civilisation that owns tile."""
         return self._civ_id
+
+    @property
+    def city_id(self):
+        """Return city that owns building."""
+        return self._city_id
 
     @property
     def currency(self):

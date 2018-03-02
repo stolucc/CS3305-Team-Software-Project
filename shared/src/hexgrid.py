@@ -27,6 +27,7 @@ class Hex:
         self._unit = None
         self._building = None
         self._civ_id = None
+        self._city_id = None
 
     @property
     def x(self):
@@ -176,6 +177,16 @@ class Hex:
     def civ_id(self, civilisation_id):
         """Set civilisation ID of tile."""
         self._civ_id = civilisation_id
+
+    @property
+    def city_id(self):
+        """Return city that owns tile."""
+        return self._city_id
+
+    @city_id.setter
+    def city_id(self, city_id):
+        """Set city ID of tile."""
+        self._city_id = city_id
 
     def __eq__(self, other):
         """
