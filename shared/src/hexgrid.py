@@ -5,6 +5,7 @@ from terrain import Terrain, TerrainType, BiomeType
 from building import BuildingType, Building
 import unit
 from random import choice
+from mapresource import ResourceType, Resource
 
 
 class Hex:
@@ -645,10 +646,12 @@ class Grid:
     def static_map(self):
         for hex_point in self.get_hextiles():
             hexagon = self.get_hextile(hex_point)
-            if abs(hexagon._x) == (self._size // 2) or abs(hexagon._y) == (self._size // 2) \
-                    or abs(hexagon._z) == (self._size // 2):
-                if abs(hexagon._x) == (self._size // 6) or abs(hexagon._y) == (self._size // 6)\
-                        or abs(hexagon._z) == (self._size // 6):
+            if abs(hexagon._x) == (self._size // 2) or \
+               abs(hexagon._y) == (self._size // 2) or \
+               abs(hexagon._z) == (self._size // 2):
+                if abs(hexagon._x) == (self._size // 6) or \
+                   abs(hexagon._y) == (self._size // 6) or \
+                   abs(hexagon._z) == (self._size // 6):
                     terraintype = TerrainType.FLAT
                 else:
                     terraintype = TerrainType.OCEAN
@@ -670,19 +673,16 @@ class Grid:
 
             resource = None
             if terraintype != TerrainType.OCEAN:
-                if hexagon._x % 6 == 1 and hexagon._y % 4 == 0:
-                    hexagon._unit = unit.Archer(1, 3, hexagon, Civilisation(1, self))
                 if hexagon._y % 2 == 1 and hexagon._z % 3 == 1:
-                    print(hexagon._x, hexagon._y, hexagon._z)
                     if hexagon._y % 4 == 1:
                         if hexagon._z % 6 == 1:
-                            resource = mapresource.ResourceType.COAL
+                            resource = Resource(ResourceType.COAL, 1)
                         elif hexagon._z % 6 == 4:
-                            resource = mapresource.ResourceType.GEMS
+                            resource = Resource(ResourceType.GEMS, 1)
                     elif hexagon._y % 4 == 3:
                         if hexagon._z % 6 == 1:
-                            resource = mapresource.ResourceType.LOGS
+                            resource = Resource(ResourceType.LOGS, 1)
                         if hexagon._z % 6 == 4:
-                            resource = mapresource.ResourceType.IRON
+                            resource = Resource(ResourceType.IRON, 1)
 
             hexagon._terrain = Terrain(terraintype, biometype, resource)

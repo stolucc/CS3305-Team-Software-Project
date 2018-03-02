@@ -5,7 +5,6 @@ import math
 import sys
 import time
 import threading
-import building
 from layout import Layout
 from hexgrid import Grid, Hex
 from hud_overlay import HudOverlay
@@ -13,6 +12,8 @@ from gamestate import GameState
 from civilisation import Civilisation
 from enum import Enum
 from math import floor
+from building import BuildingType
+from mapresource import ResourceType
 
 IMAGE_PATH = "../resources/images/"
 
@@ -112,23 +113,17 @@ class Game:
             "health_bar": load_image("health/health_bar_75.png")
         }
         self._resource_images = {
-            "COAL": load_image("map_resources/coal.png"),
-            "IRON": load_image("map_resources/iron.png"),
-            "GEMS": load_image("map_resources/gems.png"),
-            "LOGS": load_image("map_resources/logs.png")
+            ResourceType.COAL: load_image("map_resources/coal.png"),
+            ResourceType.IRON: load_image("map_resources/iron.png"),
+            ResourceType.GEMS: load_image("map_resources/gems.png"),
+            ResourceType.LOGS: load_image("map_resources/logs.png")
         }
         self._scaled_sprite_images = self._sprite_images.copy()
         self._building_images = {
-            "CITY": load_image("buildings/city.png"),
-            "FARM": load_image("buildings/farm.png"),
-            "TRADE_POST": load_image("buildings/trading_post.png"),
-            "UNIVERSITY": load_image("buildings/university.png")
-        }
-        self._resource_images = {
-            "COAL": load_image("map_resources/coal.png"),
-            "IRON": load_image("map_resources/iron.png"),
-            "GEMS": load_image("map_resources/gems.png"),
-            "LOGS": load_image("map_resources/logs.png")
+            BuildingType.CITY: load_image("buildings/city.png"),
+            BuildingType.FARM: load_image("buildings/farm.png"),
+            BuildingType.TRADE_POST: load_image("buildings/trading_post.png"),
+            BuildingType.UNIVERSITY: load_image("buildings/university.png")
         }
         self._scaled_building_images = self._building_images.copy()
 
@@ -421,13 +416,13 @@ class Game:
                     hexagon_coords = layout.hex_to_pixel(hexagon)
                     self.draw_building(hexagon_coords,
                                        self._scaled_building_images[
-                                            build.name])
+                                            build.building_type])
                 if hexagon._terrain._resource is not None:
                     resource = hexagon._terrain._resource
                     hexagon_coords = layout.hex_to_pixel(hexagon)
                     self.draw_sprite(hexagon_coords,
                                      self._scaled_resource_images[
-                                          resource.name])
+                                          resource.resource_type])
                 if hexagon.unit is not None:
                     unit = hexagon.unit
                     hexagon_coords = layout.hex_to_pixel(unit.position)
@@ -436,21 +431,6 @@ class Game:
                                          unit.__class__.__name__])
                     self.draw_sprite(hexagon_coords,
                                      self._scaled_sprite_images["health_bar"])
-
-            if hexagon.unit is not None:
-                unit = hexagon.unit
-                hexagon_coords = layout.hex_to_pixel(unit.position)
-                self.draw_sprite(hexagon_coords,
-                                 self._scaled_sprite_images[
-                                     unit.__class__.__name__])
-                self.draw_sprite(hexagon_coords,
-                                 self._scaled_sprite_images["health_bar"])
-            if hexagon._terrain._resource is not None:
-                resource = hexagon._terrain._resource
-                hexagon_coords = layout.hex_to_pixel(hexagon)
-                self.draw_sprite(hexagon_coords,
-                                 self._scaled_resource_images[
-                                     resource.name])
 
     def get_mirrors(self):
         """Store each hexgrid mirror layout in a list."""
@@ -490,6 +470,7 @@ class Game:
 if __name__ == "__main__":
     map_ref = Grid(26)
     map_ref.create_grid()
+    map_ref.static_map()
     civ = Civilisation(1, map_ref)
     game_state = GameState(1, 1, map_ref)
     game_state.add_civ(civ)
