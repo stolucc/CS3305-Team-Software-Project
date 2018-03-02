@@ -29,7 +29,7 @@ class ServerAPI:
         Create a Message which contains action and send it to the server.
 
         :param action: Action object to be encapsulated and sent to the
-        server.
+            server.
         """
         self.con.open()
         message = Message(action, self.id)

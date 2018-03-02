@@ -16,8 +16,8 @@ class Connection:
         :param user: username for the database
         :param password: password for the database
         :param db: database to connect to
-        :param host: host that the database is running on. Default: localhost
-        :param port: port that the database is listening on. Default: 5432
+        :param host: host that the database is running on. Default is localhost
+        :param port: port that the database is listening on. Default is 5432
         """
         url = 'postgresql://{}:{}@{}:{}/{}'
         url = url.format(user, password, host, port, db)
@@ -173,10 +173,10 @@ class User(Base):
         :param active: specifies if the user is active or not
         :param gold: specifies the amount of gold the user has. Must be >= 0.
         :param production: specifies the amount of production the user has.
-        Must be >= 0.
+            Must be >= 0.
         :param food: specifies the amount of food the user has. Must be >= 0.
         :param science: specifies the amount of science the user has.
-        Must be >= 0.
+            Must be >= 0.
         """
         user = User(game_id=game_id, active=active, gold=gold,
                     production=production, food=food, science=science)
@@ -378,8 +378,8 @@ class Technology(Base):
 
         :param session: sessionmaker object
         :param user_id: user_id of the technology to be deleted
-        :param technology_id: technology_id of the technology to be deleted.
-        Must be >= 0.
+        :param technology_id: technology_id of the technology to be deleted,
+            Must be >= 0.
         """
         session = session()
         technology = session.query(Technology).filter(
@@ -668,7 +668,7 @@ class Log(Base):
         :param process_id: id of the process that created the log.
             Must be >= 0.
         :param process_name: name of the process that created the log
-        (limit is 256 characters)
+            (limit is 256 characters)
         :param thread_id: id of the thread that created the log.
             Must be >= 0.
         :param thread_name: name of the thread that created the log

@@ -268,7 +268,7 @@ class Grid:
         Create a grid layout.
 
         :return: a dictionary in the form {(x,y,z):Hex},
-        where (x,y,z) is a tuple of coordinates and Hex is a Hex object
+            where (x,y,z) is a tuple of coordinates and Hex is a Hex object
         """
         map_radius = self._size // 2
         x = -map_radius
@@ -324,7 +324,7 @@ class Grid:
 
         :param hexagon: a Hex object
         :return: a list in the form [(x, y, z)],
-        where (x,y,z) is a tuple of coordinates
+            where (x,y,z) is a tuple of coordinates
         """
         x, y, z = hexagon.x, hexagon.y, hexagon.z
         return [self.get_hextile((x+1, y-1, z)),
@@ -385,7 +385,7 @@ class Grid:
         :param first_hex: A Hex object
         :param second_hex: A Hex object
         :return: the distance between first_hex and second_hex,
-        in the form of an int
+            in the form of an int
         """
         distance = 0
         distance += abs(first_hex.x - second_hex.x)
@@ -401,7 +401,7 @@ class Grid:
         :param first_coord: coordinates (x, y, z)
         :param second_coord: coordinates (x, y, z)
         :return: the distance between first_hex and second_hex,
-        in the form of an int
+            in the form of an int
         """
         distance = 0
         distance += abs(first_coord[0] - second_coord[0])
@@ -561,7 +561,7 @@ class Grid:
         :param start_hex: the starting hex to determine paths from
         :param movement: the movement cost limit available
         :return: a dictionary with keys as reachable tiles and
-                 values as previous tile in path
+            values as previous tile in path
         """
         opn = PriorityQueue()
         opn.put((0, start_hex))
@@ -603,7 +603,7 @@ class Grid:
         :param end_hex: the hex the path ends at
         :param movement: the total movement cost available
         :return: a list of the tiles on the path from start_hex to second_hex
-                returns an empty list if no path is available
+            returns an empty list if no path is available
         """
         reachable = self.dijkstra(start_hex, movement)
         path = []

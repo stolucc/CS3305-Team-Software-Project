@@ -8,7 +8,10 @@ Welcome to CS3305-Team-Software-Project's documentation!
 
 .. toctree::
    :maxdepth: 5
-   :caption: Contents:
+
+   client/modules
+   server/modules
+   shared/modules
 
 
 

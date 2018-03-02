@@ -65,6 +65,6 @@ class Message:
         Deserialise byte string to Message object.
 
         :param bytestring: bytes -- The string of bytes to be deserialised
-        to a message object.
+            to a message object.
         """
         return pickle.loads(bytestring)

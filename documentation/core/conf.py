@@ -36,9 +36,9 @@ import sys
 import os
 
 root_dir = os.path.abspath('../..')
-sys.path.append(root_dir + "/bin/client/src")
-sys.path.append(root_dir + "/bin/server/src")
-# sys.path.append(root_dir + "/shared/src/")
+sys.path.append(root_dir + "/client/src")
+sys.path.append(root_dir + "/server/src")
+sys.path.append(root_dir + "/shared/src")
 
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.todo',
