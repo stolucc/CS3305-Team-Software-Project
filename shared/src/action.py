@@ -176,3 +176,27 @@ class StartTurnUpdate():
     def __str__(self):
         """Return a String representation of a StartTurnUpdate object."""
         return "<StartTurnUpdate '%s'>" % (str(self._current_player))
+
+
+class UnitHealthUpdate():
+    """An update on a unit's health."""
+
+    def __init__(self, unit):
+        """Initialise a new unit health update object."""
+        self._unit = unit
+
+    def __str__(self):
+        """Return a String representation of a UnitHealthUpdate object."""
+        return "<UnitHealthUpdate>"
+
+
+class TileUpdates():
+    """A list of tiles that need to be updated."""
+
+    def __init__(self, tiles):
+        """Initialise a new title update object."""
+        self._tiles = tiles
+
+    def __str__(self):
+        """Return a String representation of a TileUpdates object."""
+        return "<TileUpdates>"

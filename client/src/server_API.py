@@ -84,7 +84,7 @@ class ServerAPI:
             self._log.error(reply.obj)
             raise action.ServerError(action.VALIDATION_ERROR)
         else:
-            # TODO Add code to handle response
+            # TODO Add code to handle responses
             print("Check for updates", reply.obj)
             for update in reply.obj:
                 if update.__class__.__name__ == "StartTurnUpdate":
@@ -94,6 +94,23 @@ class ServerAPI:
                     self._game_state.turn_count = update._turn_count
                     if update._current_player == self.id:
                         self._game_state._civs[self.id].currency_per_turn()
+                elif update.__class__.__name__ == "UnitHealthUpdate":
+                    civ = self._game_state._civs[update._attacker._civ_id]
+                    unit = civ._units[update._attacker._id]
+                    unit._health = update._attacker._civ_id._health
+                elif update.__class__.__name__ == "TileUpdates":
+                    for tile in update._tiles:
+                        old_tile = self._game_state.get_hextile(tile.coords)
+                        if tile._unit is not None:
+                            pass
+                        else:
+                            old_tile._unit = None
+                        if tile._building is not None:
+                            pass
+                        else:
+                            old_tile._building = None
+                        old_tile._civ_id = tile._civ_id
+                        old_tile._city_id = tile._city_id
 
     def move_unit(self, unit, hexagon):
         """
