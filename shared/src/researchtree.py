@@ -151,7 +151,7 @@ class ResearchTree(object):
         return False
 
     def __repr__(self):
-        """String representation of Research Tree."""
+        """Return string representation of Research Tree."""
         string = "Root -> 3 Branches -> End Node:\nTier: Worker: %i, Archer: %i,\
  Swordsman: %i\n" % (self._tier['worker'], self._tier['archer'],
                      self._tier['swordsman'])
@@ -221,7 +221,7 @@ class ResearchNode(object):
     @property
     def unlocked(self):
         """
-        True if node is unlocked, False otherwise.
+        Return true if node is unlocked, False otherwise.
 
         :return: boolean
         """
@@ -241,7 +241,7 @@ class ResearchNode(object):
             self._child.add_child(unlock_cost*2, tier + 1)
 
     def __repr__(self):
-        """String representation of Research Node."""
+        """Return string representation of Research Node."""
         string = " %i : %s " % (self._tier, str(self._unlocked))
         if self._child is not None:
             string += "->" + str(self._child)
