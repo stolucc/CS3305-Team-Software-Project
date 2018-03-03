@@ -4,6 +4,7 @@ from server_connection_handler import ConnectionHandler
 from database_logger import Logger
 from hexgrid import Grid
 from gamestate import GameState
+import traceback
 import database_API
 import os
 import sys
@@ -47,11 +48,11 @@ class Server():
         try:
             info = connection.recv()
             message = Message.deserialise(info)
-            result = self._gamestate.handle_action(message)
+            result = self._gamestate.handle_message(message)
             msg = Message(result, -1)
             connection.send(msg.serialise())
         except TypeError as t:
-            self._log.error(str(t))
+            self._log.error(traceback.format_exc(t))
 
 
 if __name__ == "__main__":

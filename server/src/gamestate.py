@@ -5,7 +5,7 @@ from civilisation import Civilisation
 from building import Building
 from unit import Unit
 from action import ServerError, GAME_FULL_ERROR, UNKNOWN_ACTION, \
-    StartTurnUpdate
+    StartTurnUpdate, TileUpdates, UnitUpdate
 from unit import Worker
 import random
 from queue import Queue
@@ -123,7 +123,6 @@ class GameState:
             elif message.type == "EndTurnAction":
                 return self.end_turn(message)
             elif message.type in civ_actions:
-                # TODO
                 result_set = self.handle_action(message.id, message.obj)
                 self.populate_queues(result_set)
         err = ServerError(UNKNOWN_ACTION)
@@ -133,8 +132,10 @@ class GameState:
     def populate_queues(self, result_set):
         """Add update information to relevant queues."""
         impacted_tiles = result_set
+        is_tile = True
         if isinstance(result_set[0], Unit):
             impacted_tiles = [unit.location for unit in impacted_tiles]
+            is_tile = False
         for civ in self._civs:
             self.civs[civ].calculate_vision()
             vision = self._civs[civ].vision
@@ -142,7 +143,12 @@ class GameState:
             for tile in range(len(impacted_tiles)):
                 if impacted_tiles[tile] in vision:
                     relevant += [tile]
-            self._queues[civ].put([result_set[x] for x in relevant])
+            if is_tile:
+                self._queues[civ].put(
+                    TileUpdates([result_set[x] for x in relevant]))
+            else:
+                for index in relevant:
+                    self._queues[civ].put(UnitUpdate(result_set[index]))
 
     def add_player(self, message):
         """
@@ -172,7 +178,7 @@ class GameState:
             self._civs[user_id].set_up(self._grid.get_hextile(location),
                                        unit_id)
             self._queues[user_id] = Queue()
-            # TODO: Inform client of worker
+            self._queues[user_id].put(self._civs[user_id].units[unit_id])
 
             if(len(self._civs) == 4):
                 self._game_started = True
