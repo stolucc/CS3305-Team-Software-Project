@@ -5,7 +5,7 @@ import json
 import action
 from message import Message
 from hexgrid import Grid
-from gamestate import GameState
+from client_gamestate import GameState
 from file_logger import Logger
 from civilisation import Civilisation
 
