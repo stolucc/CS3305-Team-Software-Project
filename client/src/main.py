@@ -13,8 +13,22 @@ def main():
         server_api.join_game()
         thread = threading.Thread(name="check_for_updates",
                                   target=check_for_updates,
-                                  args=(server_api,))
+                                  args=(server_api,), daemon=True)
         thread.start()
+        sleep(3)
+        civ = server_api._game_state._civs[server_api.id]
+        unit = None
+        for key in civ._units:
+            unit = civ._units[key]
+        unit_coords = unit.position.coords
+        move_coords = (unit_coords[0] + 1, unit_coords[1] - 1, unit_coords[2])
+        hex_to_move = server_api._game_state._grid.get_hextile(move_coords)
+        hello = input("send move")
+        server_api.move_unit(unit, hex_to_move)
+        server_api.end_turn()
+        hello = input("send move2")
+        server_api.move_unit(unit, unit_coords)
+        server_api.end_turn()
         # server_api.leave_game()
     except action.ServerError as e:
         print("Server error occurred with error code " + str(e.error_code))

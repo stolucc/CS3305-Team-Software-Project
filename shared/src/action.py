@@ -212,3 +212,15 @@ class TileUpdates():
     def __str__(self):
         """Return a String representation of a TileUpdates object."""
         return "<TileUpdates>"
+
+
+class PlayerJoinedUpdate():
+    """An action to inform players who else is playing."""
+
+    def __init__(self, players):
+        """Initialise a new player join update object."""
+        self._players = players
+
+    def __str__(self):
+        """Return a String representation of a PlayerJoinedUpdate object."""
+        return "<PlayerJoinedUpdate>"
