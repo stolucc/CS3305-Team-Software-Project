@@ -178,7 +178,7 @@ class StartTurnUpdate():
         return "<StartTurnUpdate '%s'>" % (str(self._current_player))
 
 
-class UnitHealthUpdate():
+class UnitUpdate():
     """An update on a unit's health."""
 
     def __init__(self, unit):
