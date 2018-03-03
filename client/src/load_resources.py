@@ -1,5 +1,5 @@
+"""Module for loading of game resources."""
 import pygame
-from pygame.locals import *
 from building import BuildingType
 from mapresource import ResourceType
 
@@ -18,9 +18,10 @@ def load_image(image):
 
 
 class LoadImages:
-    """Class to load and store images in dictionaries"""
+    """Class to load and store images in dictionaries."""
 
     def __init__(self):
+        """Initialise a LoadImages object."""
         self._terrain_images = {
             "move-highlight": load_image("tiles/move-highlight.png"),
             "civ1_border": load_image("tiles/civ1_border.png"),

@@ -8,16 +8,13 @@ import threading
 from layout import Layout
 from hexgrid import Grid, Hex
 from load_resources import LoadImages
-import building
 from unit import Worker
 from hud_overlay import HudOverlay
 from gamestate import GameState
+from civilisation import Civilisation
 from enum import Enum
 from math import floor
-import math
-from civilisation import Civilisation
-from building import BuildingType
-from mapresource import ResourceType
+
 
 class Resolution(Enum):
     """Enum for resolutions."""
@@ -103,7 +100,7 @@ class Game:
 
     def start(self):
         """Initialize the game."""
-        self._civ1.set_up(self._grid.get_hextile((0,0,0)), 1, 1)
+        self._civ1.set_up(self._grid.get_hextile((0, 0, 0)), 1, 1)
         self.scale_images_to_hex_size()
         self.scale_sprites_to_hex_size()
         self.scale_buildings_to_hex_size()
@@ -383,8 +380,8 @@ class Game:
         for hex_point in self._grid.get_hextiles():
             hexagon = self._grid.get_hextile(hex_point)
             hexagon_coords = layout.hex_to_pixel(hexagon)
-            if (size[0] + 100 > hexagon_coords[0] > -100 and
-                                size[1] + 100 > hexagon_coords[1] > -100):
+            if size[0] + 100 > hexagon_coords[0] > -100 and \
+               size[1] + 100 > hexagon_coords[1] > -100:
                 terrain = hexagon.terrain
                 terrain_image = self._scaled_terrain_images[
                     (terrain.terrain_type.value, terrain.biome.value)]
@@ -393,7 +390,6 @@ class Game:
                     (hexagon_coords[0]
                      - math.ceil(self._layout.size * (math.sqrt(3) / 2)),
                      hexagon_coords[1] - self._layout.size))
-
                 if hexagon in civ1_tiles:
                     self._screen.blit(
                         self._scaled_terrain_images["civ2_border"],
@@ -404,7 +400,7 @@ class Game:
                     build = hexagon.building
                     hexagon_coords = layout.hex_to_pixel(hexagon)
                     self.draw_building(hexagon_coords,
-                                     self._scaled_building_images[
+                                       self._scaled_building_images[
                                          build.building_type])
                     if hexagon.terrain.resource is not None:
                         resource = hexagon.terrain.resource
@@ -422,7 +418,8 @@ class Game:
                                          unit.__class__.__name__
                                          + str(unit_level)])
                     self.draw_sprite(hexagon_coords,
-                                     self._scaled_health_bar_images[unit_health])
+                                     self._scaled_health_bar_images[
+                                        unit_health])
 
     def get_mirrors(self):
         """Store each hexgrid mirror layout in a list."""
