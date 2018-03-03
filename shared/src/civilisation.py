@@ -339,8 +339,8 @@ class Civilisation(object):
             self._logger.debug("Unable to purchase unit.")
 
     def per_turn(self):
-        """Action to be taken per turn."""
-        self.reset_unit_actions()
+        """Amount of actions to be taken per turn."""
+        self.reset_unit_actions_and_movement()
         self.currency_per_turn()
 
     def reset_unit_actions_and_movement(self):
