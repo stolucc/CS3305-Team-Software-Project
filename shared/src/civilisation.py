@@ -5,7 +5,6 @@ from city import City
 from building import Building
 from currency import CurrencyType
 from researchtree import ResearchTree
-import database_API
 
 
 class Civilisation(object):
@@ -160,14 +159,12 @@ class Civilisation(object):
 
         Create Worker.
         """
-        worker_id = database_API.Unit.insert(self._session, self._id, 1, 0,
-                                             100, tile.x, tile.y, tile.z)
         worker = Worker(worker_id, 1, tile, self._id)
         worker.actions = 2
         tile.unit = worker
         self.units[worker_id] = worker
 
-    def build_city_on_tile(self, tile):
+    def build_city_on_tile(self, tile, city_id):
         """
         Build city on given tile.
 
@@ -177,9 +174,6 @@ class Civilisation(object):
         unit = tile.unit
         if not tile.claimed and isinstance(unit, Worker)\
                 and self.gold >= cost_of_city:
-            city_id = database_API.Building.insert(self._session, self._id,
-                                                   True, 3, tile.x, tile.y,
-                                                   tile.z)
             city = City(city_id, tile)
             tiles = self.grid.spiral_ring(tile, City.RANGE)
             city.tiles = tiles
@@ -193,7 +187,7 @@ class Civilisation(object):
         else:
             self._logger.debug("Unable to build city.")
 
-    def build_structure(self, worker, building_type):
+    def build_structure(self, worker, building_type, building_id):
         """
         Build building at tiles position.
 
@@ -205,15 +199,11 @@ class Civilisation(object):
                 and self.gold >= building_type.buy_cost()\
                 and worker.actions > 0:
             city_id = tile.city_id
-            bld_id = database_API.Building.insert(self._session, self._id,
-                                                  True, Building.get_type
-                                                  (building_type),
-                                                  tile.x, tile.y, tile.z)
-            building = Building(bld_id, building_type, tile, worker.civ_id,
-                                city_id)
+            building = Building(building_id, building_type, tile,
+                                worker.civ_id, city_id)
             self.gold -= building.buy_cost
             tile.building = building
-            self.cities[city_id].buildings[bld_id] = building
+            self.cities[city_id].buildings[building_id] = building
             worker.actions -= 1
         else:
             self._logger.debug("Unable to build structure.")
@@ -228,7 +218,7 @@ class Civilisation(object):
             if self.tree.next_unlock_node(branch).unlock_cost <= self.science:
                 self.tree.unlock_tier(branch)
             else:
-                print("Not enough Science points.")
+                self._logger.debug("Not enough Science points.")
         else:
             self._logger.debug("Branch not in research tree.")
 
@@ -245,8 +235,6 @@ class Civilisation(object):
             if self.gold >= cost and unit.actions > 0:
                 unit.level_up()
                 unit.actions -= 1
-                database_API.Unit.update(self._session, unit._id,
-                                         level=unit.level, health=unit.health)
             else:
                 self._logger.debug("Not enough gold.")
         else:
@@ -269,8 +257,6 @@ class Civilisation(object):
                 unit.position = tile
                 tile.unit = unit
                 unit.actions -= 1
-                database_API.Unit.update(self._session, unit.id, x=tile.x,
-                                         y=tile.y, z=tile.z)
             else:
                 self._logger.debug("Unable to move unit.")
         else:
@@ -296,14 +282,10 @@ class Civilisation(object):
             enemy.receive_damage(damage)
             self.is_dead(enemy)
             soldier.actions -= 1
-            database_API.Unit.update(self._session, enemy.id,
-                                     health=enemy.health)
             if distance == 1 and isinstance(enemy, Swordsman):
                 damage = enemy.attack_power()
                 soldier.receive_damage(damage)
                 self.is_dead(soldier)
-                database_API.Unit.update(self._session, soldier.id,
-                                         health=soldier.health)
 
     def is_dead(self, unit):
         """Check if unit is dead and remove references if True."""
@@ -311,8 +293,7 @@ class Civilisation(object):
             unit.position.unit = None
             del unit.civilisation.units[unit.id]
 
-
-    def buy_unit(self, identifier, city, unit_type, level):
+    def buy_unit(self, city, unit_type, level, unit_id):
         """
         Buy unit.
 
@@ -325,11 +306,6 @@ class Civilisation(object):
         position = city.no_unit_tile()
         if issubclass(unit_type, Unit) and self.gold >= \
                 unit_type.gold_cost(level) and position is not None:
-            unit_id = database_API.Unit.insert(self._session, self._id, level,
-                                               unit_type.get_type(),
-                                               unit_type.get_health(level),
-                                               position.x, position.y,
-                                               position.z)
             unit = unit_type(unit_id, level, position, self)
             self.gold -= unit.gold_cost(level)
             position.unit = unit
