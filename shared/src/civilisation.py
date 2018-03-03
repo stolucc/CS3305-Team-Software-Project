@@ -207,25 +207,18 @@ class Civilisation(object):
         else:
             self._logger.debug("Unable to build structure.")
 
-    def unlock_research(self, branch):
+    def unlock_research(self, node_id):
         """
-        Unlock next node on research branch.
+        Unlock node on research tree.
 
-        branches = 'worker', 'archer', 'swordsman'.
+        branches = 'worker', 'archer', 'swordsman', 'win'.
         """
-        if branch in self.tree.branches:
-            if self.tree.next_unlock_node(branch).unlock_cost <= self.science:
-                self.tree.unlock_tier(branch)
-            else:
-                self._logger.debug("Not enough Science points.")
+        node = self._tree._nodes[node_id]
+        if node.unlock_cost <= self.science and self._tree.unlockable(node_id):
+            self.science -= node.unlock_cost
+            self._tree.unlock_node(node_id)
         else:
-            self._logger.debug("Branch not in research tree.")
-
-    def unlock_research_win(self):
-        """Unlock last node of researchh to win game."""
-        if self.tree.end_node_unlockable():
-            if self.science >= self.tree.win_node._unlock_cost:
-                self.tree.unlock_end_node()
+            self._logger.debug("Unable to unlock research node.")
 
     def upgrade_unit(self, unit):
         """Upgrade unit."""

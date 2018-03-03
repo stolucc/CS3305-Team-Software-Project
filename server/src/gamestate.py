@@ -294,6 +294,11 @@ class GameState:
                                                position.z)
             return [self._civs[civ].buy_unit(unit_id, action.building,
                                              action.unit_type, action.level)]
+        elif action.type == "ResearchAction":
+            node_id = action.node_id
+            database_API.Technology.insert(self._session, self._civs[civ]._id,
+                                           node_id)
+            return [self._civs[civ].unlock_research(node_id)]
 
 # NOTE: City database insertion
 # city_id = database_API.Building.insert(self._session, self._id,

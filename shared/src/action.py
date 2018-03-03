@@ -190,6 +190,18 @@ class UnitUpdate():
         return "<UnitHealthUpdate>"
 
 
+class ResearchAction():
+        """An update on Research Tree."""
+
+        def __init__(self, node_id):
+            """Initialise a node id."""
+            self._node_id = node_id
+
+        def __str__(self):
+            """Return String representation of a ResearchTreeUpdate onject."""
+            return "<ResearchTreeUpdate>"
+
+
 class TileUpdates():
     """A list of tiles that need to be updated."""
 
