@@ -334,6 +334,7 @@ class Civilisation(object):
             self.gold -= unit.gold_cost(level)
             position.unit = unit
             self.units[unit_id] = unit
+            return unit
         else:
             self._logger.debug("Unable to purchase unit.")
 
@@ -407,21 +408,3 @@ class Civilisation(object):
                 building_vision = self._grid.vision(tile, vision_range)
                 vision |= set(building_vision)
         self._vision = vision
-
-    def handle_action(self, action):
-        """
-        Handle incoming client-actions and update game state accordingly.
-
-        :param action: The action to be processed.
-        """
-        # NOTE: Assume validation has already ocurred
-        if action.type == "MovementAction":
-            self.move_unit_to_hex(action.unit, action.destination)
-        elif action.type == "CombatAction":
-            self.attack_unit(action.attacker, action.defender)
-        elif action.type == "UpgradeAction":
-            self.upgrade_unit(action.unit)
-        elif action.type == "BuildAction":
-            self.build_structure(action.unit, action.building_type)
-        elif action.type == "PurchaseAction":
-            self.buy_unit(action.building, action.unit_type, action.level)
