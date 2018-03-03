@@ -6,7 +6,8 @@ from building import Building
 from unit import Unit
 from action import ServerError, GAME_FULL_ERROR, UNKNOWN_ACTION, \
     StartTurnUpdate, TileUpdates, UnitUpdate, MovementAction, \
-    CombatAction, UpgradeAction, BuildAction, PurchaseAction
+    CombatAction, UpgradeAction, BuildAction, PurchaseAction, \
+    PlayerJoinedUpdate
 from unit import Worker
 import random
 from queue import Queue
@@ -184,6 +185,9 @@ class GameState:
             if(len(self._civs) == 4):
                 self._game_started = True
                 self._turn_count = 1
+                player_ids = [x for x in self._civs]
+                for civ in self.civs:
+                    self._queues[civ].put(PlayerJoinedUpdate(player_ids))
                 self._current_player = list(self._civs.keys())[0]
                 start_turn_update = StartTurnUpdate(self._current_player,
                                                     self._turn_count)
