@@ -178,7 +178,8 @@ class GameState:
             self._civs[user_id].set_up(self._grid.get_hextile(location),
                                        unit_id)
             self._queues[user_id] = Queue()
-            self._queues[user_id].put(self._civs[user_id].units[unit_id])
+            self._queues[user_id].put(UnitUpdate(
+                self._civs[user_id].units[unit_id]))
 
             if(len(self._civs) == 4):
                 self._game_started = True
