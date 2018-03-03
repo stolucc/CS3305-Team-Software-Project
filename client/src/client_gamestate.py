@@ -1,18 +1,10 @@
 """Game state representation."""
 
-import database_API
-from civilisation import Civilisation
-from action import ServerError, GAME_FULL_ERROR, UNKNOWN_ACTION, \
-    StartTurnUpdate
-from unit import Worker
-import random
-from queue import Queue
-
 
 class GameState:
     """Game state class."""
 
-    def __init__(self, game_id, seed, grid, logger, session):
+    def __init__(self, game_id, seed, grid, logger):
         """
         Initialise GameState attributes.
 
@@ -21,7 +13,6 @@ class GameState:
         :param grid: hex grid that game is using
         """
         self._logger = logger
-        self._session = session
         self._game_id = game_id
         self._seed = seed
         self._grid = grid
@@ -30,7 +21,6 @@ class GameState:
         self._turn_count = 1
         self._current_player = None
         self._game_started = False
-        self._queues = {}
 
     @property
     def game_id(self):

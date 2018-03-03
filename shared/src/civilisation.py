@@ -26,7 +26,6 @@ class Civilisation(object):
         self._science = 0
         self._tree = ResearchTree(self)
         self._logger = logger
-        self._session = session
         self._vision = []
 
     def __repr__(self):
