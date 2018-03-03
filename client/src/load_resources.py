@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import *
 from building import BuildingType
+from mapresource import ResourceType
 
 
 IMAGE_PATH = "../resources/images/"
@@ -17,6 +18,8 @@ def load_image(image):
 
 
 class LoadImages:
+    """Class to load and store images in dictionaries"""
+
     def __init__(self):
         self._terrain_images = {
             "move-highlight": load_image("tiles/move-highlight.png"),
@@ -74,19 +77,53 @@ class LoadImages:
         self._building_images = {
             BuildingType.CITY: load_image("buildings/city.png"),
             BuildingType.FARM: load_image("buildings/farm.png"),
-            BuildingType.TRADE_POST: load_image("buildings/trading_post.png"),
+            BuildingType.TRADE_POST: load_image("buildings/" +
+                                                "trading_post.png"),
             BuildingType.UNIVERSITY: load_image("buildings/university.png")
+        }
+        self._resource_images = {
+            ResourceType.COAL: load_image("map_resources/coal.png"),
+            ResourceType.IRON: load_image("map_resources/iron.png"),
+            ResourceType.GEMS: load_image("map_resources/gems.png"),
+            ResourceType.LOGS: load_image("map_resources/logs.png")
         }
 
     def load_terrain_images(self):
+        """
+        Getter for terrain images.
+
+        :return: Dictonary of terrain images.
+        """
         return self._terrain_images
 
     def load_sprite_images(self):
+        """
+        Getter for sprite images.
+
+        :return: Dictonary of sprite images.
+        """
         return self._sprite_images
 
     def load_health_bar_images(self):
+        """
+        Getter for health bar images.
+
+        :return: Dictonary of health bar images.
+        """
         return self._health_bar_images
 
     def load_building_images(self):
+        """
+        Getter for building images.
+
+        :return: Dictonary of building images.
+        """
         return self._building_images
 
+    def load_resource_images(self):
+        """
+        Getter for resource images.
+
+        :return: Dictonary of resource images.
+        """
+        return self._resource_images

@@ -24,10 +24,10 @@ class Hex:
         self._z = z
         # self._claimed = False
         # self._terrain = Terrain(TerrainType.FLAT, BiomeType.GRASSLAND)
-        # self._unit = None
-        # self._building = None
-        self._unit = (choice([None, None, None, None, None, None, None, None, None, None, None,
-                              None, None, None, None, None, None, unit.Archer(3, 3, self, "Meh")]))
+        self._unit = None
+        # # self._building = None
+        # self._unit = (choice([None, None, None, None, None, None, None, None, None, None, None,
+        #                       None, None, None, None, None, None, unit.Archer(3, 3, self, "Meh")]))
         self._claimed = False
         self._terrain = Terrain(choice(list(TerrainType)),
                                 choice(list(BiomeType)))

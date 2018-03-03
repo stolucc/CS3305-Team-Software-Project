@@ -9,6 +9,7 @@ from layout import Layout
 from hexgrid import Grid, Hex
 from load_resources import LoadImages
 import building
+from unit import Worker
 from hud_overlay import HudOverlay
 from gamestate import GameState
 from enum import Enum
@@ -17,9 +18,6 @@ import math
 from civilisation import Civilisation
 from building import BuildingType
 from mapresource import ResourceType
-
-IMAGE_PATH = "../resources/images/"
-
 
 class Resolution(Enum):
     """Enum for resolutions."""
@@ -89,10 +87,16 @@ class Game:
         self._threads.append(t)
         t.start()
         self._load_images = LoadImages()
-        self._scaled_terrain_images = self._load_images.load_terrain_images().copy()
-        self._scaled_sprite_images = self._load_images.load_sprite_images().copy()
-        self._scaled_building_images = self._load_images.load_building_images().copy()
-        self._scaled_health_bar_images = self._load_images.load_health_bar_images().copy()
+        self._scaled_terrain_images = \
+            self._load_images.load_terrain_images().copy()
+        self._scaled_sprite_images = \
+            self._load_images.load_sprite_images().copy()
+        self._scaled_building_images = \
+            self._load_images.load_building_images().copy()
+        self._scaled_health_bar_images = \
+            self._load_images.load_health_bar_images().copy()
+        self._scaled_resource_images = \
+            self._load_images.load_resource_images().copy()
         self._currently_selected_unit = None
         self._currently_selected_tile = None
         self._current_available_moves = {}
@@ -216,10 +220,16 @@ class Game:
         c_hex = layout.pixel_to_hex(click)
         c_hex_coords = self._grid.hex_round((c_hex.x, c_hex.y, c_hex.z))
         hexagon = self._grid.get_hextile(c_hex_coords)
+        unit = self._currently_selected_unit
+        print(Worker)
+        print(type(unit))
         if self._currently_selected_tile != hexagon:
-            if self._currently_selected_unit is not None:
+            if unit is not None:
                 if hexagon in self._current_available_moves:
-                    self.move_unit(self._currently_selected_unit, hexagon)
+                    unit.civilisation.move_unit_to_hex(unit, hexagon)
+                elif type(unit) != Worker \
+                        and hexagon.unit is not None:
+                    unit.civilisation.attack_unit(unit, hexagon.unit)
                 self._currently_selected_tile = None
                 self._currently_selected_unit = None
                 self._current_available_moves = {}
@@ -250,23 +260,18 @@ class Game:
                  - math.ceil(layout.size * (math.sqrt(3) / 2)),
                  hexagon_coords[1] - layout.size))
 
-    def move_unit(self, unit, hexagon):
-        """
-        Move a unit to another hexagon.
-
-        :param unit: Unit to be moved.
-        :param hexagon: Hexagon to move to.
-        """
-        unit.position.unit = None
-        unit.position = hexagon
-        hexagon.unit = unit
-
     def build_structure(self, layout):
+        """
+        Build a structure using selected worker.
+
+        :param layout: Layout object being drawn on.
+        """
         click = pygame.mouse.get_pos()
         c_hex = layout.pixel_to_hex(click)
         c_hex_coords = self._grid.hex_round((c_hex.x, c_hex.y, c_hex.z))
         hexagon = self._grid.get_hextile(c_hex_coords)
-        if self._currently_selected_unit == hexagon.unit and self._currently_selected_unit.__class__.__name__ == "Worker":
+        unit = self._currently_selected_unit
+        if unit == hexagon.unit and unit.__class__.__name__ == "Worker":
             hexagon.unit.civilisation.build_city_on_tile(4, hexagon)
         self.draw_map()
 
@@ -305,9 +310,9 @@ class Game:
             self._scaled_health_bar_images[k] = pygame.transform.smoothscale(
                 self._load_images.load_health_bar_images()[k],
                 (adjusted_size, adjusted_size))
-        for l in self._resource_images:
+        for l in self._load_images.load_resource_images():
             self._scaled_resource_images[l] = pygame.transform.smoothscale(
-                self._resource_images[l],
+                self._load_images.load_resource_images()[l],
                 (adjusted_size, adjusted_size))
 
     def scale_resources_to_hex_size(self):
@@ -319,9 +324,9 @@ class Game:
         image quality.
         """
         adjusted_size = math.floor(1800 / self._zoom)
-        for k in self._resource_images:
+        for k in self._load_images.load_resource_images():
             self._scaled_resource_images[k] = pygame.transform.smoothscale(
-                self._resource_images[k],
+                self._load_images.load_resource_images()[k],
                 (adjusted_size, adjusted_size))
 
     def scale_buildings_to_hex_size(self):
@@ -402,12 +407,13 @@ class Game:
                     hexagon_coords = layout.hex_to_pixel(hexagon)
                     self.draw_building(hexagon_coords,
                                      self._scaled_building_images[
-                                         build.building_type])if hexagon._terrain._resource is not None:
-                    resource = hexagon._terrain._resource
-                    hexagon_coords = layout.hex_to_pixel(hexagon)
-                    self.draw_sprite(hexagon_coords,
-                                     self._scaled_resource_images[
-                                          resource.resource_type])
+                                         build.building_type])
+                    if hexagon.terrain.resource is not None:
+                        resource = hexagon.terrain.resource
+                        hexagon_coords = layout.hex_to_pixel(hexagon)
+                        self.draw_sprite(hexagon_coords,
+                                         self._scaled_resource_images[
+                                              resource.resource_type])
                 if hexagon.unit is not None:
                     unit = hexagon.unit
                     unit_level = unit.level

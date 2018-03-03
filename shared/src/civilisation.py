@@ -1,6 +1,6 @@
 """Civilisation representation."""
 
-from unit import Worker, Swordsman, Unit
+from unit import Worker, Swordsman, Unit, Archer
 from city import City
 from building import Building
 from currency import CurrencyType
@@ -156,6 +156,12 @@ class Civilisation(object):
         worker = Worker(worker_id, 1, city.no_unit_tile(), self)
         worker.position.unit = worker
         self.units[worker_id] = worker
+        archer = Archer(2, 2, city.no_unit_tile(), self)
+        archer.position.unit = archer
+        self.units[archer.id] = archer
+        soldier = Swordsman(1, 3, city.no_unit_tile(), self)
+        soldier.position.unit = soldier
+        self.units[soldier.id] = soldier
 
     def build_city_on_tile(self, identifier, tile):
         """
@@ -207,6 +213,7 @@ class Civilisation(object):
             movement_cost = self.movement_cost_of_path(path)
             if unit.movement_range >= movement_cost:
                 unit.movement -= movement_cost
+                unit.position.unit = None
                 unit.position = tile
                 tile.unit = unit
             else:
