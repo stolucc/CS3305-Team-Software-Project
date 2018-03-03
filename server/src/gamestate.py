@@ -174,7 +174,6 @@ class GameState:
             # NOTE: Not needed when loading from db
             location = random.choice(self._start_locations)
             del self._start_locations[self._start_locations.index(location)]
-            print(self._start_locations)
             unit_id = database_API.Unit.insert(self._session, user_id, 1,
                                                0, Worker.get_health(1),
                                                *location)
