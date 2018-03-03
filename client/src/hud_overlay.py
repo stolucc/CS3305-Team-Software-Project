@@ -13,12 +13,17 @@ class InfoType(Enum):
     FOOD = 1
     SCIENCE = 2
     PRODUCTION = 3
+    GEMS = 4
+    LOGS = 5
+    COAL = 6
+    IRON = 7
 
 
 class HudOverlay:
     """Class to represent a HUD Overlay."""
 
-    def __init__(self, game_state, screen_surface, resolution, zoom_level):
+    def __init__(self, game_state, screen_surface,
+                 quick_surface, resolution, layout):
         """
         Construct hud_overlay.
 
@@ -30,8 +35,9 @@ class HudOverlay:
         self._grid = game_state.grid
         self._myciv = game_state.get_civ(self._game_state.my_id)
         self._screen = screen_surface
+        self._quick_surface = quick_surface
         self._resolution = resolution
-        self._zoom_level = zoom_level
+        self._layout = layout
         self.font = pygame.font.Font('freesansbold.ttf', 12)
         path = "../resources/images/hud/"
         x, y = 50, 50
@@ -40,12 +46,16 @@ class HudOverlay:
             InfoType.FOOD: self._load_img(path+"food_logo.png", x, y),
             InfoType.SCIENCE: self._load_img(path+"science_logo.png", x, y),
             InfoType.PRODUCTION: self._load_img(path+"production_logo.png", x,
-                                                y)
+                                                y),
+            InfoType.GEMS: self._load_img(path+"gems.png", x, y),
+            InfoType.LOGS: self._load_img(path+"logs.png", x, y),
+            InfoType.COAL: self._load_img(path+"coal.png", x, y),
+            InfoType.IRON: self._load_img(path+"iron.png", x, y),
             }
         path = "../resources/images/tiles/"
-        scale = round(100 / self._grid.size)
+        scale = round(200 / self._grid.size)
         x, y = math.ceil((scale * 2 * math.sqrt(3) / 2)), scale * 2
-        self._map_layout = Layout(scale, (95, self._resolution[1]-85))
+        self._map_layout = Layout(scale, (200, self._resolution[1]-170))
         self.map_imgs = {
             (0, 0): self._load_img(path+"tundra_flat.png", x, y),
             (0, 1): self._load_img(path+"grassland_flat.png", x, y),
@@ -58,7 +68,8 @@ class HudOverlay:
             (2, 2): self._load_img(path+"desert_mountain.png", x, y),
             (3, 0): self._load_img(path+"ocean.png", x, y),
             (3, 1): self._load_img(path+"ocean.png", x, y),
-            (3, 2): self._load_img(path+"ocean.png", x, y)}
+            (3, 2): self._load_img(path+"ocean.png", x, y),
+            0: self._load_img(path+"view-highlight.png", x, y)}
         self._background = (74, 74, 74)
         self._color1 = (0, 0, 0)
         self._color2 = (255, 255, 255)
@@ -78,12 +89,50 @@ class HudOverlay:
         self.draw_info_panel()
         self.draw_minimap()
 
+    def draw_quick_surface(self, layouts):
+        """Draw quick moving HUD elements."""
+        self._quick_surface.fill((0, 0, 0, 0))
+        self.draw_view(layouts)
+
+    def draw_view(self, layouts):
+        """Draw box showing current view."""
+        self.highlight_view(self._layout)
+        for layout in layouts:
+            self.highlight_view(layout)
+
+    def highlight_view(self, layout):
+        """Highlight viewed tiles."""
+        size = pygame.display.get_surface().get_size()
+        image = self.map_imgs[0]
+        for hex_point in self._grid.get_hextiles():
+            hexagon = self._grid.get_hextile(hex_point)
+            hexagon_coords = layout.hex_to_pixel(hexagon)
+            if (size[0] + 100 > hexagon_coords[0] > -100 and
+               size[1] + 100 > hexagon_coords[1] > -100):
+                hexagon_coords = self._map_layout.hex_to_pixel(hexagon)
+                self._quick_surface.blit(
+                        image,
+                        (hexagon_coords[0]
+                         - math.ceil(self._map_layout.size
+                         * (math.sqrt(3) / 2)),
+                         hexagon_coords[1] - self._map_layout.size))
+
     def draw_resource_panel(self):
         """Draw resource panel."""
         resources = {InfoType.GOLD: self._myciv.gold,
                      InfoType.FOOD: self._myciv.food,
                      InfoType.SCIENCE: self._myciv.science,
-                     InfoType.PRODUCTION: None}
+                     InfoType.PRODUCTION: None,
+                     InfoType.GEMS: 0,  # self._myciv.gems,
+                     InfoType.LOGS: 0,  # self._myciv.logs,
+                     InfoType.COAL: 0,  # self._myciv.coal,
+                     InfoType.IRON: 0}  # self._myciv.iron}
+        points = [(450, 0),
+                  (0, 0),
+                  (0, 60),
+                  (430, 60),
+                  (450, 40)]
+        pygame.draw.polygon(self._screen, self._background, points, 0)
         offset = 10
         for resource in resources:
             value = resources[resource]
@@ -120,10 +169,11 @@ class HudOverlay:
 
     def draw_minimap(self):
         """Draw minimap."""
-        lay = Layout(105, (95, self._resolution[1]-85), False)
+        lay = Layout(200, (200, self._resolution[1]-170), False)
         points = lay.polygon_corners(self._grid.get_hextile(self._color1))
-        x, y = 0, self._resolution[1] - 176
-        pygame.draw.rect(self._screen, self._background, (x, y, 50, 180), 0)
+        x, y = 0, self._resolution[1] - 344
+        pygame.draw.rect(self._screen,
+                         self._background, (x, y, 100, 350), 0)
         pygame.draw.polygon(self._screen, self._background, points, 0)
         self.draw_hex_grid()
 
