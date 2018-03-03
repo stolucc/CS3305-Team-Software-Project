@@ -2,7 +2,8 @@
 
 import database_API
 from civilisation import Civilisation
-from Building import Building
+from building import Building
+from unit import Unit
 from action import ServerError, GAME_FULL_ERROR, UNKNOWN_ACTION, \
     StartTurnUpdate
 from unit import Worker
@@ -124,9 +125,24 @@ class GameState:
             elif message.type in civ_actions:
                 # TODO
                 result_set = self.handle_action(message.id, message.obj)
+                self.populate_queues(result_set)
         err = ServerError(UNKNOWN_ACTION)
         self._logger.error(err)
         return err
+
+    def populate_queues(self, result_set):
+        """Add update information to relevant queues."""
+        impacted_tiles = result_set
+        if isinstance(result_set[0], Unit):
+            impacted_tiles = [unit.location for unit in impacted_tiles]
+        for civ in self._civs:
+            self.civs[civ].calculate_vision()
+            vision = self._civs[civ].vision
+            relevant = []
+            for tile in range(len(impacted_tiles)):
+                if impacted_tiles[tile] in vision:
+                    relevant += [tile]
+            self._queues[civ].put([result_set[x] for x in relevant])
 
     def add_player(self, message):
         """
