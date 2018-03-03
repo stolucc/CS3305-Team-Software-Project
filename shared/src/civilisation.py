@@ -244,10 +244,12 @@ class Civilisation(object):
                                            unit.movement_range)
             movement_cost = self.movement_cost_of_path(path)
             if unit.movement_range >= movement_cost and unit.actions > 0:
+                pos = unit.position
                 unit.movement -= movement_cost
                 unit.position.unit = None
                 unit.position = tile
                 tile.unit = unit
+                pos.unit = None
                 unit.actions -= 1
             else:
                 self._logger.debug("Unable to move unit.")

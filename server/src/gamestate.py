@@ -35,6 +35,8 @@ class GameState:
         self._current_player = None
         self._game_started = False
         self._queues = {}
+        self._start_locations = [(0, 0, 0), (50, -25, -25),
+                                 (-50, 25, 25), (25, -50, 25)]
 
     @property
     def game_id(self):
@@ -159,8 +161,6 @@ class GameState:
         :param message: The message object sent from the client.
         :return: The id of the new player
         """
-        start_locations = [(0, 0, 0), (50, -25, -25),
-                           (-50, 25, 25), (25, -50, 25)]
         if len(self._civs) < 4:
             user_id = database_API.User.insert(self._session,
                                                self._game_id,
@@ -172,8 +172,9 @@ class GameState:
             self._logger.info("New Civilisation joined with id " +
                               str(user_id))
             # NOTE: Not needed when loading from db
-            location = random.choice(start_locations)
-            del start_locations[start_locations.index(location)]
+            location = random.choice(self._start_locations)
+            del self._start_locations[self._start_locations.index(location)]
+            print(self._start_locations)
             unit_id = database_API.Unit.insert(self._session, user_id, 1,
                                                0, Worker.get_health(1),
                                                *location)
@@ -186,7 +187,7 @@ class GameState:
                 self._game_started = True
                 self._turn_count = 1
                 player_ids = [x for x in self._civs]
-                for civ in self.civs:
+                for civ in self._civs:
                     self._queues[civ].put(PlayerJoinedUpdate(player_ids))
                 self._current_player = list(self._civs.keys())[0]
                 start_turn_update = StartTurnUpdate(self._current_player,
