@@ -65,7 +65,7 @@ class ServerAPI:
         reply = self.send_action(end_turn_action, self.con)
         if reply.type == "ServerError":
             self._log.error(reply.obj)
-            raise action.ServerError(action.GAME_FULL_ERROR)
+            raise action.ServerError(reply.obj)
         else:
             self._log.info("Turn ended")
 
@@ -85,7 +85,7 @@ class ServerAPI:
         reply = self.send_action(check_for_updates_action, self.con2)
         if reply.type == "ServerError":
             self._log.error(reply.obj)
-            raise action.ServerError(action.VALIDATION_ERROR)
+            raise action.ServerError(reply.obj)
         else:
             for update in reply.obj:
                 if update.__class__.__name__ == "StartTurnUpdate":
@@ -206,7 +206,7 @@ class ServerAPI:
         reply = self.send_action(upgrade_action, self.con)
         if reply.type == "ServerError":
             self._log.error(reply.obj)
-            raise action.ServerError(action.VALIDATION_ERROR)
+            raise action.ServerError(reply.obj)
         else:
             self._game_state._civs[self.id].upgrade_unit(unit)
 
