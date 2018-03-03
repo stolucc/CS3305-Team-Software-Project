@@ -20,14 +20,18 @@ def main():
         unit = None
         for key in civ._units:
             unit = civ._units[key]
+        print(unit)
         unit_coords = unit.position.coords
+        move_back = server_api._game_state._grid.get_hextile(unit_coords)
         move_coords = (unit_coords[0] + 1, unit_coords[1] - 1, unit_coords[2])
         hex_to_move = server_api._game_state._grid.get_hextile(move_coords)
         hello = input("send move")
+        print(hex_to_move)
         server_api.move_unit(unit, hex_to_move)
         server_api.end_turn()
         hello = input("send move2")
-        server_api.move_unit(unit, unit_coords)
+        print(move_back)
+        server_api.move_unit(unit, move_back)
         server_api.end_turn()
         # server_api.leave_game()
     except action.ServerError as e:
