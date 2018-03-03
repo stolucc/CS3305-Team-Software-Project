@@ -362,9 +362,10 @@ class Civilisation(object):
     def calculate_vision(self):
         """Determine the tiles visible to the civilisation."""
         vision = set()
-        for unit in self._units:
+        for unit_id in self._units:
+            unit = self._units[unit_id]
             vision_range = 2  # TODO: Replace with unit vision range
-            tile = unit.location
+            tile = unit.position
             unit_vision = self._grid.vision(tile, vision_range)
             vision |= set(unit_vision)
 

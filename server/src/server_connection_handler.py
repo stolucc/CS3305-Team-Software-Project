@@ -64,6 +64,7 @@ class ConnectionHandler:
                 client_conn = Connection(addr[0], addr[1], connection=conn)
                 thread = threading.Thread(name="worker",
                                           target=self._function,
+                                          daemon=True,
                                           args=(client_conn,))
                 thread.start()
                 self._threads.append(thread)
