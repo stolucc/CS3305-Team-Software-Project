@@ -221,8 +221,6 @@ class Game:
         c_hex_coords = self._grid.hex_round((c_hex.x, c_hex.y, c_hex.z))
         hexagon = self._grid.get_hextile(c_hex_coords)
         unit = self._currently_selected_unit
-        print(Worker)
-        print(type(unit))
         if self._currently_selected_tile != hexagon:
             if unit is not None:
                 if hexagon in self._current_available_moves:
