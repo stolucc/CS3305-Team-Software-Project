@@ -2,6 +2,7 @@
 
 import database_API
 from civilisation import Civilisation
+from Building import Building
 from action import ServerError, GAME_FULL_ERROR, UNKNOWN_ACTION, \
     StartTurnUpdate
 from unit import Worker
@@ -99,7 +100,7 @@ class GameState:
         """Setter for turn_count."""
         self._turn_count = turn_count
 
-    def handle_action(self, message):
+    def handle_message(self, message):
         """
         Handle an action sent by a client.
 
@@ -121,7 +122,8 @@ class GameState:
             elif message.type == "EndTurnAction":
                 return self.end_turn(message)
             elif message.type in civ_actions:
-                result_set = self._civs[message.id].handle_action(message.obj)
+                # TODO
+                result_set = self.handle_action(message.id, message.obj)
         err = ServerError(UNKNOWN_ACTION)
         self._logger.error(err)
         return err
@@ -228,17 +230,49 @@ class GameState:
         """
         # NOTE: Assume validation has already ocurred
         if action.type == "MovementAction":
-            self.move_unit_to_hex(action.unit, action.destination)
+            self._civs[civ].move_unit_to_hex(action.unit, action.destination)
+            unit = action.unit
+            tile = action.destination
+            database_API.Unit.update(self._session, unit.id, x=tile.x,
+                                     y=tile.y, z=tile.z)
             return [action.unit.location, action.destination]
         elif action.type == "CombatAction":
-            self.attack_unit(action.attacker, action.defender)
+            self._civs[civ].attack_unit(action.attacker, action.defender)
+            enemy = action.defender
+            database_API.Unit.update(self._session, enemy.id,
+                                     health=enemy.health)
             return [action.attacker, action.defender]
         elif action.type == "UpgradeAction":
-            self.upgrade_unit(action.unit)
+            self._civs[civ].upgrade_unit(action.unit)
+            unit = action.unit
+            database_API.Unit.update(self._session, unit._id,
+                                     level=unit.level, health=unit.health)
             return [action.unit]
         elif action.type == "BuildAction":
-            self.build_structure(action.unit, action.building_type)
+            building_type = action.building_type
+            tile = action.unit.location
+            bld_id = database_API.Building.insert(self._session,
+                                                  self._civs[civ]._id,
+                                                  True, Building.get_type
+                                                  (building_type),
+                                                  tile.x, tile.y, tile.z)
+            self._civs[civ].build_structure(bld_id, action.unit,
+                                            action.building_type)
             return [action.unit.location]
         elif action.type == "PurchaseAction":
-            return [self.buy_unit(action.building,
-                                  action.unit_type, action.level)]
+            level = action.level
+            unit_type = action.unit_type
+            position = action.building.position
+            unit_id = database_API.Unit.insert(self._session,
+                                               self._civs[civ]._id, level,
+                                               unit_type.get_type(),
+                                               unit_type.get_health(level),
+                                               position.x, position.y,
+                                               position.z)
+            return [self._civs[civ].buy_unit(unit_id, action.building,
+                                             action.unit_type, action.level)]
+
+# NOTE: City database insertion
+# city_id = database_API.Building.insert(self._session, self._id,
+#                                        True, 3, tile.x, tile.y,
+#                                        tile.z)
