@@ -5,12 +5,13 @@ from city import City
 from building import Building
 from currency import CurrencyType
 from researchtree import ResearchTree
+from mapresource import ResourceType
 
 
 class Civilisation(object):
     """Civilisation class."""
 
-    def __init__(self, identifier, grid, logger, session):
+    def __init__(self, identifier, grid, logger):
         """
         Initialise Civilisation attributes.
 
@@ -129,6 +130,17 @@ class Civilisation(object):
         :param science: int.
         """
         self._science = science
+
+    @property
+    def resources(self):
+        """Getter for all resources available to civ."""
+        values = {}
+        for resource in list(ResourceType):
+            values[resource] = 0
+        for key, city in self._cities.items():
+            for resource in list(ResourceType):
+                values[resource] += city.resources
+        return values
 
     @property
     def grid(self):

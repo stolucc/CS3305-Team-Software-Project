@@ -1,6 +1,6 @@
 """City representation."""
 from currency import CurrencyType
-from mapresource import Resource
+from mapresource import ResourceType
 from building import BuildingType
 
 
@@ -67,12 +67,13 @@ class City():
     def resources(self):
         """Property to evaluate total resources produced by this city."""
         resources = {}
-        for resource in list(Resource):
+        for resource in list(ResourceType):
             resources[resource] = 0
         for tile in self._tiles:
-            if tile.terrain.resource is not None \
-               and tile.terrain.resource.is_worked:
-                    resources[tile.terrain.resource] += 1
+            resource = tile.terrain.resource
+            if resource is not None \
+               and resource.is_worked:
+                    resources[resource] += resource.quantity
         return resources
 
     @property

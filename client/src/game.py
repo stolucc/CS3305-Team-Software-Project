@@ -2,6 +2,8 @@
 
 import pygame
 import math
+import os
+import json
 import sys
 import time
 import threading
@@ -10,15 +12,16 @@ from hexgrid import Grid, Hex
 from load_resources import LoadImages
 from unit import Worker
 from hud_overlay import HudOverlay
-from gamestate import GameState
+from client_gamestate import GameState
 from civilisation import Civilisation
 from math import floor
+from file_logger import Logger
 
 
 class Game:
     """Class to represent client-side rendering of the game."""
 
-    def __init__(self, game_state):
+    def __init__(self, game_state, logger):
         """Initialise display surface."""
         pygame.init()
         pygame.font.init()
@@ -46,9 +49,8 @@ class Game:
         self._max_zoom = 40
         self._hex_size = lambda x: (self.infoObject.current_w // x)
         self._grid = self._game_state.grid
-        self._civ1 = Civilisation("Player 1", self._grid)
-        self._civs = [self._civ1]
-        self._grid.create_grid()
+        self._civ1 = Civilisation(1, self._grid, logger)
+        self._game_state.add_civ(self._civ1)
         self._layout = Layout(self._hex_size(self._zoom),
                               (self._window_size[0] / 2,
                                self._window_size[1] / 2))
@@ -81,7 +83,7 @@ class Game:
 
     def start(self):
         """Initialize the game."""
-        self._civ1.set_up(self._grid.get_hextile((0, 0, 0)), 1, 1)
+        self._civ1.set_up(self._grid.get_hextile((0, 0, 0)), 1)
         self.scale_images_to_hex_size()
         self.scale_sprites_to_hex_size()
         self.scale_buildings_to_hex_size()
@@ -100,7 +102,7 @@ class Game:
                     self.mouse_button_down(event)
                 if event.type == pygame.MOUSEBUTTONUP:
                     self.mouse_button_up(event)
-            time.sleep(0.001)
+            time.sleep(0.004)
 
     def quit(self):
         """Close game."""
@@ -209,11 +211,12 @@ class Game:
         unit = self._currently_selected_unit
         if self._currently_selected_tile != hexagon:
             if unit is not None:
+                civilisation = self._game_state.get_civ(unit.civ_id)
                 if hexagon in self._current_available_moves:
-                    unit.civilisation.move_unit_to_hex(unit, hexagon)
+                    civilisation.move_unit_to_hex(unit, hexagon)
                 elif type(unit) != Worker \
                         and hexagon.unit is not None:
-                    unit.civilisation.attack_unit(unit, hexagon.unit)
+                    civilisation.attack_unit(unit, hexagon.unit)
                 self._currently_selected_tile = None
                 self._currently_selected_unit = None
                 self._current_available_moves = {}
@@ -256,7 +259,8 @@ class Game:
         hexagon = self._grid.get_hextile(c_hex_coords)
         unit = self._currently_selected_unit
         if unit == hexagon.unit and unit.__class__.__name__ == "Worker":
-            hexagon.unit.civilisation.build_city_on_tile(4, hexagon)
+            civilisation = self._game_state.get_civ(hexagon.unit.civ_id)
+            civilisation.build_city_on_tile(4, hexagon)
         self.draw_map()
 
     def scale_images_to_hex_size(self):
@@ -391,12 +395,12 @@ class Game:
                     self.draw_building(hexagon_coords,
                                        self._scaled_building_images[
                                          build.building_type])
-                    if hexagon.terrain.resource is not None:
-                        resource = hexagon.terrain.resource
-                        hexagon_coords = layout.hex_to_pixel(hexagon)
-                        self.draw_sprite(hexagon_coords,
-                                         self._scaled_resource_images[
-                                              resource.resource_type])
+                if hexagon.terrain.resource is not None:
+                    resource = hexagon.terrain.resource
+                    hexagon_coords = layout.hex_to_pixel(hexagon)
+                    self.draw_sprite(hexagon_coords,
+                                     self._scaled_resource_images[
+                                          resource.resource_type])
                 if hexagon.unit is not None:
                     unit = hexagon.unit
                     unit_level = unit.level
@@ -448,12 +452,16 @@ class Game:
 
 
 if __name__ == "__main__":
+    with open(os.path.join("..", "config", "config.json")) as config_file:
+        config = json.load(config_file)
     map_ref = Grid(26)
     map_ref.create_grid()
     map_ref.static_map()
-    civ = Civilisation(1, map_ref)
-    game_state = GameState(1, 1, map_ref)
+    logger = Logger("client.log", "client", config["logging"]["log_level"])
+    logger = logger.get_logger()
+    civ = Civilisation(1, map_ref, logger)
+    game_state = GameState(1, 1, map_ref, logger)
     game_state.add_civ(civ)
     game_state.my_id = 1
-    game = Game(game_state)
+    game = Game(game_state, logger)
     game.start()
