@@ -113,7 +113,7 @@ class GameState:
         :return: The value to be sent back to the client
         """
         civ_actions = ["MovementAction", "CombatAction", "UpgradeAction",
-                       "BuildAction", "PurchaseAction"]
+                       "BuildAction", "PurchaseAction", "BuildCityAction"]
 
         if message.type == "CheckForUpdates":
             return self.update_player(message)
@@ -304,10 +304,12 @@ class GameState:
         elif isinstance(action, BuildCityAction):
             unit = action.unit
             tile = unit.position
-            city_id = database_API.Building.insert(self._session, self._id,
+            city_id = database_API.Building.insert(self._session,
+                                                   self._civs[civ]._id,
                                                    True, 3, tile.x, tile.y,
                                                    tile.z)
             self._civs[civ].build_city_on_tile(unit, city_id)
+            return ([tile], city_id)
 
         elif isinstance(action, ResearchAction):
             node_id = action.node_id
