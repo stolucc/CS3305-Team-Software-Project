@@ -196,14 +196,19 @@ class Civilisation(object):
         :param tile: hex object
         """
         tile = worker.position
+        print("Tile: ", tile)
+        print("building there:", tile.building is None)
+        print("Tile and worker match:", tile.civ_id == worker.civ_id)
+        print("Enough Money:", self.gold >= Building.buy_cost(building_type))
+        print("Enough Actions:", worker.actions > 0)
         if tile.building is None and isinstance(worker, Worker)\
                 and tile.civ_id == worker.civ_id\
-                and self.gold >= building_type.buy_cost()\
+                and self.gold >= Building.buy_cost(building_type)\
                 and worker.actions > 0:
             city_id = tile.city_id
             building = Building(building_id, building_type, tile,
                                 worker.civ_id, city_id)
-            self.gold -= building.buy_cost
+            self.gold -= Building.buy_cost(building_type)
             tile.building = building
             self.cities[city_id].buildings[building_id] = building
             worker.actions -= 1
@@ -378,7 +383,7 @@ class Civilisation(object):
             buildings = self.cities[city_id].buildings
             for building in buildings:
                 vision_range = 2
-                tile = building.location
+                tile = buildings[building].position
                 building_vision = self._grid.vision(tile, vision_range)
                 vision |= set(building_vision)
         self._vision = vision

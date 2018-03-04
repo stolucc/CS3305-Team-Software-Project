@@ -73,14 +73,14 @@ class Building():
         return values[self._type]
 
     @staticmethod
-    def buy_cost(self):
+    def buy_cost(type):
         """Cost in gold to purchase building."""
         values = {
             BuildingType.FARM: 10,
             BuildingType.TRADE_POST: 10,
             BuildingType.UNIVERSITY: 10
         }
-        return values[self._type]
+        return values[type]
 
     @staticmethod
     def get_type(type):

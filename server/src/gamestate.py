@@ -240,6 +240,7 @@ class GameState:
         next_civ_index = (current_civ_index + 1) % 4
         next_civ = civs[next_civ_index]
         self._current_player = next_civ
+        self._civs[self._current_player].reset_unit_actions_and_movement()
         if next_civ_index == 0:
             self._turn_count += 1
         start_turn_update = StartTurnUpdate(self._current_player,
@@ -285,8 +286,9 @@ class GameState:
                                                   True, Building.get_type
                                                   (building_type),
                                                   tile.x, tile.y, tile.z)
-            self._civs[civ].build_structure(bld_id, action.unit,
-                                            action.building_type)
+            self._civs[civ].build_structure(action.unit,
+                                            action.building_type,
+                                            bld_id)
             return ([action.unit.position], bld_id)
         elif isinstance(action, PurchaseAction):
             level = action.level
