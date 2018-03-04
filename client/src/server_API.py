@@ -79,93 +79,6 @@ class ServerAPI:
         else:
             self._log.info("Left game = " + str(reply.obj))
 
-    def check_for_updates(self):
-        """Ask the server to update the game for a client."""
-        check_for_updates_action = action.CheckForUpdates()
-        reply = self.send_action(check_for_updates_action, self.con2)
-        if reply.type == "ServerError":
-            self._log.error(reply.obj)
-            raise action.ServerError(reply.obj)
-        else:
-            for update in reply.obj:
-                if update.__class__.__name__ == "StartTurnUpdate":
-                    self._game_state.set_player_turn(update._current_player)
-                    self._game_state.turn_count = update._turn_count
-                    if update._current_player == self.id:
-                        self._game_state._civs[self.id].currency_per_turn()
-                elif update.__class__.__name__ == "PlayerJoinedUpdate":
-                    for id in update._players:
-                        if id not in self._game_state._civs:
-                            new_civ = Civilisation(id,
-                                                   self._game_state._grid,
-                                                   self._log,
-                                                   None)
-                            self._game_state._civs[id] = new_civ
-                elif update.__class__.__name__ == "UnitUpdate":
-                    civ = self._game_state._civs[update._unit._civ_id]
-                    if update._unit._id in civ._units:
-                        if update._unit._health <= 0:
-                            del civ._units[update._unit._id]
-                        else:
-                            if self._game_state._my_id == update._unit._civ_id:
-                                while civ._units[update._unit._id]._level < \
-                                        update._unit._level:
-                                    civ.upgrade_unit(
-                                        civ._units[update._unit._id])
-                            else:
-                                civ._units[update._unit._id]._level = \
-                                    update._unit._level
-                            civ._units[update._unit._id]._health = \
-                                update._unit._health
-                    else:
-                        if update._unit._health > 0:
-                            civ._units[update._unit._id] = update._unit
-                            unit_coords = update._unit.position.coords
-                            hex_tile = \
-                                self._game_state._grid.get_hextile(unit_coords)
-                            civ._units[update._unit._id].position = hex_tile
-                            hex_tile._unit = civ._units[update._unit._id]
-                elif update.__class__.__name__ == "TileUpdates":
-                    for tile in update._tiles:
-                        old_tile = \
-                            self._game_state._grid.get_hextile(tile.coords)
-                        if tile._unit is not None:
-                            civ = self._game_state._civs[tile._unit._civ_id]
-                            if tile._unit._id in civ._units:
-                                civ._units[tile._unit._id].position = old_tile
-                                old_tile._unit = civ._units[tile._unit._id]
-                            else:
-                                civ._units[tile._unit._id] = tile._unit
-                                unit_coords = tile._unit.position.coords
-                                hex_tile = \
-                                    self._game_state._grid.get_hextile(
-                                        unit_coords)
-                                civ._units[tile._unit._id].position = hex_tile
-                                old_tile._unit = civ._units[tile._unit._id]
-                        else:
-                            old_tile._unit = None
-                        if tile._building is not None:
-                            civ = \
-                                self._game_state._civs[tile._building._civ_id]
-                            city = civ._cities[tile._building._city_id]
-                            buildings = city._buildings
-                            building = tile._building
-                            if building._id in buildings:
-                                # TODO Update building
-                                pass
-                            else:
-                                buildings[tile._building._id] = building
-                                building_coords = building._location.coords
-                                hex_tile = \
-                                    self._game_state._grid.get_hextile(
-                                        building_coords)
-                                buildings[building._id].position = hex_tile
-                                old_tile._building = buildings[building._id]
-                        else:
-                            old_tile._building = None
-                        old_tile._civ_id = tile._civ_id
-                        old_tile._city_id = tile._city_id
-
     def move_unit(self, unit, hexagon):
         """
         Create and send an action causing a unit to move.
@@ -242,3 +155,107 @@ class ServerAPI:
             raise action.ServerError(reply.obj)
         else:
             self._game_state._civs[self.id].attack_unit(city, unit_type, level)
+
+    def check_for_updates(self):
+        """Ask the server to update the game for a client."""
+        check_for_updates_action = action.CheckForUpdates()
+        reply = self.send_action(check_for_updates_action, self.con2)
+        if reply.type == "ServerError":
+            self._log.error(reply.obj)
+            raise action.ServerError(reply.obj)
+        else:
+            for update in reply.obj:
+                self.handle_update(update)
+
+    def handle_update(self, update):
+        """Handle update reply that comes from the server."""
+        if update.__class__.__name__ == "StartTurnUpdate":
+            self.handle_start_turn_update(update)
+        elif update.__class__.__name__ == "PlayerJoinedUpdate":
+            self.handle_player_joined_update(update)
+        elif update.__class__.__name__ == "UnitUpdate":
+            self.handle_unit_update(update)
+        elif update.__class__.__name__ == "TileUpdates":
+            for tile in update._tiles:
+                self.handle_tile_update(tile)
+
+    def handle_start_turn_update(self, update):
+        """Handle start turn update."""
+        self._game_state.set_player_turn(update._current_player)
+        self._game_state.turn_count = update._turn_count
+        if update._current_player == self.id:
+            self._game_state._civs[self.id].currency_per_turn()
+
+    def handle_player_joined_update(self, update):
+        """Handle player joined update."""
+        for id in update._players:
+            if id not in self._game_state._civs:
+                new_civ = Civilisation(id, self._game_state._grid, self._log,
+                                       None)
+                self._game_state._civs[id] = new_civ
+
+    def handle_unit_update(self, update):
+        """Handle unit update."""
+        civ = self._game_state._civs[update._unit._civ_id]
+        unit = update._unit
+        if unit._id in civ._units:
+            if unit._health <= 0:
+                del civ._units[unit._id]
+            else:
+                if self._game_state._my_id == unit._civ_id:
+                    while civ._units[unit._id]._level < unit._level:
+                        civ.upgrade_unit(
+                            civ._units[unit._id])
+                else:
+                    civ._units[unit._id]._level = unit._level
+                civ._units[unit._id]._health = unit._health
+        else:
+            if unit._health > 0:
+                civ._units[unit._id] = update._unit
+                coords = unit.position.coords
+                hex_tile = self._game_state._grid.get_hextile(coords)
+                civ._units[unit._id].position = hex_tile
+                hex_tile._unit = civ._units[unit._id]
+
+    def handle_tile_update(self, tile):
+        old_tile = self._game_state._grid.get_hextile(tile.coords)
+        unit = tile._unit
+        building = tile._building
+        if unit is not None:
+            civ = self._game_state._civs[unit._civ_id]
+            if unit._id in civ._units:
+                civ._units[unit._id].position = old_tile
+                old_tile._unit = civ._units[unit._id]
+            else:
+                civ._units[unit._id] = tile._unit
+                coords = unit.position.coords
+                hex_tile = self._game_state._grid.get_hextile(coords)
+                civ._units[unit._id].position = hex_tile
+                old_tile._unit = civ._units[unit._id]
+        else:
+            old_tile._unit = None
+        if building is not None:
+            if building._type.__class__.__name__ == "City":
+                civ_id = tile.civ_id
+                civ = self._game_state._civs[civ_id]
+                civ._cities[building.id] = building
+                coords =building._hex.coords
+                hex_tile = self._game_state._grid.get_hextile(coords)
+                civ._cities[building.id]._hex = hex_tile
+                old_tile._building = civ._cities[building.id]
+            else:
+                civ = self._game_state._civs[building._civ_id]
+                city = civ._cities[building._city_id]
+                buildings = city._buildings
+                if building._id in buildings:
+                    pass
+                else:
+                    buildings[building._id] = building
+                    coords = building._location.coords
+                    hex_tile = self._game_state._grid.get_hextile(coords)
+                    buildings[building._id].position = hex_tile
+                    old_tile._building = buildings[building._id]
+        else:
+            old_tile._building = None
+        old_tile._civ_id = tile._civ_id
+        old_tile._city_id = tile._city_id
