@@ -237,6 +237,7 @@ class ServerAPI:
                 hex_tile._unit = civ._units[unit._id]
 
     def handle_tile_update(self, tile):
+        """Handle tile update."""
         old_tile = self._game_state._grid.get_hextile(tile.coords)
         unit = tile._unit
         building = tile._building
@@ -258,7 +259,7 @@ class ServerAPI:
                 civ_id = tile.civ_id
                 civ = self._game_state._civs[civ_id]
                 civ._cities[building.id] = building
-                coords =building._hex.coords
+                coords = building._hex.coords
                 hex_tile = self._game_state._grid.get_hextile(coords)
                 civ._cities[building.id]._hex = hex_tile
                 old_tile._building = civ._cities[building.id]

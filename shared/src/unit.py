@@ -245,6 +245,11 @@ class Unit:
             self._health = health
 
     def get_health_percentage(self):
+        """
+        Return int for health percentage.
+
+        :return: int
+        """
         return int(math.ceil(self.health/self.max_health * 20) * 5)
 
     def __repr__(self):

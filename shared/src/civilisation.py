@@ -1,6 +1,6 @@
 """Civilisation representation."""
 
-from unit import Worker, Swordsman, Unit, Archer
+from unit import Worker, Swordsman, Unit
 from city import City
 from building import Building
 from currency import CurrencyType
@@ -150,6 +150,11 @@ class Civilisation(object):
 
     @property
     def tiles(self):
+        """
+        List of tiles that the civ owns.
+
+        :return: list of hex object
+        """
         return self._tiles
 
     def set_up(self, tile, worker_id):
@@ -176,12 +181,10 @@ class Civilisation(object):
             city = City(city_id, tile, self._id)
             tiles = self.grid.spiral_ring(tile, City.RANGE)
             city.tiles = tiles
-            for tile in tiles:
-                tile.city_id = city_id
             self.gold -= cost_of_city
             worker.actions -= 1
             for tile in tiles:
-                self._tiles[tile]= self._id
+                self._tiles[tile] = self._id
             self.cities[city.id] = city
         else:
             self._logger.debug("Unable to build city.")

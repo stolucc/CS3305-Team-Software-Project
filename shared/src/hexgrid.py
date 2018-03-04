@@ -2,8 +2,6 @@
 
 from queue import PriorityQueue
 from terrain import Terrain, TerrainType, BiomeType
-from building import BuildingType, Building
-import unit
 from random import choice
 from mapresource import ResourceType, Resource
 
@@ -641,6 +639,7 @@ class Grid:
         hex._terrain = Terrain(terraintype, biometype)
 
     def static_map(self):
+        """Generate a static map."""
         for hex_point in self.get_hextiles():
             hexagon = self.get_hextile(hex_point)
             if abs(hexagon._x) == (self._size // 2) or \

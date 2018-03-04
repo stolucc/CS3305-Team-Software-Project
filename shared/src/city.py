@@ -87,9 +87,10 @@ class City():
 
     @property
     def position(self):
+        """Property to get position."""
         return self._hex
 
     @property
     def building_type(self):
+        """Property to get building type."""
         return self._type
-

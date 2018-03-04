@@ -126,7 +126,8 @@ class GameState:
             return self.end_turn(message)
         if message.id == self._current_player:
             if message.type in civ_actions:
-                (result_set, return_value) = self.handle_action(message.id, message.obj)
+                (result_set, return_value) = self.handle_action(message.id,
+                                                                message.obj)
                 self.populate_queues(result_set)
                 return return_value
         err = ServerError(UNKNOWN_ACTION)
