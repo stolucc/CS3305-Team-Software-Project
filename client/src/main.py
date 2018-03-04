@@ -4,6 +4,7 @@ import action
 import sys
 import threading
 from time import sleep
+from building import BuildingType
 
 
 def main():
@@ -15,7 +16,7 @@ def main():
                                   target=check_for_updates,
                                   args=(server_api,), daemon=True)
         thread.start()
-        sleep(3)
+        sleep(5)
         civ = server_api._game_state._civs[server_api.id]
         unit = None
         for key in civ._units:
@@ -25,14 +26,25 @@ def main():
         move_back = server_api._game_state._grid.get_hextile(unit_coords)
         move_coords = (unit_coords[0] + 1, unit_coords[1] - 1, unit_coords[2])
         hex_to_move = server_api._game_state._grid.get_hextile(move_coords)
-        input("send move")
-        print(hex_to_move)
+
+        input("send turn 1")
         server_api.move_unit(unit, hex_to_move)
+        print("moved")
+        server_api.build_city(unit)
+        print("city built")
         server_api.end_turn()
-        input("send move2")
+        print("turn ended")
+
+        input("send turn 2")
         print(move_back)
         server_api.move_unit(unit, move_back)
+        print("moved")
+        server_api.build(unit, BuildingType.FARM)
+        print("farm built")
         server_api.end_turn()
+        print("turn ended")
+
+        sleep(1000)
         # server_api.leave_game()
     except action.ServerError as e:
         print("Server error occurred with error code " + str(e.error_code))

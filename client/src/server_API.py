@@ -8,6 +8,7 @@ from hexgrid import Grid
 from client_gamestate import GameState
 from file_logger import Logger
 from civilisation import Civilisation
+from city import City
 
 
 class ServerAPI:
@@ -204,6 +205,7 @@ class ServerAPI:
         self._game_state.turn_count = update._turn_count
         if update._current_player == self.id:
             self._game_state._civs[self.id].currency_per_turn()
+            self._game_state._civs[self.id].reset_unit_actions_and_movement()
 
     def handle_player_joined_update(self, update):
         """Handle player joined update."""
@@ -255,7 +257,7 @@ class ServerAPI:
         else:
             old_tile._unit = None
         if building is not None:
-            if building._type.__class__.__name__ == "City":
+            if isinstance(building, City):
                 civ_id = tile.civ_id
                 civ = self._game_state._civs[civ_id]
                 civ._cities[building.id] = building
@@ -265,7 +267,7 @@ class ServerAPI:
                 old_tile._building = civ._cities[building.id]
             else:
                 civ = self._game_state._civs[building._civ_id]
-                city = civ._cities[building._city_id]
+                city = civ._cities[building._id]
                 buildings = city._buildings
                 if building._id in buildings:
                     pass
