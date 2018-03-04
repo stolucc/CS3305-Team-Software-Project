@@ -171,9 +171,9 @@ class Civilisation(object):
         """
         cost_of_city = 25
         unit = tile.unit
-        if not tile.claimed and isinstance(unit, Worker)\
+        if tile.civ_id is not None and isinstance(unit, Worker)\
                 and self.gold >= cost_of_city:
-            city = City(city_id, tile)
+            city = City(city_id, tile, self._id)
             tiles = self.grid.spiral_ring(tile, City.RANGE)
             city.tiles = tiles
             for tile in tiles:
