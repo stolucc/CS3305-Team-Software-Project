@@ -136,9 +136,26 @@ class ServerAPI:
             self._log.error(reply.obj)
             raise action.ServerError(reply.obj)
         else:
-            # TODO Add ability to build city
+            building_id = reply.obj
             self._game_state._civs[self.id].build_structure(unit,
-                                                            building_type)
+                                                            building_type,
+                                                            building_id)
+
+    def build_city(self, unit):
+        """
+        Create and send an action which constructs a new city.
+
+        :param unit: unit that is doing the building.
+        """
+        build_city_action = action.BuildCityAction(unit)
+        reply = self.send_action(build_city_action, self.con)
+        if reply.type == "ServerError":
+            self._log.error(reply.obj)
+            raise action.ServerError(reply.obj)
+        else:
+            city_id = reply.obj
+            self._game_state._civs[self.id].build_city_on_tile(unit,
+                                                               city_id)
 
     def purchase(self, city, unit_type, level):
         """
@@ -154,7 +171,9 @@ class ServerAPI:
             self._log.error(reply.obj)
             raise action.ServerError(reply.obj)
         else:
-            self._game_state._civs[self.id].attack_unit(city, unit_type, level)
+            unit_id = reply.obj
+            self._game_state._civs[self.id].buy_unit(city, unit_type, level,
+                                                     unit_id)
 
     def check_for_updates(self):
         """Ask the server to update the game for a client."""

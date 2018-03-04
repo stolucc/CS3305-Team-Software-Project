@@ -145,6 +145,22 @@ class BuildAction():
                 (str(self.unit), str(self.building_type)))
 
 
+class BuildCityAction():
+    """An action which constructs a new city."""
+
+    def __init__(self, unit):
+        """
+        Initialise a new build city action.
+
+        :param unit: The unit used to construct the city
+        """
+        self.unit = unit
+
+    def __str__(self):
+        """Return a String representation of a BuildAction object."""
+        return "<BuildCityAction unit: '%s'" % str(self.unit)
+
+
 class PurchaseAction():
     """An action which purchases a new unit."""
 
