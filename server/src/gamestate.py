@@ -7,7 +7,7 @@ from unit import Unit
 from action import ServerError, GAME_FULL_ERROR, UNKNOWN_ACTION, \
     StartTurnUpdate, TileUpdates, UnitUpdate, MovementAction, \
     CombatAction, UpgradeAction, BuildAction, PurchaseAction, \
-    PlayerJoinedUpdate
+    PlayerJoinedUpdate, ResearchAction, BuildCityAction
 from unit import Worker
 import random
 from queue import Queue
@@ -126,9 +126,9 @@ class GameState:
             return self.end_turn(message)
         if message.id == self._current_player:
             if message.type in civ_actions:
-                result_set = self.handle_action(message.id, message.obj)
+                (result_set, return_value) = self.handle_action(message.id, message.obj)
                 self.populate_queues(result_set)
-                return True
+                return return_value
         err = ServerError(UNKNOWN_ACTION)
         self._logger.error(err)
         return err
@@ -263,13 +263,13 @@ class GameState:
             tile = action.destination
             database_API.Unit.update(self._session, unit.id, x=tile.x,
                                      y=tile.y, z=tile.z)
-            return [action.unit.position, action.destination]
+            return ([action.unit.position, action.destination], True)
         elif isinstance(action, CombatAction):
             self._civs[civ].attack_unit(action.attacker, action.defender)
             enemy = action.defender
             database_API.Unit.update(self._session, enemy.id,
                                      health=enemy.health)
-            return [action.attacker, action.defender]
+            return ([action.attacker, action.defender], True)
         elif isinstance(action, UpgradeAction):
             self._civs[civ].upgrade_unit(action.unit)
             unit = action.unit
@@ -286,7 +286,7 @@ class GameState:
                                                   tile.x, tile.y, tile.z)
             self._civs[civ].build_structure(bld_id, action.unit,
                                             action.building_type)
-            return [action.unit.position]
+            return ([action.unit.position], bld_id)
         elif isinstance(action, PurchaseAction):
             level = action.level
             unit_type = action.unit_type
@@ -297,15 +297,20 @@ class GameState:
                                                unit_type.get_health(level),
                                                position.x, position.y,
                                                position.z)
-            return [self._civs[civ].buy_unit(unit_id, action.building,
-                                             action.unit_type, action.level)]
-        elif action.type == "ResearchAction":
+            return ([self._civs[civ].buy_unit(unit_id, action.building,
+                                              action.unit_type, action.level)],
+                    unit_id)
+
+        elif isinstance(action, BuildCityAction):
+            unit = action.unit
+            tile = unit.position
+            city_id = database_API.Building.insert(self._session, self._id,
+                                                   True, 3, tile.x, tile.y,
+                                                   tile.z)
+            self._civs[civ].build_city_on_tile(unit, city_id)
+
+        elif isinstance(action, ResearchAction):
             node_id = action.node_id
             database_API.Technology.insert(self._session, self._civs[civ]._id,
                                            node_id)
             return [self._civs[civ].unlock_research(node_id)]
-
-# NOTE: City database insertion
-# city_id = database_API.Building.insert(self._session, self._id,
-#                                        True, 3, tile.x, tile.y,
-#                                        tile.z)

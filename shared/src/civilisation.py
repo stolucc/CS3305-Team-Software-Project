@@ -163,15 +163,15 @@ class Civilisation(object):
         tile.unit = worker
         self.units[worker_id] = worker
 
-    def build_city_on_tile(self, tile, city_id):
+    def build_city_on_tile(self, worker, city_id):
         """
         Build city on given tile.
 
         :param tile: hex tile to build city on
         """
         cost_of_city = 25
-        unit = tile.unit
-        if tile.civ_id is not None and isinstance(unit, Worker)\
+        tile = worker.position
+        if tile.civ_id is not None and isinstance(worker, Worker)\
                 and self.gold >= cost_of_city:
             city = City(city_id, tile, self._id)
             tiles = self.grid.spiral_ring(tile, City.RANGE)
@@ -179,7 +179,7 @@ class Civilisation(object):
             for tile in tiles:
                 tile.city_id = city_id
             self.gold -= cost_of_city
-            unit.actions -= 1
+            worker.actions -= 1
             for tile in tiles:
                 self._tiles[tile]= self._id
             self.cities[city.id] = city
