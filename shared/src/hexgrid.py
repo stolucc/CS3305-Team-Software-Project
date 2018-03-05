@@ -544,12 +544,13 @@ class Grid:
         ring = self.single_ring(hex, radius)
         for tile in ring:
             view = True
-            ray = self.hex_linedraw(hex, tile)
-            for raytile in range(len(ray)):
-                if(view):
-                    result = result | {ray[raytile]}
-                    if not ray[raytile].vision:
-                        view = False
+            if self.hex_distance(hex, tile) < radius:
+                ray = self.hex_linedraw(hex, tile)
+                for raytile in range(len(ray)):
+                    if(view):
+                        result = result | {ray[raytile]}
+                        if not ray[raytile].vision:
+                            view = False
         return list(result)
 
     def dijkstra(self, start_hex, movement):

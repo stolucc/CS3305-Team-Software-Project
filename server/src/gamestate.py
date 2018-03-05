@@ -265,7 +265,8 @@ class GameState:
             tile = action.destination
             database_API.Unit.update(self._session, unit.id, x=tile.x,
                                      y=tile.y, z=tile.z)
-            return ([action.unit.position, action.destination], True)
+            return ([action.unit.position, action.destination],
+                    TileUpdates(self._grid.vision(tile, 2)))
         elif isinstance(action, CombatAction):
             self._civs[civ].attack_unit(action.attacker, action.defender)
             enemy = action.defender
