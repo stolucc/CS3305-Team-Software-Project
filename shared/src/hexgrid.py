@@ -2,7 +2,6 @@
 
 from queue import PriorityQueue
 from terrain import Terrain, TerrainType, BiomeType
-from random import choice
 from mapresource import ResourceType, Resource
 
 
@@ -629,18 +628,8 @@ class Grid:
             if tile > 0:
                 path[tile - 1].unit = None
 
-    def randomize_terrain(self, hex):
-        """
-        Pick a random terrain type for the hex tile.
-
-        :param hex: the hex tile to be randomized
-        """
-        terraintype = choice(list(TerrainType))
-        biometype = hex.terrain._biome
-        hex._terrain = Terrain(terraintype, biometype)
-
     def static_map(self):
-
+        """Create the static map."""
         resourcenum = 0
 
         for hex_point in self.get_hextiles():
@@ -653,14 +642,20 @@ class Grid:
 
             resource = self.choose_resource(hexagon, resourcenum)
 
-            if resource != None:
+            if resource is not None:
                 resourcenum += 1
 
             hexagon._terrain._resource = resource
 
     def choose_terrain_type(self, hexagon):
+        """
+        Choose a terrain type for the hexagon based on its coordinates.
 
-        if abs(hexagon._x) == (self._size // 2) or abs(hexagon._y) == (self._size // 2) \
+        :param hexagon: the hexagonal tile to be given a terrain type
+        :return: the terrain type chosen
+        """
+        if abs(hexagon._x) == (self._size // 2) \
+                or abs(hexagon._y) == (self._size // 2) \
                 or abs(hexagon._z) == (self._size // 2):
             # water around edges
             terraintype = TerrainType.OCEAN
@@ -672,19 +667,26 @@ class Grid:
             terraintype = TerrainType.OCEAN
         elif hexagon._y % 3 != 1 and hexagon._z % 2 == 1:
             terraintype = TerrainType.HILL
-        elif hexagon._z % 3 == 0 and (hexagon._y % 2 == 1 or hexagon._x % 3 == 1):
+        elif hexagon._z % 3 == 0 and \
+                (hexagon._y % 2 == 1 or hexagon._x % 3 == 1):
             terraintype = TerrainType.MOUNTAIN
         else:
             terraintype = TerrainType.FLAT
 
-        if abs(hexagon._x) == self._size // 4 or abs(hexagon._y) == self._size // 4:
+        if abs(hexagon._x) == self._size // 4 or \
+                abs(hexagon._y) == self._size // 4:
             # makes land bridges
             terraintype = TerrainType.FLAT
 
         return terraintype
 
     def choose_biome_type(self, hexagon):
+        """
+        Choose a biome type for the hexagon based on its coordinates.
 
+        :param hexagon: the hexagon to be given a biome type
+        :return: the biome type chosen
+        """
         if abs(hexagon._y) < (self._size // 6):
             biometype = BiomeType.DESERT
         elif abs(hexagon._y) > (self._size // 3):
@@ -695,10 +697,18 @@ class Grid:
         return biometype
 
     def choose_resource(self, hexagon, resourcenum):
+        """
+        Choose a resource for the hexagon.
 
+        :param hexagon: the resource for the hexagon
+        :param resourcenum: a number used to decide which resource
+        to put on tile
+        :return: the chosen resource, or None if no resource on tile
+        """
         resource = None
 
-        if hexagon._terrain.terrain_type != TerrainType.OCEAN and hexagon._terrain.terrain_type != TerrainType.MOUNTAIN:
+        if hexagon._terrain.terrain_type != TerrainType.OCEAN and \
+                hexagon._terrain.terrain_type != TerrainType.MOUNTAIN:
 
             if hexagon._y % 2 == 1:
                 # resources

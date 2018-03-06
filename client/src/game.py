@@ -214,7 +214,6 @@ class Game:
         unit = self._currently_selected_unit
         if self._currently_selected_tile != hexagon:
             if unit is not None:
-                civilisation = self._game_state.get_civ(unit.civ_id)
                 if hexagon in self._current_available_moves:
                     self._server_api.move_unit(unit, hexagon)
                 elif type(unit) != Worker \
