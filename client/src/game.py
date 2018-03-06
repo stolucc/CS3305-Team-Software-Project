@@ -85,7 +85,6 @@ class Game:
 
     def start(self):
         """Initialize the game."""
-        self._civ1.set_up(self._grid.get_hextile((0, 0, 0)), 1)
         self.scale_images_to_hex_size()
         self.scale_sprites_to_hex_size()
         self.scale_buildings_to_hex_size()
