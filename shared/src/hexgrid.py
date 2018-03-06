@@ -640,46 +640,75 @@ class Grid:
         hex._terrain = Terrain(terraintype, biometype)
 
     def static_map(self):
-        """Generate a static map."""
+
+        resourcenum = 0
+
         for hex_point in self.get_hextiles():
             hexagon = self.get_hextile(hex_point)
-            if abs(hexagon._x) == (self._size // 2) or \
-               abs(hexagon._y) == (self._size // 2) or \
-               abs(hexagon._z) == (self._size // 2):
-                if abs(hexagon._x) == (self._size // 6) or \
-                   abs(hexagon._y) == (self._size // 6) or \
-                   abs(hexagon._z) == (self._size // 6):
-                    terraintype = TerrainType.FLAT
-                else:
-                    terraintype = TerrainType.OCEAN
-            elif hexagon._x % 3 == 1 and hexagon._y % 2 == 1:
-                terraintype = TerrainType.OCEAN
-            elif hexagon._y % 3 != 1 and hexagon._z % 2 == 1:
-                terraintype = TerrainType.HILL
-            elif hexagon._z % 3 == 2 and hexagon._x % 2 == 0:
-                terraintype = TerrainType.MOUNTAIN
-            else:
-                terraintype = TerrainType.FLAT
 
-            if abs(hexagon._y) < (self._size // 6):
-                biometype = BiomeType.DESERT
-            elif abs(hexagon._y) > (self._size // 3):
-                biometype = BiomeType.TUNDRA
-            else:
-                biometype = BiomeType.GRASSLAND
+            terraintype = self.choose_terrain_type(hexagon)
+            biometype = self.choose_biome_type(hexagon)
 
-            resource = None
-            if terraintype != TerrainType.OCEAN:
-                if hexagon._y % 2 == 1 and hexagon._z % 3 == 1:
-                    if hexagon._y % 4 == 1:
-                        if hexagon._z % 6 == 1:
-                            resource = Resource(ResourceType.COAL, 1)
-                        elif hexagon._z % 6 == 4:
-                            resource = Resource(ResourceType.GEMS, 1)
-                    elif hexagon._y % 4 == 3:
-                        if hexagon._z % 6 == 1:
-                            resource = Resource(ResourceType.LOGS, 1)
-                        if hexagon._z % 6 == 4:
-                            resource = Resource(ResourceType.IRON, 1)
+            hexagon._terrain = Terrain(terraintype, biometype)
 
-            hexagon._terrain = Terrain(terraintype, biometype, resource)
+            resource = self.choose_resource(hexagon, resourcenum)
+
+            if resource != None:
+                resourcenum += 1
+
+            hexagon._terrain._resource = resource
+
+    def choose_terrain_type(self, hexagon):
+
+        if abs(hexagon._x) == (self._size // 2) or abs(hexagon._y) == (self._size // 2) \
+                or abs(hexagon._z) == (self._size // 2):
+            # water around edges
+            terraintype = TerrainType.OCEAN
+        elif hexagon._x == 0 or hexagon._y == 0 or hexagon._z == 0:
+            # rivers separating continents
+            terraintype = TerrainType.OCEAN
+        elif hexagon._x % 3 == 1 and hexagon._y % 2 == 1:
+            # lakes
+            terraintype = TerrainType.OCEAN
+        elif hexagon._y % 3 != 1 and hexagon._z % 2 == 1:
+            terraintype = TerrainType.HILL
+        elif hexagon._z % 3 == 0 and (hexagon._y % 2 == 1 or hexagon._x % 3 == 1):
+            terraintype = TerrainType.MOUNTAIN
+        else:
+            terraintype = TerrainType.FLAT
+
+        if abs(hexagon._x) == self._size // 4 or abs(hexagon._y) == self._size // 4:
+            # makes land bridges
+            terraintype = TerrainType.FLAT
+
+        return terraintype
+
+    def choose_biome_type(self, hexagon):
+
+        if abs(hexagon._y) < (self._size // 6):
+            biometype = BiomeType.DESERT
+        elif abs(hexagon._y) > (self._size // 3):
+            biometype = BiomeType.TUNDRA
+        else:
+            biometype = BiomeType.GRASSLAND
+
+        return biometype
+
+    def choose_resource(self, hexagon, resourcenum):
+
+        resource = None
+
+        if hexagon._terrain.terrain_type != TerrainType.OCEAN and hexagon._terrain.terrain_type != TerrainType.MOUNTAIN:
+
+            if hexagon._y % 2 == 1:
+                # resources
+                if resourcenum % 4 == 0:
+                    resource = Resource(ResourceType.COAL, 1)
+                elif resourcenum % 4 == 1:
+                    resource = Resource(ResourceType.IRON, 1)
+                elif resourcenum % 4 == 2:
+                    resource = Resource(ResourceType.LOGS, 1)
+                elif resourcenum % 4 == 3:
+                    resource = Resource(ResourceType.GEMS, 1)
+
+        return resource
