@@ -99,6 +99,8 @@ class Game:
                     pressed = pygame.key.get_pressed()
                     if pressed[306] == 1 and pressed[99] == 1:  # 306 CTRL,99 C
                         self.quit()
+                    elif pressed[32] == 1:
+                        self._server_api.end_turn()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     self.mouse_button_down(event)
                 if event.type == pygame.MOUSEBUTTONUP:
