@@ -168,8 +168,7 @@ class GameState:
                                                active=True, gold=100,
                                                food=100, science=0,
                                                production=0)
-            self.add_civ(Civilisation(user_id, self._grid, self._logger,
-                         self._session))
+            self.add_civ(Civilisation(user_id, self._grid, self._logger))
             self._logger.info("New Civilisation joined with id " +
                               str(user_id))
             # NOTE: Not needed when loading from db
