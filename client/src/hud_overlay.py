@@ -38,6 +38,11 @@ class HudOverlay:
             ResourceType.LOGS: self._load_img(path+"logs.png", x, y),
             ResourceType.COAL: self._load_img(path+"coal.png", x, y),
             ResourceType.IRON: self._load_img(path+"iron.png", x, y),
+            0: self._load_img(path+"research_logo.png", (x-(x//5)-(x//10)),
+                              (y-(y//10))),
+            1: self._load_img(path+"research_background.png", x, y),
+            2: self._load_img(path+"button_disabled.png", x*2, y),
+            3: self._load_img(path+"button_active.png", x*2, y)
             }
         path = "../resources/images/tiles/"
         scale = round(200 / self._grid.size)
@@ -75,7 +80,7 @@ class HudOverlay:
         self.draw_resource_panel()
         self.draw_info_panel()
         self.draw_minimap()
-        self.draw_science_button()
+        self.draw_button_panel()
 
     def draw_quick_surface(self, layouts):
         """Draw quick moving HUD elements."""
@@ -127,16 +132,16 @@ class HudOverlay:
             if value is not None:
                 logo = self._hud_images[resource]
                 self._screen.blit(logo, (offset, 5))
-                self.draw_text(value, (offset+5, 30), self._color1)
+                self.draw_text(value, (offset+5, 30), self._color2)
                 offset += 60
 
     def draw_info_panel(self):
         """Draw info panel containing turn details and ping."""
-        points = [(self._resolution[0] - 260, 0),
+        points = [(self._resolution[0] - 240, 0),
                   (self._resolution[0], 0),
                   (self._resolution[0], 40),
                   (self._resolution[0] - 220, 40),
-                  (self._resolution[0] - 260, 20)]
+                  (self._resolution[0] - 240, 20)]
         pygame.draw.polygon(self._screen, self._background, points, 0)
         offset = self._resolution[0] - 200
         turn_count = self._game_state.turn_count
@@ -164,9 +169,29 @@ class HudOverlay:
         pygame.draw.polygon(self._screen, self._background, points, 0)
         self.draw_hex_grid()
 
-    def draw_science_button(self):
+    def draw_button_panel(self):
         """Draw button to open science tree."""
-        pass
+        points = [(self._resolution[0] - 200, self._resolution[1]),
+                  (self._resolution[0], self._resolution[1]),
+                  (self._resolution[0], self._resolution[1] - 60),
+                  (self._resolution[0] - 180, self._resolution[1] - 60),
+                  (self._resolution[0] - 200, self._resolution[1] - 40)]
+        pygame.draw.polygon(self._screen, self._background, points, 0)
+        logo_background = self._hud_images[1]
+        logo_forground = self._hud_images[0]
+        x, y = self._resolution[0] - 55, self._resolution[1] - 55
+        self._screen.blit(logo_background, (x, y))
+        z = 50
+        self._screen.blit(logo_forground, (x+((z//5)+(z//10)//2),
+                                           (y+((z//10)//2))))
+        my_turn = True  # self._game_state.my_turn()
+        if my_turn:
+            image = self._hud_images[3]
+        else:
+            image = self._hud_images[2]
+        x, y = self._resolution[0] - 170, self._resolution[1] - 55
+        self._screen.blit(image, (x, y))
+        self.draw_text("End Turn", (x+30, y+25), self._color1)
 
     def draw_text(self, text, position, color):
         """
