@@ -101,3 +101,13 @@ class GameState:
     def set_player_turn(self, current_player):
         """Update the person whose turn it is."""
         self._current_player = current_player
+
+    @property
+    def current_player(self):
+        """Who holds current turn."""
+        return self._current_player
+
+    @property
+    def my_turn(self):
+        """Getter True if this is my turn."""
+        return self._my_id == self._current_player

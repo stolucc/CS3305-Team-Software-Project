@@ -149,7 +149,8 @@ class HudOverlay:
                        (offset, 20),
                        self._color2)
         offset += 80
-        my_turn = True  # self._game_state.my_turn()
+        current_player = self._game_state.current_player
+        my_turn = self._game_state.my_turn
         if my_turn:
             color = self._color3
         else:
@@ -184,7 +185,7 @@ class HudOverlay:
         z = 50
         self._screen.blit(logo_forground, (x+((z//5)+(z//10)//2),
                                            (y+((z//10)//2))))
-        my_turn = True  # self._game_state.my_turn()
+        my_turn = self._game_state.my_turn
         if my_turn:
             image = self._hud_images[3]
         else:
