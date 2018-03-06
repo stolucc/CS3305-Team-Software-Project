@@ -465,5 +465,6 @@ if __name__ == "__main__":
     game_state = GameState(1, 1, map_ref, logger)
     game_state.add_civ(civ)
     game_state.my_id = 1
-    game = Game(game_state, logger)
+    server_api = server_API.ServerAPI()
+    game = Game(game_state, logger, server_api)
     game.start()
