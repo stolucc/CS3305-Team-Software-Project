@@ -4,7 +4,10 @@ import action
 import sys
 import threading
 from time import sleep
-from building import BuildingType
+from game import Game
+from file_logger import Logger
+import os
+import json
 
 
 def main():
@@ -12,40 +15,13 @@ def main():
     server_api = ServerAPI()
     try:
         server_api.join_game()
+        game_state = server_api._game_state
         thread = threading.Thread(name="check_for_updates",
                                   target=check_for_updates,
                                   args=(server_api,), daemon=True)
         thread.start()
-        sleep(5)
-        civ = server_api._game_state._civs[server_api.id]
-        unit = None
-        for key in civ._units:
-            unit = civ._units[key]
-        print(unit)
-        unit_coords = unit.position.coords
-        move_back = server_api._game_state._grid.get_hextile(unit_coords)
-        move_coords = (unit_coords[0] + 1, unit_coords[1] - 1, unit_coords[2])
-        hex_to_move = server_api._game_state._grid.get_hextile(move_coords)
-
-        input("send turn 1")
-        server_api.move_unit(unit, hex_to_move)
-        print("moved")
-        server_api.build_city(unit)
-        print("city built")
-        server_api.end_turn()
-        print("turn ended")
-
-        input("send turn 2")
-        print(move_back)
-        server_api.move_unit(unit, move_back)
-        print("moved")
-        server_api.build(unit, BuildingType.FARM)
-        print("farm built")
-        server_api.end_turn()
-        print("turn ended")
-
-        sleep(1000)
-        # server_api.leave_game()
+        game = Game(game_state, game_state._log)
+        game.start()
     except action.ServerError as e:
         print("Server error occurred with error code " + str(e.error_code))
         sys.exit(1)
