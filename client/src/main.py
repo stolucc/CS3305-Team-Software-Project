@@ -5,9 +5,6 @@ import sys
 import threading
 from time import sleep
 from game import Game
-from file_logger import Logger
-import os
-import json
 
 
 def main():
