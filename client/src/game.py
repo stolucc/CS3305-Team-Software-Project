@@ -23,16 +23,15 @@ from file_logger import Logger
 class Game:
     """Class to represent client-side rendering of the game."""
 
-    def __init__(self, game_state, logger):
+    def __init__(self, game_state, logger, server_api):
         """Initialise display surface."""
-        self._server_api = server_API.ServerAPI()
+        self._server_api = server_api
         pygame.init()
         pygame.font.init()
         self._threads = []
         self._game_state = game_state
         self._flags = (pygame.DOUBLEBUF |
-                       pygame.HWSURFACE |
-                       pygame.FULLSCREEN)
+                       pygame.HWSURFACE)
         self.infoObject = pygame.display.Info()
         self._window_size = (self.infoObject.current_w,
                              self.infoObject.current_h)

@@ -13,11 +13,14 @@ def main():
     try:
         server_api.join_game()
         game_state = server_api._game_state
+        print("Game id =", game_state._game_id)
         thread = threading.Thread(name="check_for_updates",
                                   target=check_for_updates,
                                   args=(server_api,), daemon=True)
         thread.start()
-        game = Game(game_state, game_state._log)
+        print("Thread started")
+        game = Game(game_state, game_state._logger, server_api)
+        print("Starting game")
         game.start()
     except action.ServerError as e:
         print("Server error occurred with error code " + str(e.error_code))
