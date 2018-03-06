@@ -131,6 +131,14 @@ class ActionValidatior():
         distance = self._gamestate.map.hex_distance(atile, dtile)
         return arange >= distance
 
+    def actions_remaining(self, unit):
+        """
+        Determine if unit has actions left to use this turn.
+
+        :param unit: The unit object
+        """
+        return unit.actions > 0
+
     def upgrade_possible(self, unit):
         """
         Determine if unit is not already at max level.
@@ -145,8 +153,8 @@ class ActionValidatior():
 
         :param unit: The unit to be checked
         """
-        # TODO: Complete when research implemented.
-        return True
+        civ = self._gamestate._civs[unit.civ_id]
+        return civ.tree.tier[unit.get_string()] > unit.level
 
     def currency_available(self, civ, gold=0, food=0, science=0):
         """

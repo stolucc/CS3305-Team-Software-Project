@@ -231,7 +231,8 @@ class Civilisation(object):
         """
         Unlock node on research tree.
 
-        branches = 'worker', 'archer', 'swordsman', 'win'.
+        Nodes ID go from 0-9.
+        :param node_id: int ID of research node
         """
         node = self._tree._nodes[node_id]
         if node.unlock_cost <= self.science and self._tree.unlockable(node_id):
@@ -241,14 +242,18 @@ class Civilisation(object):
             self._logger.debug("Unable to unlock research node.")
 
     def upgrade_unit(self, unit):
-        """Upgrade unit."""
+        """
+        Upgrade unit.
+
+        :param unit: Unit object that is to be levelled up
+        """
         if unit.level < self.tree.tier[unit.get_string()]:
             cost = unit.level * 10
             if self.gold >= cost and unit.actions > 0:
                 unit.level_up()
                 unit.actions -= 1
             else:
-                self._logger.debug("Not enough gold.")
+                self._logger.debug("Unable to upgrade unit.")
         else:
             self._logger.debug("Unable to upgrade unit.")
 
