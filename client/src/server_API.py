@@ -52,7 +52,7 @@ class ServerAPI:
         else:
             self._log.info("Joined game player id = " + str(reply.obj))
             game_id, self.id = reply.obj
-            grid = Grid(103)
+            grid = Grid(20)
             self._game_state = GameState(game_id, 1, grid, self._log)
             self._game_state._grid.create_grid()
             civ = Civilisation(self.id, self._game_state._grid, self._log)
