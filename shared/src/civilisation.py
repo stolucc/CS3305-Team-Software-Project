@@ -196,7 +196,7 @@ class Civilisation(object):
             self.gold -= cost_of_city
             worker.actions -= 1
             for tile in tiles:
-                self._tiles[tile] = self._id
+                self.tiles[tile] = self._id
             self.cities[city.id] = city
         else:
             self._logger.debug("Unable to build city.")
@@ -208,11 +208,6 @@ class Civilisation(object):
         :param tile: hex object
         """
         tile = worker.position
-        print("Tile: ", tile)
-        print("building there:", tile.building is None)
-        print("Tile and worker match:", tile.civ_id == worker.civ_id)
-        print("Enough Money:", self.gold >= Building.buy_cost(building_type))
-        print("Enough Actions:", worker.actions > 0)
         if tile.building is None and isinstance(worker, Worker)\
                 and tile.civ_id == worker.civ_id\
                 and self.gold >= Building.buy_cost(building_type)\
@@ -391,7 +386,7 @@ class Civilisation(object):
         vision = set()
         for unit_id in self._units:
             unit = self._units[unit_id]
-            vision_range = 2  # TODO: Replace with unit vision range
+            vision_range = 5  # TODO: Replace with unit vision range
             tile = unit.position
             unit_vision = self._grid.vision(tile, vision_range)
             vision |= set(unit_vision)

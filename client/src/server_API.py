@@ -55,8 +55,7 @@ class ServerAPI:
             grid = Grid(103)
             self._game_state = GameState(game_id, 1, grid, self._log)
             self._game_state._grid.create_grid()
-            civ = Civilisation(self.id, self._game_state._grid, self._log,
-                               None)
+            civ = Civilisation(self.id, self._game_state._grid, self._log)
             self._game_state.add_civ(civ)
             self._game_state._my_id = self.id
 
@@ -211,8 +210,7 @@ class ServerAPI:
         """Handle player joined update."""
         for id in update._players:
             if id not in self._game_state._civs:
-                new_civ = Civilisation(id, self._game_state._grid, self._log,
-                                       None)
+                new_civ = Civilisation(id, self._game_state._grid, self._log)
                 self._game_state._civs[id] = new_civ
 
     def handle_unit_update(self, update):
