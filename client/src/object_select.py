@@ -46,9 +46,10 @@ class SelectMenu(Menu):
                     x_coordinate, y_coordinate-option_height,
                     option_width, option_height)
                 self.draw_option(option_block, self._options[i].name)
-                self._start = [(x_coordinate, y_coordinate)] + self._start
+                self._start = [(x_coordinate,
+                                y_coordinate-option_height)] + self._start
                 self._end = [(x_coordinate + option_width,
-                              y_coordinate + option_height)] + self._end
+                              y_coordinate)] + self._end
                 y_coordinate -= option_height
         else:
             for i in range(len(self._options)):
