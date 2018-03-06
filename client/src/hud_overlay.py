@@ -75,6 +75,7 @@ class HudOverlay:
         self.draw_resource_panel()
         self.draw_info_panel()
         self.draw_minimap()
+        self.draw_science_button()
 
     def draw_quick_surface(self, layouts):
         """Draw quick moving HUD elements."""
@@ -162,6 +163,10 @@ class HudOverlay:
                          self._background, (x, y, 100, 350), 0)
         pygame.draw.polygon(self._screen, self._background, points, 0)
         self.draw_hex_grid()
+
+    def draw_science_button(self):
+        """Draw button to open science tree."""
+        pass
 
     def draw_text(self, text, position, color):
         """
