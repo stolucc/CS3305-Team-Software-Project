@@ -169,6 +169,15 @@ class Civilisation(object):
         """
         return self._tiles
 
+    @property
+    def tree(self):
+        """
+        Research Tree of civilisation.
+
+        :return: Research tree
+        """
+        return self._tree
+
     def set_up(self, tile, worker_id):
         """
         Start civilisation.
