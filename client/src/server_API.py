@@ -250,6 +250,7 @@ class ServerAPI:
         if unit is not None:
             civ = self._game_state._civs[unit._civ_id]
             if unit._id in civ._units:
+                civ._units[unit._id].position.unit = None
                 civ._units[unit._id].position = old_tile
                 old_tile._unit = civ._units[unit._id]
             else:

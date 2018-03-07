@@ -66,13 +66,6 @@ class Game:
                                self._hud_quick_surface,
                                self._window_size,
                                self._layout)
-        t = threading.Thread(group=None,
-                             target=self.render_hud,
-                             name="HUD_render",
-                             args=(),
-                             daemon=True)
-        self._threads.append(t)
-        t.start()
         self._load_images = LoadImages()
         self._scaled_terrain_images = \
             self._load_images.load_terrain_images().copy()
@@ -96,6 +89,13 @@ class Game:
         self.scale_resources_to_hex_size()
         self.draw_map()
         count = 0
+        t = threading.Thread(group=None,
+                             target=self.render_hud,
+                             name="HUD_render",
+                             args=(),
+                             daemon=True)
+        self._threads.append(t)
+        t.start()
         while True:
             for event in pygame.event.get():  # something happened
                 if event.type == pygame.QUIT:
@@ -512,8 +512,9 @@ class Game:
 
     def render_hud(self):
         """Render heads up display."""
-        self._hud.draw()
-        time.sleep(1)
+        while True:
+            self._hud.draw()
+            time.sleep(1)
 
 
 if __name__ == "__main__":
