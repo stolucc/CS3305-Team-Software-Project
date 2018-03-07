@@ -426,12 +426,11 @@ class Game:
                     unit_level = unit.level
                     unit_health = unit.get_health_percentage()
                     hexagon_coords = layout.hex_to_pixel(unit.position)
-                    if unit.civ_id == my_civ.id:
-                        self._screen.blit(
-                            self._scaled_terrain_images[self._civ_colours[my_civ.id]],
-                            (hexagon_coords[0]
-                             - math.ceil(self._layout.size * (math.sqrt(3) / 2)),
-                             hexagon_coords[1] - self._layout.size))
+                    self._screen.blit(
+                        self._scaled_terrain_images[self._civ_colours[unit.civ.id]],
+                        (hexagon_coords[0]
+                         - math.ceil(self._layout.size * (math.sqrt(3) / 2)),
+                         hexagon_coords[1] - self._layout.size))
                     self.draw_sprite(hexagon_coords,
                                      self._scaled_sprite_images[
                                          unit.__class__.__name__
