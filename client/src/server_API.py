@@ -281,6 +281,7 @@ class ServerAPI:
                         old_tile._building = buildings[building._id]
                 else:
                     old_tile._building = building
+                    old_tile._civ_id = building._civ_id
                     coords = building._hex.coords
                     hex_tile = self._game_state._grid.get_hextile(coords)
                     old_tile._building._hex = hex_tile
