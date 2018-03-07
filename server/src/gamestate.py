@@ -35,7 +35,7 @@ class GameState:
         self._current_player = None
         self._game_started = False
         self._queues = {}
-        self._start_locations = [(0, 0, 0), (1, -1, 0),
+        self._start_locations = [(4, -2, -2), (1, -1, 0),
                                  (0, -1, 1), (-1, 1, 0)]
 
     @property
@@ -122,10 +122,11 @@ class GameState:
             return self.add_player(message)
         elif message.type == "LeaveGameAction":
             return self.remove_player(message)
-        elif message.type == "EndTurnAction":
-            return self.end_turn(message)
+
         if message.id == self._current_player:
-            if message.type in civ_actions:
+            if message.type == "EndTurnAction":
+                return self.end_turn(message)
+            elif message.type in civ_actions:
                 (result_set, return_value) = self.handle_action(message.id,
                                                                 message.obj)
                 self.populate_queues(result_set)
