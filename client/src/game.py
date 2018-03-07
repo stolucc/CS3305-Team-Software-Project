@@ -55,6 +55,8 @@ class Game:
         self._min_zoom = 1
         self._max_zoom = 40
         self._hex_size = lambda x: (self.infoObject.current_w // x)
+        self._select_menu = SelectMenu(self._screen)
+        self._menu_displayed = False
         self._grid = self._game_state.grid
         self._layout = Layout(self._hex_size(self._zoom),
                               (self._window_size[0] / 2,
@@ -104,10 +106,6 @@ class Game:
                         self.quit()
                     elif pressed[32] == 1:
                         self._server_api.end_turn()
-                    elif pressed[98] == 1:
-                        self.build_structure(self._layout, BuildingType.CITY)
-                    elif pressed[102] == 1:
-                        self.build_structure(self._layout, BuildingType.FARM)
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     self.mouse_button_down(event)
                 if event.type == pygame.MOUSEBUTTONUP:
@@ -152,7 +150,7 @@ class Game:
         if event.button == 1:  # Left click
             pass
         elif event.button == 2:  # Middle click
-            pass
+            self.build_structure(self._layout)
         elif event.button == 3:  # Right click
             self.highlight_new_movement(self._layout)
 
@@ -263,24 +261,44 @@ class Game:
                  - math.ceil(layout.size * (math.sqrt(3) / 2)),
                  hexagon_coords[1] - layout.size))
 
-    def build_structure(self, layout, structure):
+    def build_structure(self, layout):
         """
         Build a structure using selected worker.
 
         :param layout: Layout object being drawn on.
         """
+
         click = pygame.mouse.get_pos()
         c_hex = layout.pixel_to_hex(click)
         c_hex_coords = self._grid.hex_round((c_hex.x, c_hex.y, c_hex.z))
         hexagon = self._grid.get_hextile(c_hex_coords)
         unit = self._currently_selected_unit
+
+        def build_city():
+            self._server_api.build_city(unit)
+
+        def build_farm():
+            self._server_api.build(unit, BuildingType.FARM)
+
+        def build_trade_post():
+            self._server_api.build(unit, BuildingType.TRADE_POST)
+
+        def build_uni():
+            self._server_api.build(unit, BuildingType.UNIVERSITY)
+
         if unit == hexagon.unit and unit.__class__.__name__ == "Worker":
-            if structure == BuildingType.CITY:
-                self._server_api.build_city(unit)
+            if self._menu_displayed is False:
+                self._menu_displayed = self._select_menu.display_menu(click, [("Build City", build_city()),
+                                                 ("Build Farm", build_farm()),
+                                                 ("Build Trade Post", build_trade_post()),
+                                                 ("Build Uni", build_uni())])
             else:
-                self._server_api.build(unit, structure)
-        self._game_state.get_civ(self._game_state.my_id).calculate_vision()
-        self.draw_map()
+                self._menu_displayed = self._select_menu.menu_click(click)
+                if not self._menu_displayed:
+                    self._screen.fill((0, 0, 0))
+                    pygame.display.flip()
+            self._game_state.get_civ(self._game_state.my_id).calculate_vision()
+            self.draw_map()
 
     def scale_images_to_hex_size(self):
         """
@@ -480,7 +498,7 @@ class Game:
     def render_hud(self):
         """Render heads up display."""
         self._hud.draw()
-        time.sleep(4)
+        time.sleep(1)
 
 
 if __name__ == "__main__":
