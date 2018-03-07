@@ -93,9 +93,9 @@ class ServerAPI:
             self._log.error(reply.obj)
             # raise action.ServerError(reply.obj)
         else:
-            tile_updates = reply.obj
-            for tile in tile_updates._tiles:
-                self.handle_tile_update(tile)
+            # tile_updates = reply.obj
+            # for tile in tile_updates._tiles:
+            #     self.handle_tile_update(tile)
             self._game_state._civs[self.id].move_unit_to_hex(unit, hexagon)
 
     def attack(self, attacker, defender):
