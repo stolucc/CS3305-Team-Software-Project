@@ -348,9 +348,7 @@ class Worker(Unit):
 
         Health increases by 20, movement and build_speed by 1, each level
         """
-        if self.level >= 3:
-            print("Max level reached.")
-        else:
+        if self.level < 3:
             self.cost_increase(food=1, gold=0, science=0)
             super().level_up(health_increase=20, movement_increase=1)
             self.build_speed += 1
@@ -469,9 +467,7 @@ class Swordsman(Soldier):
 
     def level_up(self):
         """Level up Swordsman."""
-        if self._level >= 3:
-            print("Max level reached.")
-        else:
+        if self._level < 3:
             super().level_up(health_increase=30, movement_increase=1)
             self.cost_increase(food=1, gold=1, science=0)
             self.strength += 20
@@ -541,9 +537,7 @@ class Archer(Soldier):
 
     def level_up(self):
         """Level up Archer."""
-        if self._level >= 3:
-            print("Max level reached.")
-        else:
+        if self._level < 3:
             super().level_up(health_increase=20, movement_increase=1)
             self.cost_increase(food=0, gold=0, science=1)
             self.strength += 10
