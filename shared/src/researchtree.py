@@ -12,6 +12,7 @@ class ResearchTree(object):
         """
         self._civilisation = civilisation
         self._nodes = {}
+        self._branches = 3
         self._tier = {'worker': 1, 'archer': 1, 'swordsman': 1}
         self.tree_setup()
 
@@ -73,17 +74,17 @@ class ResearchTree(object):
     def get_unlocked(self):
         """Get unlocked nodes."""
         unlocked_nodes = []
-        for node in self._nodes:
-            if node.unlocked:
-                unlocked_nodes += [node]
+        for id in self._nodes:
+            if self._nodes[id].unlocked:
+                unlocked_nodes += [self._nodes[id]]
         return unlocked_nodes
 
     def get_unlockable(self):
         """Get unlockable nodes."""
         unlockable_nodes = []
-        for node in self._nodes:
-            if self.unlockable(node.id):
-                unlockable_nodes += [node]
+        for id in self._nodes:
+            if self.unlockable(id):
+                unlockable_nodes += [self._nodes[id]]
         return unlockable_nodes
 
     def __repr__(self):
