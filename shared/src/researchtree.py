@@ -75,7 +75,7 @@ class ResearchTree(object):
         """Get unlocked nodes."""
         unlocked_nodes = []
         for id in self._nodes:
-            if self._nodes[id].unlocked:
+            if self._nodes[id]._unlocked:
                 unlocked_nodes += [self._nodes[id]]
         return unlocked_nodes
 
