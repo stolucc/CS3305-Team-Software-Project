@@ -2,7 +2,7 @@
 
 
 class ResearchTree(object):
-    """Class for Reserach Tree."""
+    """Class for Research Tree."""
 
     def __init__(self, civilisation):
         """
@@ -69,6 +69,22 @@ class ResearchTree(object):
             node = self._nodes[node_id]
             node._unlocked = True
             self._tier[node._branch] += 1
+
+    def get_unlocked(self):
+        """Get unlocked nodes."""
+        unlocked_nodes = []
+        for node in self._nodes:
+            if node.unlocked:
+                unlocked_nodes += [node]
+        return unlocked_nodes
+
+    def get_unlockable(self):
+        """Get unlockable nodes."""
+        unlockable_nodes = []
+        for node in self._nodes:
+            if self.unlockable(node.id):
+                unlockable_nodes += [node]
+        return unlockable_nodes
 
     def __repr__(self):
         """Return string representation of Research Tree."""
