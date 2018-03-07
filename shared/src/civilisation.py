@@ -284,7 +284,6 @@ class Civilisation(object):
             if unit.movement_range >= movement_cost and unit.actions > 0:
                 pos = unit.position
                 unit.movement -= movement_cost
-                unit.position.unit = None
                 unit.position = tile
                 tile.unit = unit
                 pos.unit = None
@@ -419,4 +418,3 @@ class Civilisation(object):
                 vision |= set(building_vision)
         for tile in vision:
             self._vision[tile] = tile
-

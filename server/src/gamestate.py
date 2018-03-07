@@ -16,7 +16,7 @@ from queue import Queue
 class GameState:
     """Game state class."""
 
-    NUM_PLAYERS = 3
+    NUM_PLAYERS = 2
 
     def __init__(self, game_id, seed, grid, logger, session):
         """
@@ -149,8 +149,8 @@ class GameState:
             vision = self._civs[civ].vision
             relevant = []
             for tile in range(len(impacted_tiles)):
-                # if impacted_tiles[tile] in vision:
-                relevant += [tile]
+                if impacted_tiles[tile] in vision:
+                    relevant += [tile]
             if is_tile:
                 self._queues[civ].put(
                     TileUpdates([result_set[x] for x in relevant]))
@@ -269,8 +269,11 @@ class GameState:
             tile = action.destination
             database_API.Unit.update(self._session, unit.id, x=tile.x,
                                      y=tile.y, z=tile.z)
+            result_tiles = self._grid.vision(unit.position, 3)
+            for i in result_tiles:
+                print(i, " -- ", i._unit)
             return ([action.unit.position, action.destination],
-                    TileUpdates(self._grid.vision(tile, 2)))
+                    TileUpdates(self._grid.vision(unit.position, 3)))
         elif isinstance(action, CombatAction):
             if self._civs[civ].id != action.attacker._civ_id \
                 or self._civs[civ].id == action.defender._civ_id:
