@@ -386,9 +386,9 @@ class Game:
         :param layout: The layout of the grid to draw. Either the
                        main layout or one of it's mirrors.
         """
-        my_id = self._game_state.get_civ(self._game_state.my_id)
-        my_vision = my_id.vision
-        my_tiles = my_id.tiles
+        my_civ = self._game_state.get_civ(self._game_state.my_id)
+        my_vision = my_civ.vision
+        my_tiles = my_civ.tiles
         size = pygame.display.get_surface().get_size()
         for hex_point in self._grid.get_hextiles():
             hexagon = self._grid.get_hextile(hex_point)
@@ -405,7 +405,7 @@ class Game:
                      hexagon_coords[1] - self._layout.size))
                 if hexagon in my_tiles:
                     self._screen.blit(
-                        self._scaled_terrain_images[self._civ_colours[my_id.id]],
+                        self._scaled_terrain_images[self._civ_colours[my_civ.id]],
                         (hexagon_coords[0]
                          - math.ceil(self._layout.size * (math.sqrt(3) / 2)),
                          hexagon_coords[1] - self._layout.size))
@@ -426,9 +426,9 @@ class Game:
                     unit_level = unit.level
                     unit_health = unit.get_health_percentage()
                     hexagon_coords = layout.hex_to_pixel(unit.position)
-                    if unit.civ_id == my_id:
+                    if unit.civ_id == my_civ.id:
                         self._screen.blit(
-                            self._scaled_terrain_images[self._civ_colours[my_id.id]],
+                            self._scaled_terrain_images[self._civ_colours[my_civ.id]],
                             (hexagon_coords[0]
                              - math.ceil(self._layout.size * (math.sqrt(3) / 2)),
                              hexagon_coords[1] - self._layout.size))
