@@ -18,6 +18,7 @@ from civilisation import Civilisation
 from building import BuildingType
 from math import floor
 from file_logger import Logger
+from object_select import SelectMenu
 
 
 class Game:
@@ -388,7 +389,6 @@ class Game:
         """
         my_civ = self._game_state.get_civ(self._game_state.my_id)
         my_vision = my_civ.vision
-        my_tiles = my_civ.tiles
         size = pygame.display.get_surface().get_size()
         for hex_point in self._grid.get_hextiles():
             hexagon = self._grid.get_hextile(hex_point)
@@ -415,9 +415,9 @@ class Game:
                     self.draw_sprite(hexagon_coords,
                                      self._scaled_resource_images[
                                           resource.resource_type])
-                if hexagon in my_tiles:
+                if hexagon.civ_id is not None:
                     self._screen.blit(
-                        self._scaled_terrain_images[self._civ_colours[my_civ.id]],
+                        self._scaled_terrain_images[self._civ_colours[hexagon.civ_id]],
                         (hexagon_coords[0]
                          - math.ceil(self._layout.size * (math.sqrt(3) / 2)),
                          hexagon_coords[1] - self._layout.size))
