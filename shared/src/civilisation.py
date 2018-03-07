@@ -27,7 +27,7 @@ class Civilisation(object):
         self._science = 0
         self._tree = ResearchTree(self)
         self._logger = logger
-        self._vision = []
+        self._vision = {}
 
     def __repr__(self):
         """Return string representation of Civilisation."""
@@ -159,6 +159,15 @@ class Civilisation(object):
         :return: list of hex object
         """
         return self._vision
+
+    @property
+    def visions(self):
+        """
+        List of tiles that the civ can see.
+
+        :return: list of hex object
+        """
+        return self._visions
 
     @property
     def tiles(self):
@@ -393,9 +402,10 @@ class Civilisation(object):
     def calculate_vision(self):
         """Determine the tiles visible to the civilisation."""
         vision = set()
+        self._visions = {}
         for unit_id in self._units:
             unit = self._units[unit_id]
-            vision_range = 5  # TODO: Replace with unit vision range
+            vision_range = 3  # TODO: Replace with unit vision range
             tile = unit.position
             unit_vision = self._grid.vision(tile, vision_range)
             vision |= set(unit_vision)
@@ -407,4 +417,6 @@ class Civilisation(object):
                 tile = buildings[building].position
                 building_vision = self._grid.vision(tile, vision_range)
                 vision |= set(building_vision)
-        self._vision = vision
+        for tile in vision:
+            self._vision[tile] = tile
+

@@ -30,6 +30,10 @@ class Game:
         pygame.font.init()
         self._threads = []
         self._game_state = game_state
+        self._civ_colours = dict((civ, colour) for (civ, colour)
+                           in zip(sorted(self._game_state.get_civs),
+                                  ["civ1_border", "civ2_border",
+                                   "civ3_border", "civ4_border"]))
         self._flags = (pygame.DOUBLEBUF |
                        pygame.HWSURFACE)
         self.infoObject = pygame.display.Info()
@@ -51,8 +55,6 @@ class Game:
         self._max_zoom = 40
         self._hex_size = lambda x: (self.infoObject.current_w // x)
         self._grid = self._game_state.grid
-        self._civ1 = Civilisation(1, self._grid, logger)
-        self._game_state.add_civ(self._civ1)
         self._layout = Layout(self._hex_size(self._zoom),
                               (self._window_size[0] / 2,
                                self._window_size[1] / 2))
@@ -105,7 +107,7 @@ class Game:
                     self.mouse_button_down(event)
                 if event.type == pygame.MOUSEBUTTONUP:
                     self.mouse_button_up(event)
-            time.sleep(0.004)
+            time.sleep(0.01)
 
     def quit(self):
         """Close game."""
@@ -369,7 +371,9 @@ class Game:
         :param layout: The layout of the grid to draw. Either the
                        main layout or one of it's mirrors.
         """
-        civ1_tiles = self._civ1.tiles
+        my_id = self._game_state.get_civ(self._game_state.my_id)
+        my_vision = my_id.vision
+        my_tiles = my_id.tiles
         size = pygame.display.get_surface().get_size()
         for hex_point in self._grid.get_hextiles():
             hexagon = self._grid.get_hextile(hex_point)
@@ -384,9 +388,9 @@ class Game:
                     (hexagon_coords[0]
                      - math.ceil(self._layout.size * (math.sqrt(3) / 2)),
                      hexagon_coords[1] - self._layout.size))
-                if hexagon in civ1_tiles:
+                if hexagon in my_tiles:
                     self._screen.blit(
-                        self._scaled_terrain_images["civ2_border"],
+                        self._scaled_terrain_images[self._civ_colours[my_id]],
                         (hexagon_coords[0]
                          - math.ceil(self._layout.size * (math.sqrt(3) / 2)),
                          hexagon_coords[1] - self._layout.size))
@@ -402,11 +406,17 @@ class Game:
                     self.draw_sprite(hexagon_coords,
                                      self._scaled_resource_images[
                                           resource.resource_type])
-                if hexagon.unit is not None:
+                if hexagon.unit is not None and hexagon in my_vision:
                     unit = hexagon.unit
                     unit_level = unit.level
                     unit_health = unit.get_health_percentage()
                     hexagon_coords = layout.hex_to_pixel(unit.position)
+                    if unit.civ_id == my_id:
+                        self._screen.blit(
+                            self._scaled_terrain_images[self._civ_colours[my_id]],
+                            (hexagon_coords[0]
+                             - math.ceil(self._layout.size * (math.sqrt(3) / 2)),
+                             hexagon_coords[1] - self._layout.size))
                     self.draw_sprite(hexagon_coords,
                                      self._scaled_sprite_images[
                                          unit.__class__.__name__
@@ -414,6 +424,12 @@ class Game:
                     self.draw_sprite(hexagon_coords,
                                      self._scaled_health_bar_images[
                                         unit_health])
+                if hexagon not in my_vision:
+                    self._screen.blit(
+                        self._scaled_terrain_images["fogofwar"],
+                        (hexagon_coords[0]
+                         - math.ceil(self._layout.size * (math.sqrt(3) / 2)),
+                         hexagon_coords[1] - self._layout.size))
 
     def get_mirrors(self):
         """Store each hexgrid mirror layout in a list."""
