@@ -480,7 +480,7 @@ class Game:
     def render_hud(self):
         """Render heads up display."""
         self._hud.draw()
-        time.sleep(4)
+        time.sleep(1)
 
 
 if __name__ == "__main__":
