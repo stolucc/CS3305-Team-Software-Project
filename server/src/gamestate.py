@@ -35,8 +35,8 @@ class GameState:
         self._current_player = None
         self._game_started = False
         self._queues = {}
-        self._start_locations = [(0, 0, 0), (5, -5, 0),
-                                 (0, 5, -5), (-5, 0, 5)]
+        self._start_locations = [(0, 0, 0), (1, -1, 0),
+                                 (0, -1, 1), (-1, 1, 0)]
 
     @property
     def game_id(self):
@@ -146,8 +146,8 @@ class GameState:
             vision = self._civs[civ].vision
             relevant = []
             for tile in range(len(impacted_tiles)):
-                if impacted_tiles[tile] in vision:
-                    relevant += [tile]
+                # if impacted_tiles[tile] in vision:
+                relevant += [tile]
             if is_tile:
                 self._queues[civ].put(
                     TileUpdates([result_set[x] for x in relevant]))
@@ -162,7 +162,7 @@ class GameState:
         :param message: The message object sent from the client.
         :return: The id of the new player
         """
-        if len(self._civs) < 4:
+        if len(self._civs) < 2:
             user_id = database_API.User.insert(self._session,
                                                self._game_id,
                                                active=True, gold=100,
@@ -182,7 +182,7 @@ class GameState:
             self._queues[user_id] = Queue()
             self._queues[user_id].put(UnitUpdate(
                 self._civs[user_id].units[unit_id]))
-            if(len(self._civs) == 4):
+            if(len(self._civs) == 2):
                 self._game_started = True
                 self._turn_count = 1
                 player_ids = [x for x in self._civs]

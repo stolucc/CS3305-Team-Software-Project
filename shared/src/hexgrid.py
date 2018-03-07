@@ -543,7 +543,7 @@ class Grid:
         ring = self.single_ring(hex, radius)
         for tile in ring:
             view = True
-            if self.hex_distance(hex, tile) < radius:
+            if self.hex_distance(hex, tile) <= radius:
                 ray = self.hex_linedraw(hex, tile)
                 for raytile in range(len(ray)):
                     if(view):

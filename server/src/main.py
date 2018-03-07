@@ -31,6 +31,7 @@ class Server():
                                                      self._log)
         grid = Grid(20)
         grid.create_grid()
+        grid.static_map()
         game_id = database_API.Game.insert(self._session, 1, True)
         self._gamestate = GameState(game_id, 1, grid, self._log, self._session)
         try:
