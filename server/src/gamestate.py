@@ -236,7 +236,7 @@ class GameState:
         """
         civs = list(self._civs.keys())
         current_civ_index = civs.index(self._current_player)
-        next_civ_index = (current_civ_index + 1) % 4
+        next_civ_index = (current_civ_index + 1) % 2
         next_civ = civs[next_civ_index]
         self._current_player = next_civ
         self._civs[self._current_player].reset_unit_actions_and_movement()
