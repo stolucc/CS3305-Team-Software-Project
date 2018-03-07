@@ -150,9 +150,9 @@ class Game:
         if event.button == 1:  # Left click
             pass
         elif event.button == 2:  # Middle click
-            self.build_structure(self._layout)
+            pass
         elif event.button == 3:  # Right click
-            self.highlight_new_movement(self._layout)
+            self.unit_menu(self._layout)
 
     def panning(self):
         """
@@ -261,7 +261,7 @@ class Game:
                  - math.ceil(layout.size * (math.sqrt(3) / 2)),
                  hexagon_coords[1] - layout.size))
 
-    def build_structure(self, layout):
+    def unit_menu(self, layout):
         """
         Build a structure using selected worker.
 
@@ -274,31 +274,46 @@ class Game:
         hexagon = self._grid.get_hextile(c_hex_coords)
         unit = self._currently_selected_unit
 
+        def move_unit():
+            self.highlight_new_movement(layout)
+
         def build_city():
             self._server_api.build_city(unit)
+            self._game_state.get_civ(self._game_state.my_id).calculate_vision()
+            self.draw_map()
 
         def build_farm():
             self._server_api.build(unit, BuildingType.FARM)
+            self._game_state.get_civ(self._game_state.my_id).calculate_vision()
+            self.draw_map()
 
         def build_trade_post():
             self._server_api.build(unit, BuildingType.TRADE_POST)
+            self._game_state.get_civ(self._game_state.my_id).calculate_vision()
+            self.draw_map()
 
         def build_uni():
             self._server_api.build(unit, BuildingType.UNIVERSITY)
-
-        if unit == hexagon.unit and unit.__class__.__name__ == "Worker":
-            if self._menu_displayed is False:
-                self._menu_displayed = self._select_menu.display_menu(click, [("Build City", build_city()),
-                                                 ("Build Farm", build_farm()),
-                                                 ("Build Trade Post", build_trade_post()),
-                                                 ("Build Uni", build_uni())])
-            else:
-                self._menu_displayed = self._select_menu.menu_click(click)
-                if not self._menu_displayed:
-                    self._screen.fill((0, 0, 0))
-                    pygame.display.flip()
             self._game_state.get_civ(self._game_state.my_id).calculate_vision()
             self.draw_map()
+
+        if unit == hexagon.unit and self._menu_displayed is False:
+            if unit.__class__.__name__ == "Worker":
+                self._menu_displayed = self._select_menu.display_menu(click, [
+                    ("Move", move_unit),
+                    ("Build City", build_city),
+                    ("Build Farm", build_farm),
+                    ("Build Trade Post", build_trade_post),
+                    ("Build Uni", build_uni)])
+            else:
+                self._menu_displayed = self._select_menu.display_menu(click, [
+                    ("Move", move_unit)])
+
+        else:
+            self._menu_displayed = self._select_menu.menu_click(click)
+            if not self._menu_displayed:
+                self._screen.fill((0, 0, 0))
+                pygame.display.flip()
 
     def scale_images_to_hex_size(self):
         """
