@@ -552,7 +552,7 @@ class Grid:
                             view = False
         return list(result)
 
-    def dijkstra(self, start_hex, movement):
+    def dijkstra(self, start_hex, movement, include_units=False):
         """
         Implement Dijkstra's algorithm for hex tiles.
 
@@ -588,9 +588,10 @@ class Grid:
                 if neighbour not in visited:
                     opn.put((current_cost +
                              neighbour.movement_cost, neighbour))
-        for tile in list(result):
-            if tile.unit is not None:
-                del result[tile]
+        if include_units:
+            for tile in list(result):
+                if tile.unit is not None:
+                    del result[tile]
         return result
 
     def shortest_path(self, start_hex, end_hex, movement):
@@ -603,7 +604,7 @@ class Grid:
         :return: a list of the tiles on the path from start_hex to second_hex
             returns an empty list if no path is available
         """
-        reachable = self.dijkstra(start_hex, movement)
+        reachable = self.dijkstra(start_hex, movement, True)
         path = []
         if end_hex in reachable:
             nxt = end_hex
