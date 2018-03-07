@@ -17,7 +17,7 @@ def main():
                                   target=check_for_updates,
                                   args=(server_api,), daemon=True)
         thread.start()
-        while len(game_state._civs) < 2:
+        while len(game_state._civs) < 3:
             print("Waiting for other players to join...")
             sleep(1)
         game = Game(game_state, game_state._logger, server_api)
