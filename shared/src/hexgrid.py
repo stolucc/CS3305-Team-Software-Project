@@ -711,7 +711,7 @@ class Grid:
         if hexagon._terrain.terrain_type != TerrainType.OCEAN and \
                 hexagon._terrain.terrain_type != TerrainType.MOUNTAIN:
 
-            if hexagon._y % 2 == 1:
+            if hexagon._y % 2 == 1 and hexagon._z % 2 == 0:
                 # resources
                 if resourcenum % 4 == 0:
                     resource = Resource(ResourceType.COAL, 1)
