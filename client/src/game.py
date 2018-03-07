@@ -152,7 +152,7 @@ class Game:
         elif event.button == 2:  # Middle click
             pass
         elif event.button == 3:  # Right click
-            self.unit_menu(self._layout)
+            self.highlight_new_movement(self._layout)
 
     def panning(self):
         """
