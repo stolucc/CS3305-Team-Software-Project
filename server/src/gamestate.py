@@ -194,8 +194,8 @@ class GameState:
                                                     self._turn_count)
                 for key in self._queues:
                     self._queues[key].put(start_turn_update)
-
-                # TODO: Tell Clients game has begun and who's turn it is
+                    unit = self._civs[key].units[list(self._civs[key].units.keys())[0]]
+                    self.populate_queues([unit])
 
             return self._game_id, user_id
         else:
