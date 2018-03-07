@@ -195,6 +195,7 @@ class ServerAPI:
             self.handle_player_joined_update(update)
         elif update.__class__.__name__ == "UnitUpdate":
             self.handle_unit_update(update)
+            self._game_state.get_civ(self._game_state.my_id).calculate_vision()
         elif update.__class__.__name__ == "TileUpdates":
             for tile in update._tiles:
                 self.handle_tile_update(tile)
