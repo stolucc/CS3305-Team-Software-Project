@@ -49,6 +49,15 @@ class GameState:
         """
         return self._grid
 
+    @property
+    def civs(self):
+        """
+        Getter for civs.
+
+        :return: civs
+        """
+        return self._civs
+
     def get_civ(self, civ_id):
         """
         Return the civ with the id of civ_id.
