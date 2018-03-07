@@ -270,18 +270,25 @@ class GameState:
             return ([action.unit.position, action.destination],
                     TileUpdates(self._grid.vision(tile, 2)))
         elif isinstance(action, CombatAction):
+            if self._civs[civ].id != action.attacker._civ_id \
+                or self._civs[civ].id == action.defender._civ_id:
+                    return ServerError(4)
             self._civs[civ].attack_unit(action.attacker, action.defender)
             enemy = action.defender
             database_API.Unit.update(self._session, enemy.id,
                                      health=enemy.health)
             return ([action.attacker, action.defender], True)
         elif isinstance(action, UpgradeAction):
+            if self._civs[civ].id != action.unit._civ_id:
+                return ServerError(4)
             self._civs[civ].upgrade_unit(action.unit)
             unit = action.unit
             database_API.Unit.update(self._session, unit._id,
                                      level=unit.level, health=unit.health)
             return [action.unit]
         elif isinstance(action, BuildAction):
+            if self._civs[civ].id != action.building._civ_id:
+                return ServerError(4)
             building_type = action.building_type
             tile = action.unit.position
             bld_id = database_API.Building.insert(self._session,
@@ -294,6 +301,8 @@ class GameState:
                                             bld_id)
             return ([action.unit.position], bld_id)
         elif isinstance(action, PurchaseAction):
+            if self._civs[civ].id != action.unit._civ_id:
+                return ServerError(4)
             level = action.level
             unit_type = action.unit_type
             position = action.building.position
@@ -308,6 +317,8 @@ class GameState:
                     unit_id)
 
         elif isinstance(action, BuildCityAction):
+            if self._civs[civ].id != action.unit._civ_id:
+                return ServerError(4)
             unit = action.unit
             tile = unit.position
             city_id = database_API.Building.insert(self._session,
