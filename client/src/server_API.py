@@ -265,16 +265,23 @@ class ServerAPI:
                 old_tile._building = civ._cities[building.id]
             else:
                 civ = self._game_state._civs[building._civ_id]
-                city = civ._cities[building._id]
-                buildings = city._buildings
-                if building._id in buildings:
-                    pass
+                if building._city_id in civ._cities:
+                    city = civ._cities[building._city_id]
+                    buildings = city._buildings
+                    if building._id in buildings:
+                        pass
+                    else:
+                        buildings[building._id] = building
+                        coords = building._location.coords
+                        hex_tile = self._game_state._grid.get_hextile(coords)
+                        buildings[building._id].position = hex_tile
+                        old_tile._building = buildings[building._id]
                 else:
-                    buildings[building._id] = building
-                    coords = building._location.coords
+                    old_tile._building = building
+                    coords = building._hex.coords
                     hex_tile = self._game_state._grid.get_hextile(coords)
-                    buildings[building._id].position = hex_tile
-                    old_tile._building = buildings[building._id]
+                    old_tile._building._hex = hex_tile
+
         else:
             old_tile._building = None
         old_tile._civ_id = tile._civ_id
