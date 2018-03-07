@@ -104,7 +104,9 @@ class Game:
                     elif pressed[32] == 1:
                         self._server_api.end_turn()
                     elif pressed[98] == 1:
-                        self.build_structure(self._layout)
+                        self.build_structure(self._layout, BuildingType.CITY)
+                    elif pressed[102] == 1:
+                        self.build_structure(self._layout, BuildingType.FARM)
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     self.mouse_button_down(event)
                 if event.type == pygame.MOUSEBUTTONUP:
@@ -149,7 +151,7 @@ class Game:
         if event.button == 1:  # Left click
             pass
         elif event.button == 2:  # Middle click
-            self.build_structure(self._layout)
+            pass
         elif event.button == 3:  # Right click
             self.highlight_new_movement(self._layout)
 
@@ -258,7 +260,7 @@ class Game:
                  - math.ceil(layout.size * (math.sqrt(3) / 2)),
                  hexagon_coords[1] - layout.size))
 
-    def build_structure(self, layout):
+    def build_structure(self, layout, structure):
         """
         Build a structure using selected worker.
 
@@ -270,8 +272,10 @@ class Game:
         hexagon = self._grid.get_hextile(c_hex_coords)
         unit = self._currently_selected_unit
         if unit == hexagon.unit and unit.__class__.__name__ == "Worker":
-            # self._server_api.build(unit, BuildingType.FARM)
-            self._server_api.build_city(unit)
+            if structure == BuildingType.CITY:
+                self._server_api.build_city(unit)
+            else:
+                self._server_api.build(unit, structure)
         self.draw_map()
 
     def scale_images_to_hex_size(self):
