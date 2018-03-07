@@ -588,7 +588,7 @@ class Grid:
                 if neighbour not in visited:
                     opn.put((current_cost +
                              neighbour.movement_cost, neighbour))
-        if include_units:
+        if not include_units:
             for tile in list(result):
                 if tile.unit is not None:
                     del result[tile]
