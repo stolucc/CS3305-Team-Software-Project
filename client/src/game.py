@@ -31,7 +31,7 @@ class Game:
         self._threads = []
         self._game_state = game_state
         self._civ_colours = dict((civ, colour) for (civ, colour)
-                           in zip(sorted(self._game_state.get_civs),
+                           in zip(sorted(self._game_state.civs),
                                   ["civ1_border", "civ2_border",
                                    "civ3_border", "civ4_border"]))
         self._flags = (pygame.DOUBLEBUF |
