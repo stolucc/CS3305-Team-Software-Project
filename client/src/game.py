@@ -90,7 +90,7 @@ class Game:
         self.scale_buildings_to_hex_size()
         self.scale_resources_to_hex_size()
         self.draw_map()
-
+        count = 0
         while True:
             for event in pygame.event.get():  # something happened
                 if event.type == pygame.QUIT:
@@ -106,6 +106,11 @@ class Game:
                 if event.type == pygame.MOUSEBUTTONUP:
                     self.mouse_button_up(event)
             time.sleep(0.004)
+            count += 1
+            if count == 100:
+                count = 0
+                self.draw_map()
+
 
     def quit(self):
         """Close game."""
