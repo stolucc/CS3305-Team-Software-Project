@@ -37,8 +37,8 @@ class GameState:
         self._current_player = None
         self._game_started = False
         self._queues = {}
-        self._start_locations = [(4, -2, -2), (1, -1, 0),
-                                 (0, -1, 1), (-1, 1, 0)]
+        self._start_locations = [(4, -2, -2), (-3, -2, 5),
+                                 (-2, 4, -2), (4, -5, 1)]
 
     @property
     def game_id(self):
