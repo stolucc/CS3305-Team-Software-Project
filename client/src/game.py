@@ -268,7 +268,8 @@ class Game:
         hexagon = self._grid.get_hextile(c_hex_coords)
         unit = self._currently_selected_unit
         if unit == hexagon.unit and unit.__class__.__name__ == "Worker":
-            self._server_api.build(unit, BuildingType.FARM)
+            # self._server_api.build(unit, BuildingType.FARM)
+            self._server_api.build_city(unit)
         self.draw_map()
 
     def scale_images_to_hex_size(self):

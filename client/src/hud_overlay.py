@@ -143,13 +143,12 @@ class HudOverlay:
                        (offset, 20),
                        self._color2)
         offset += 80
-        current_player = 1  # self._game_state.current_player
         my_turn = True  # self._game_state.my_turn()
         if my_turn:
             color = self._color3
         else:
             color = self._color2
-        value = "Player{}\'s Turn".format(current_player)
+        value = "Player{}\'s Turn".format(self._game_state._current_player)
         self.draw_text(value,
                        (offset + 20, 20),
                        color)
