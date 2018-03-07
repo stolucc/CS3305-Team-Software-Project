@@ -55,6 +55,7 @@ class ServerAPI:
             grid = Grid(20)
             self._game_state = GameState(game_id, 1, grid, self._log)
             self._game_state._grid.create_grid()
+            self._game_state._grid.static_map()
             civ = Civilisation(self.id, self._game_state._grid, self._log)
             self._game_state.add_civ(civ)
             self._game_state._my_id = self.id
