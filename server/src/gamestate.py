@@ -185,7 +185,7 @@ class GameState:
                 self._civs[user_id].units[unit_id]))
             if(len(self._civs) == 2):
                 self._game_started = True
-                self._turn_count = 1
+                self._turn_count += 1
                 player_ids = [x for x in self._civs]
                 for civ in self._civs:
                     self._queues[civ].put(PlayerJoinedUpdate(player_ids))
@@ -260,6 +260,8 @@ class GameState:
         """
         # NOTE: Assume validation has already ocurred
         if isinstance(action, MovementAction):
+            if self._civs[civ].id != action.unit._civ_id:
+                return ServerError(4)
             self._civs[civ].move_unit_to_hex(action.unit, action.destination)
             unit = action.unit
             tile = action.destination
