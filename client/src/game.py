@@ -403,12 +403,6 @@ class Game:
                     (hexagon_coords[0]
                      - math.ceil(self._layout.size * (math.sqrt(3) / 2)),
                      hexagon_coords[1] - self._layout.size))
-                if hexagon in my_tiles:
-                    self._screen.blit(
-                        self._scaled_terrain_images[self._civ_colours[my_civ.id]],
-                        (hexagon_coords[0]
-                         - math.ceil(self._layout.size * (math.sqrt(3) / 2)),
-                         hexagon_coords[1] - self._layout.size))
                 if hexagon.building is not None:
                     build = hexagon.building
                     hexagon_coords = layout.hex_to_pixel(hexagon)
@@ -421,6 +415,12 @@ class Game:
                     self.draw_sprite(hexagon_coords,
                                      self._scaled_resource_images[
                                           resource.resource_type])
+                if hexagon in my_tiles:
+                    self._screen.blit(
+                        self._scaled_terrain_images[self._civ_colours[my_civ.id]],
+                        (hexagon_coords[0]
+                         - math.ceil(self._layout.size * (math.sqrt(3) / 2)),
+                         hexagon_coords[1] - self._layout.size))
                 if hexagon.unit is not None and hexagon in my_vision:
                     unit = hexagon.unit
                     unit_level = unit.level
