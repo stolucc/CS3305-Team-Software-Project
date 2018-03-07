@@ -227,6 +227,8 @@ class Game:
             if unit is not None:
                 if hexagon in self._current_available_moves:
                     self._server_api.move_unit(unit, hexagon)
+                    self._game_state.get_civ(
+                        self._game_state.my_id).calculate_vision()
                 elif type(unit) != Worker \
                         and hexagon.unit is not None:
                     self._server_api.attack(unit, hexagon.unit)
@@ -276,6 +278,7 @@ class Game:
                 self._server_api.build_city(unit)
             else:
                 self._server_api.build(unit, structure)
+        self._game_state.get_civ(self._game_state.my_id).calculate_vision()
         self.draw_map()
 
     def scale_images_to_hex_size(self):

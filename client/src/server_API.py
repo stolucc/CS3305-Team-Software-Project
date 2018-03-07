@@ -198,6 +198,7 @@ class ServerAPI:
         elif update.__class__.__name__ == "TileUpdates":
             for tile in update._tiles:
                 self.handle_tile_update(tile)
+            self._game_state.get_civ(self._game_state.my_id).calculate_vision()
 
     def handle_start_turn_update(self, update):
         """Handle start turn update."""
