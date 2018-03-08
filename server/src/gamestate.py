@@ -360,16 +360,16 @@ class GameState:
         """
         # NOTE: Assume validation has already ocurred
         if isinstance(action, MovementAction):
-            self.handle_movement_action(civ, action)
+            return self.handle_movement_action(civ, action)
         elif isinstance(action, CombatAction):
-            self.handle_combat_action(civ, action)
+            return self.handle_combat_action(civ, action)
         elif isinstance(action, UpgradeAction):
-            self.handle_upgrade_action(civ, action)
+            return self.handle_upgrade_action(civ, action)
         elif isinstance(action, BuildAction):
-            self.handle_build_action(civ, action)
+            return self.handle_build_action(civ, action)
         elif isinstance(action, PurchaseAction):
-            self.handle_purchase_action(civ, action)
+            return self.handle_purchase_action(civ, action)
         elif isinstance(action, BuildCityAction):
-            self.handle_build_city_action(civ, action)
+            return self.handle_build_city_action(civ, action)
         elif isinstance(action, ResearchAction):
-            self.handle_research_action(civ, action)
+            return self.handle_research_action(civ, action)

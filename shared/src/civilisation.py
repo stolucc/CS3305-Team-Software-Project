@@ -197,7 +197,6 @@ class Civilisation(object):
         worker.actions = 2
         tile.unit = worker
         self.units[worker_id] = worker
-        worker._civilisation = self
 
     def build_city_on_tile(self, worker, city_id):
         """
@@ -358,7 +357,6 @@ class Civilisation(object):
             self.gold -= unit.gold_cost(level)
             position.unit = unit
             self.units[unit_id] = unit
-            unit._civilisation = self
             return unit
         else:
             self._logger.debug("Unable to purchase unit.")
