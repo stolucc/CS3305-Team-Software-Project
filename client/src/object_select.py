@@ -36,7 +36,7 @@ class SelectMenu(Menu):
             return False
         x_coordinate = self._pos[0]
         y_coordinate = self._pos[1]
-        option_width, option_height = 100, 40
+        option_width, option_height = 150, 40
         self._start = []
         self._end = []
         if x_coordinate > self._screen_width/2:
