@@ -68,17 +68,24 @@ class ResearchTree(object):
         """Check if node is able to be unlocked, based on id."""
         return self._branches[node_id]._unlockable
 
-    def unlock_node(self, node_id, branch):
+    def unlock_node(self, branch):
         """Unlock node."""
-        node = self._branches[branch][node_id]
+        node = self.get_next_unlockable(branch)
         node._unlockable = False
         node._unlocked = True
-        if node_id < 2 and branch != 'Win':
-            next_node = self._branches[branch][node_id + 1]
+        if node._id < 2 and branch != 'Win':
+            next_node = self._branches[branch][node._id + 1]
             next_node._unlockable = True
         self.win_node_unlockable()
         self._unlocked = self.unlocked_nodes()
         self._unlockable = self.unlockable_nodes()
+
+    def get_next_unlockable(self, branch):
+        """Return next unlockable node in tree, none otherwise."""
+        for node in self._unlockable:
+            if node._branch == branch:
+                return node
+        return None
 
     def win_node_unlockable(self):
         """Make win node unlockable if all other nodes unlocked."""
