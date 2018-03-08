@@ -29,12 +29,14 @@ class Game:
         self._server_api = server_api
         pygame.init()
         pygame.font.init()
+        civ_borders = ["civ1_border", "civ2_border", "civ3_border",
+                       "civ4_border"]
         self._threads = []
         self._game_state = game_state
-        self._civ_colours = dict((civ, colour) for (civ, colour)
-                           in zip(sorted(self._game_state.civs),
-                                  ["civ1_border", "civ2_border",
-                                   "civ3_border", "civ4_border"]))
+        self._civ_colours = dict((civ, colour)
+                                 for (civ, colour)in
+                                 zip(sorted(self._game_state.civs),
+                                     civ_borders))
         self._flags = (pygame.DOUBLEBUF |
                        pygame.HWSURFACE)
         self.infoObject = pygame.display.Info()
@@ -97,25 +99,32 @@ class Game:
         self._threads.append(t)
         t.start()
         while True:
-            for event in pygame.event.get():  # something happened
-                if event.type == pygame.QUIT:
-                    self.quit()
-                elif event.type == pygame.KEYDOWN:
-                    pressed = pygame.key.get_pressed()
-                    if pressed[306] == 1 and pressed[99] == 1:  # 306 CTRL,99 C
-                        self.quit()
-                    elif pressed[32] == 1:
-                        self._server_api.end_turn()
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    self.mouse_button_down(event)
-                if event.type == pygame.MOUSEBUTTONUP:
-                    self.mouse_button_up(event)
+            self.check_for_events()
             time.sleep(0.004)
             count += 1
             if count == 100:
                 count = 0
                 self.draw_map()
 
+    def check_for_events(self):
+        """Check for mouse and keyboard events."""
+        for event in pygame.event.get():  # something happened
+            if event.type == pygame.QUIT:
+                self.quit()
+            elif event.type == pygame.KEYDOWN:
+                pressed = pygame.key.get_pressed()
+                if pressed[306] == 1 and pressed[99] == 1:  # 306 CTRL,99 C
+                    self.quit()
+                elif pressed[32] == 1:
+                    self._server_api.end_turn()
+                elif pressed[98] == 1:
+                    self.build_structure(self._layout, BuildingType.CITY)
+                elif pressed[102] == 1:
+                    self.build_structure(self._layout, BuildingType.FARM)
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                self.mouse_button_down(event)
+            if event.type == pygame.MOUSEBUTTONUP:
+                self.mouse_button_up(event)
 
     def quit(self):
         """Close game."""
@@ -421,6 +430,7 @@ class Game:
                        main layout or one of it's mirrors.
         """
         my_civ = self._game_state.get_civ(self._game_state.my_id)
+        my_id = self._game_state.my_id
         my_vision = my_civ.vision
         size = pygame.display.get_surface().get_size()
         for hex_point in self._grid.get_hextiles():
@@ -459,6 +469,13 @@ class Game:
                     unit_level = unit.level
                     unit_health = unit.get_health_percentage()
                     hexagon_coords = layout.hex_to_pixel(unit.position)
+                    if unit.civ_id == my_id:
+                        self._screen.blit(
+                            self._scaled_terrain_images
+                            [self._civ_colours[my_id]],
+                            (hexagon_coords[0] - math.ceil(
+                                self._layout.size * (math.sqrt(3) / 2)),
+                                hexagon_coords[1] - self._layout.size))
                     self._screen.blit(
                         self._scaled_terrain_images[
                             self._civ_colours[unit.civ_id]],
