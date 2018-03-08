@@ -23,39 +23,23 @@ class TreeGUI(Menu):
         self._end = []
         option_width, option_height = 150, 40
         wrapper_x, wrapper_y = self.draw_background()
-        branch = None
-        branch_number = 1
         x_coordinate = 25 + wrapper_x
         y_coordinate = 50 + wrapper_y
-        upgrade = 0
-        unlockable = tree.get_unlockable()
-        print(unlockable)
-        for node in tree.get_unlocked():
-            if branch is None:
-                branch = node.branch
-            if node.branch != branch:
-                if upgrade < 3:
-                    for unlockableNode in unlockable:
-                        if unlockableNode.branch == branch:
-                            option_block = pygame.Rect(
-                                x_coordinate, y_coordinate,
-                                option_width, option_height)
-                            self.draw_option(option_block,
-                                             str(unlockableNode.unlock_cost))
-                branch_number += 1
+        branches = tree.branches
+        print(branches)
+        for branch in branches:
+            print branch
+            if branch == "Win":
+                pass
+            else:
                 x_coordinate += 250
                 y_coordinate = 50 + wrapper_y
-                branch = node.branch
-            else:
-                upgrade += 1
-            option_block = pygame.Rect(
-                x_coordinate, y_coordinate,
-                option_width, option_height)
-            self.draw_option(option_block, branch + " " + str(upgrade))
-            y_coordinate += 100
-
-        for node in tree.get_unlockable():
-            pass
+            for i in range(len(branches[branch])):
+                option_block = pygame.Rect(
+                    x_coordinate, y_coordinate,
+                    option_width, option_height)
+                self.draw_option(option_block, branch + " " + str(i+1))
+                y_coordinate += 100
         pygame.display.flip()
 
     def draw_background(self):
