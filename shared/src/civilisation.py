@@ -207,7 +207,7 @@ class Civilisation(object):
         cost_of_city = 25
         tile = worker.position
         if tile.civ_id is None and isinstance(worker, Worker)\
-                and self.gold >= cost_of_city:
+                and self.gold >= cost_of_city and worker.actions > 0:
             city = City(city_id, tile, self._id)
             tiles = self.grid.spiral_ring(tile, City.RANGE)
             city.tiles = tiles
