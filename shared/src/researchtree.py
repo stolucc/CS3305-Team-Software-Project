@@ -40,9 +40,9 @@ class ResearchTree(object):
 
         Add correct nodes to Tree and the end node to tie branches together.
         """
-        self.add_branch('worker')
-        self.add_branch('archer')
-        self.add_branch('swordsman')
+        self.add_branch('Worker')
+        self.add_branch('Archer')
+        self.add_branch('Swordsman')
         self.add_end_node()
         self._unlocked = self.unlocked_nodes()
         self._unlockable = self.unlockable_nodes()
@@ -61,8 +61,8 @@ class ResearchTree(object):
 
     def add_end_node(self):
         """Add end/win node."""
-        node = ResearchNode(0, 'win', False, False, 0)
-        self._branches['win'] = [node]
+        node = ResearchNode(0, 'Win', False, False, 0)
+        self._branches['Win'] = [node]
 
     def unlockable(self, node_id, branch):
         """Check if node is able to be unlocked, based on id."""
@@ -73,7 +73,7 @@ class ResearchTree(object):
         node = self._branches[branch][node_id]
         node._unlockable = False
         node._unlocked = True
-        if node_id < 2 and branch != 'win':
+        if node_id < 2 and branch != 'Win':
             next_node = self._branches[branch][node_id + 1]
             next_node._unlockable = True
         self.win_node_unlockable()
@@ -83,9 +83,9 @@ class ResearchTree(object):
     def win_node_unlockable(self):
         """Make win node unlockable if all other nodes unlocked."""
         branches = self._branches
-        if branches['worker'][2]._unlocked and branches['archer'][2]._unlocked\
-                and branches['swordsman'][2]._unlocked:
-            branches['win'][0]._unlockable = True
+        if branches['Worker'][2]._unlocked and branches['Archer'][2]._unlocked\
+                and branches['Swordsman'][2]._unlocked:
+            branches['Win'][0]._unlockable = True
 
     def unlockable_nodes(self):
         """Return list of unlockable nodes."""
