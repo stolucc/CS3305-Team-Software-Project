@@ -25,6 +25,15 @@ class ResearchTree(object):
         """
         return self._civilisation
 
+    @property
+    def branches(self):
+        """
+        Branch of research tree.
+
+        :return: Dictionary of branches
+        """
+        return self._branches
+
     def tree_setup(self):
         """
         Set up Research Tree.
@@ -38,7 +47,7 @@ class ResearchTree(object):
         self._unlocked = self.unlocked_nodes()
         self._unlockable = self.unlockable_nodes()
 
-    def add_branch(self, branch, nodes):
+    def add_branch(self, branch):
         """Add branch to tree with 3 nodes."""
         self._branches[branch] = []
         for node in range(3):
