@@ -94,6 +94,9 @@ class ServerAPI:
             # raise action.ServerError(reply.obj)
         else:
             self._game_state._civs[self.id].move_unit_to_hex(unit, hexagon)
+            tile_updates = reply.obj
+            for tile in tile_updates._tiles:
+                self.handle_tile_update(tile)
 
     def attack(self, attacker, defender):
         """
@@ -247,6 +250,7 @@ class ServerAPI:
         if unit is not None:
             civ = self._game_state._civs[unit._civ_id]
             if unit._id in civ._units:
+                civ._units[unit._id].position.unit = None
                 civ._units[unit._id].position = old_tile
                 old_tile._unit = civ._units[unit._id]
             else:
@@ -281,6 +285,7 @@ class ServerAPI:
                         old_tile._building = buildings[building._id]
                 else:
                     old_tile._building = building
+                    old_tile._civ_id = building._civ_id
                     coords = building._hex.coords
                     hex_tile = self._game_state._grid.get_hextile(coords)
                     old_tile._building._hex = hex_tile

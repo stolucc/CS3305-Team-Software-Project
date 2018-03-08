@@ -18,6 +18,7 @@ from civilisation import Civilisation
 from building import BuildingType
 from math import floor
 from file_logger import Logger
+from object_select import SelectMenu
 
 
 class Game:
@@ -56,6 +57,8 @@ class Game:
         self._min_zoom = 1
         self._max_zoom = 40
         self._hex_size = lambda x: (self.infoObject.current_w // x)
+        self._select_menu = SelectMenu(self._screen)
+        self._menu_displayed = False
         self._grid = self._game_state.grid
         self._layout = Layout(self._hex_size(self._zoom),
                               (self._window_size[0] / 2,
@@ -65,13 +68,6 @@ class Game:
                                self._hud_quick_surface,
                                self._window_size,
                                self._layout)
-        t = threading.Thread(group=None,
-                             target=self.render_hud,
-                             name="HUD_render",
-                             args=(),
-                             daemon=True)
-        self._threads.append(t)
-        t.start()
         self._load_images = LoadImages()
         self._scaled_terrain_images = \
             self._load_images.load_terrain_images().copy()
@@ -95,6 +91,13 @@ class Game:
         self.scale_resources_to_hex_size()
         self.draw_map()
         count = 0
+        t = threading.Thread(group=None,
+                             target=self.render_hud,
+                             name="HUD_render",
+                             args=(),
+                             daemon=True)
+        self._threads.append(t)
+        t.start()
         while True:
             self.check_for_events()
             time.sleep(0.004)
@@ -267,24 +270,59 @@ class Game:
                  - math.ceil(layout.size * (math.sqrt(3) / 2)),
                  hexagon_coords[1] - layout.size))
 
-    def build_structure(self, layout, structure):
+    def unit_menu(self, layout):
         """
         Build a structure using selected worker.
 
         :param layout: Layout object being drawn on.
         """
+
         click = pygame.mouse.get_pos()
         c_hex = layout.pixel_to_hex(click)
         c_hex_coords = self._grid.hex_round((c_hex.x, c_hex.y, c_hex.z))
         hexagon = self._grid.get_hextile(c_hex_coords)
         unit = self._currently_selected_unit
-        if unit == hexagon.unit and unit.__class__.__name__ == "Worker":
-            if structure == BuildingType.CITY:
-                self._server_api.build_city(unit)
+
+        def move_unit():
+            self.highlight_new_movement(layout)
+
+        def build_city():
+            self._server_api.build_city(unit)
+            self._game_state.get_civ(self._game_state.my_id).calculate_vision()
+            self.draw_map()
+
+        def build_farm():
+            self._server_api.build(unit, BuildingType.FARM)
+            self._game_state.get_civ(self._game_state.my_id).calculate_vision()
+            self.draw_map()
+
+        def build_trade_post():
+            self._server_api.build(unit, BuildingType.TRADE_POST)
+            self._game_state.get_civ(self._game_state.my_id).calculate_vision()
+            self.draw_map()
+
+        def build_uni():
+            self._server_api.build(unit, BuildingType.UNIVERSITY)
+            self._game_state.get_civ(self._game_state.my_id).calculate_vision()
+            self.draw_map()
+
+        if unit == hexagon.unit and self._menu_displayed is False:
+            if unit.__class__.__name__ == "Worker":
+                self._menu_displayed = self._select_menu.display_menu(click, [
+                    ("Move", move_unit),
+                    ("Build City", build_city),
+                    ("Build Farm", build_farm),
+                    ("Build Trade Post", build_trade_post),
+                    ("Build Uni", build_uni)])
             else:
-                self._server_api.build(unit, structure)
-        self._game_state.get_civ(self._game_state.my_id).calculate_vision()
-        self.draw_map()
+                self._menu_displayed = self._select_menu.display_menu(click, [
+                    ("Move", move_unit)])
+
+        else:
+            self._menu_displayed = self._select_menu.menu_click(click)
+            if not self._menu_displayed:
+                self._screen.fill((0, 0, 0))
+                pygame.display.flip()
 
     def scale_images_to_hex_size(self):
         """
@@ -391,9 +429,9 @@ class Game:
         :param layout: The layout of the grid to draw. Either the
                        main layout or one of it's mirrors.
         """
-        my_id = self._game_state.get_civ(self._game_state.my_id)
-        my_vision = my_id.vision
-        my_tiles = my_id.tiles
+        my_civ = self._game_state.get_civ(self._game_state.my_id)
+        my_id = self._game_state.my_id
+        my_vision = my_civ.vision
         size = pygame.display.get_surface().get_size()
         for hex_point in self._grid.get_hextiles():
             hexagon = self._grid.get_hextile(hex_point)
@@ -408,12 +446,6 @@ class Game:
                     (hexagon_coords[0]
                      - math.ceil(self._layout.size * (math.sqrt(3) / 2)),
                      hexagon_coords[1] - self._layout.size))
-                if hexagon in my_tiles:
-                    self._screen.blit(
-                        self._scaled_terrain_images[self._civ_colours[my_id]],
-                        (hexagon_coords[0]
-                         - math.ceil(self._layout.size * (math.sqrt(3) / 2)),
-                         hexagon_coords[1] - self._layout.size))
                 if hexagon.building is not None:
                     build = hexagon.building
                     hexagon_coords = layout.hex_to_pixel(hexagon)
@@ -426,6 +458,12 @@ class Game:
                     self.draw_sprite(hexagon_coords,
                                      self._scaled_resource_images[
                                           resource.resource_type])
+                if hexagon.civ_id is not None:
+                    self._screen.blit(
+                        self._scaled_terrain_images[self._civ_colours[hexagon.civ_id]],
+                        (hexagon_coords[0]
+                         - math.ceil(self._layout.size * (math.sqrt(3) / 2)),
+                         hexagon_coords[1] - self._layout.size))
                 if hexagon.unit is not None and hexagon in my_vision:
                     unit = hexagon.unit
                     unit_level = unit.level
@@ -438,6 +476,12 @@ class Game:
                             (hexagon_coords[0] - math.ceil(
                                 self._layout.size * (math.sqrt(3) / 2)),
                                 hexagon_coords[1] - self._layout.size))
+                    self._screen.blit(
+                        self._scaled_terrain_images[
+                            self._civ_colours[unit.civ_id]],
+                        (hexagon_coords[0]
+                         - math.ceil(self._layout.size * (math.sqrt(3) / 2)),
+                         hexagon_coords[1] - self._layout.size))
                     self.draw_sprite(hexagon_coords,
                                      self._scaled_sprite_images[
                                          unit.__class__.__name__
@@ -485,8 +529,9 @@ class Game:
 
     def render_hud(self):
         """Render heads up display."""
-        self._hud.draw()
-        time.sleep(4)
+        while True:
+            self._hud.draw()
+            time.sleep(1)
 
 
 if __name__ == "__main__":

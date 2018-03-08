@@ -7,7 +7,7 @@ from building import BuildingType
 class City():
     """A city which claims some of it's neighbouring tiles."""
 
-    RANGE = 4
+    RANGE = 3
 
     def __init__(self, identifier, hexagon, civ_id):
         """Instantiate new City object."""

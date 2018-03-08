@@ -16,6 +16,8 @@ from queue import Queue
 class GameState:
     """Game state class."""
 
+    NUM_PLAYERS = 2
+
     def __init__(self, game_id, seed, grid, logger, session):
         """
         Initialise GameState attributes.
@@ -31,12 +33,12 @@ class GameState:
         self._grid = grid
         self._civs = {}
         self._my_id = None
-        self._turn_count = 1
+        self._turn_count = 0
         self._current_player = None
         self._game_started = False
         self._queues = {}
-        self._start_locations = [(4, -2, -2), (1, -1, 0),
-                                 (0, -1, 1), (-1, 1, 0)]
+        self._start_locations = [(4, -2, -2), (-3, -2, 5),
+                                 (-2, 4, -2), (4, -5, 1)]
 
     @property
     def game_id(self):
@@ -163,7 +165,7 @@ class GameState:
         :param message: The message object sent from the client.
         :return: The id of the new player
         """
-        if len(self._civs) < 2:
+        if len(self._civs) < GameState.NUM_PLAYERS:
             user_id = database_API.User.insert(self._session,
                                                self._game_id,
                                                active=True, gold=100,
@@ -183,7 +185,7 @@ class GameState:
             self._queues[user_id] = Queue()
             self._queues[user_id].put(UnitUpdate(
                 self._civs[user_id].units[unit_id]))
-            if(len(self._civs) == 2):
+            if(len(self._civs) == GameState.NUM_PLAYERS):
                 self._game_started = True
                 self._turn_count += 1
                 player_ids = [x for x in self._civs]
@@ -194,8 +196,8 @@ class GameState:
                                                     self._turn_count)
                 for key in self._queues:
                     self._queues[key].put(start_turn_update)
-
-                # TODO: Tell Clients game has begun and who's turn it is
+                    unit = self._civs[key].units[list(self._civs[key].units.keys())[0]]
+                    self.populate_queues([unit])
 
             return self._game_id, user_id
         else:
@@ -237,7 +239,7 @@ class GameState:
         """
         civs = list(self._civs.keys())
         current_civ_index = civs.index(self._current_player)
-        next_civ_index = (current_civ_index + 1) % 2
+        next_civ_index = (current_civ_index + 1) % GameState.NUM_PLAYERS
         next_civ = civs[next_civ_index]
         self._current_player = next_civ
         self._civs[self._current_player].reset_unit_actions_and_movement()
@@ -255,44 +257,47 @@ class GameState:
     def handle_movement_action(self, civ, action):
         """Handle incoming movement actions and update game state."""
         if self._civs[civ].id != action.unit._civ_id:
-            return ServerError(4)
-        self._civs[civ].move_unit_to_hex(action.unit, action.destination)
-        unit = action.unit
-        tile = action.destination
+            return ([], ServerError(4))
+
+        unit = self.validate_unit(civ, action.unit)
+        tile = self.validate_tile(action.destination)
+
+        self._civs[civ].move_unit_to_hex(unit, tile)
         database_API.Unit.update(self._session, unit.id, x=tile.x,
                                  y=tile.y, z=tile.z)
-        return ([action.unit.position, action.destination],
-                TileUpdates(self._grid.vision(tile, 2)))
+        result_tiles = self._grid.vision(unit.position, 3)
+        return ([action.unit.position, unit.position],
+                TileUpdates(self._grid.vision(unit.position, 3)))
 
     def handle_combat_action(self, civ, action):
         """Handle incoming combat actions and update game state."""
-        if self._civs[civ].id != \
-                action.attacker._civ_id or \
-                self._civs[civ].id == \
-                action.defender._civ_id:
-            return ServerError(4)
-        self._civs[civ].attack_unit(action.attacker, action.defender)
+        if self._civs[civ].id != action.attacker._civ_id \
+                or self._civs[civ].id == action.defender._civ_id:
+            return ([], ServerError(4))
+        attacker = self.validate_unit(civ, action.attacker)
+        defender = self.validate_unit(self._civs[action.defender._civ_id], action.defender)
+        self._civs[civ].attack_unit(attacker, defender)
         enemy = action.defender
         database_API.Unit.update(self._session, enemy.id,
                                  health=enemy.health)
-        return ([action.attacker, action.defender], True)
+        return ([attacker, defender], True)
 
     def handle_upgrade_action(self, civ, action):
         """Handle incoming upgrade actions and update game state."""
         if self._civs[civ].id != action.unit._civ_id:
-            return ServerError(4)
+            return ([], ServerError(4))
         self._civs[civ].upgrade_unit(action.unit)
-        unit = action.unit
+        unit = self.validate_unit(civ, action.unit)
         database_API.Unit.update(self._session, unit._id,
                                  level=unit.level, health=unit.health)
-        return [action.unit]
+        return [unit]
 
     def handle_build_action(self, civ, action):
         """Handle incoming build actions and update game state."""
-        if self._civs[civ].id != action.building._civ_id:
-            return ServerError(4)
+        if self._civs[civ].id != action.unit._civ_id:
+            return ([], ServerError(4))
         building_type = action.building_type
-        tile = action.unit.position
+        tile = self.validate_tile(action.unit.position)
         bld_id = database_API.Building.insert(self._session,
                                               self._civs[civ]._id,
                                               True, Building.get_type
@@ -306,10 +311,10 @@ class GameState:
     def handle_purchase_action(self, civ, action):
         """Handle incoming purchase actions and update game state."""
         if self._civs[civ].id != action.unit._civ_id:
-            return ServerError(4)
+            return ([], ServerError(4))
         level = action.level
         unit_type = action.unit_type
-        position = action.building.position
+        position = self.validate_tile(action.building.position)
         unit_id = database_API.Unit.insert(self._session,
                                            self._civs[civ]._id, level,
                                            unit_type.get_type(),
@@ -323,9 +328,9 @@ class GameState:
     def handle_build_city_action(self, civ, action):
         """Handle incoming city-building actions and update game state."""
         if self._civs[civ].id != action.unit._civ_id:
-            return ServerError(4)
-        unit = action.unit
-        tile = unit.position
+            return ([], ServerError(4))
+        unit = self.validate_unit(civ, action.unit)
+        tile = self.validate_tile(unit.position)
         city_id = database_API.Building.insert(self._session,
                                                self._civs[civ]._id,
                                                True, 3, tile.x, tile.y,
@@ -333,12 +338,19 @@ class GameState:
         self._civs[civ].build_city_on_tile(unit, city_id)
         return ([tile], city_id)
 
+
     def handle_research_action(self, civ, action):
         """Handle incoming research actions and update game state."""
         node_id = action.node_id
         database_API.Technology.insert(self._session, self._civs[civ]._id,
                                        node_id)
         return [self._civs[civ].unlock_research(node_id)]
+
+    def validate_unit(self, civ, unit):
+        return self._civs[civ].units[unit.id]
+
+    def validate_tile(self, tile):
+        return self._grid.get_hextile(tile.coords)
 
     def handle_action(self, civ, action):
         """

@@ -545,7 +545,7 @@ class Grid:
             view = True
             if self.hex_distance(hex, tile) <= radius:
                 ray = self.hex_linedraw(hex, tile)
-                for raytile in range(len(ray)):
+                for raytile in range(len(ray))[1:]:
                     if(view):
                         result = result | {ray[raytile]}
                         if not ray[raytile].vision:

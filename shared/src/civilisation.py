@@ -285,7 +285,6 @@ class Civilisation(object):
             if unit.movement_range >= movement_cost and unit.actions > 0:
                 pos = unit.position
                 unit.movement -= movement_cost
-                unit.position.unit = None
                 unit.position = tile
                 tile.unit = unit
                 pos.unit = None
@@ -404,7 +403,7 @@ class Civilisation(object):
     def calculate_vision(self):
         """Determine the tiles visible to the civilisation."""
         vision = set()
-        self._visions = {}
+        self._vision = {}
         for unit_id in self._units:
             unit = self._units[unit_id]
             vision_range = 3  # TODO: Replace with unit vision range
