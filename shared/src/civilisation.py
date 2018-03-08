@@ -284,14 +284,30 @@ class Civilisation(object):
             if unit.movement_range >= movement_cost and unit.actions > 0:
                 pos = unit.position
                 unit.movement -= movement_cost
+                unit.position.unit = None
                 unit.position = tile
                 tile.unit = unit
                 pos.unit = None
                 unit.actions -= 1
+                if tile.city_id is not None and tile.civ_id != self._id:
+                    self.destroy_city(tile)
             else:
                 self._logger.debug("Unable to move unit.")
         else:
             self._logger.debug("Tile already has unit.")
+
+    def destroy_building(self, tile):
+        """Remove references for buildings."""
+        tile._building = None
+        tile._city_id = None
+        tile._civ_id = None
+
+    def destroy_city(self, tile):
+        """Remove all references for the city and its buildings."""
+        city_tiles = self._grid.spiral_ring(tile, 4)
+        for city_tile in city_tiles:
+            self.destroy_building(city_tile)
+        self.destroy_building(tile)
 
     def movement_cost_of_path(self, path):
         """Calculate movement cost of list of hex tiles."""
