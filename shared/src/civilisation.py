@@ -1,6 +1,6 @@
 """Civilisation representation."""
 
-from unit import Worker, Swordsman, Unit
+from unit import Worker, Swordsman, Soldier, Unit
 from city import City
 from building import Building
 from currency import CurrencyType
@@ -139,7 +139,7 @@ class Civilisation(object):
             values[resource] = 0
         for key, city in self._cities.items():
             for resource in list(ResourceType):
-                values[resource] += city.resources
+                values[resource] += city.resources[resource]
         return values
 
     @property
@@ -207,7 +207,7 @@ class Civilisation(object):
         cost_of_city = 25
         tile = worker.position
         if tile.civ_id is None and isinstance(worker, Worker)\
-                and self.gold >= cost_of_city:
+                and self.gold >= cost_of_city and worker.actions > 0:
             city = City(city_id, tile, self._id)
             tiles = self.grid.spiral_ring(tile, City.RANGE)
             city.tiles = tiles
@@ -289,8 +289,9 @@ class Civilisation(object):
                 tile.unit = unit
                 pos.unit = None
                 unit.actions -= 1
-                if tile.city_id is not None and tile.civ_id != self._id:
-                    self.destroy_city(tile)
+                if tile.city_id is not None and isinstance(unit, Soldier)\
+                        and tile.civ_id != self._id:
+                    return self.destroy_city(tile)
             else:
                 self._logger.debug("Unable to move unit.")
         else:
@@ -308,6 +309,7 @@ class Civilisation(object):
         for city_tile in city_tiles:
             self.destroy_building(city_tile)
         self.destroy_building(tile)
+        return city_tiles
 
     def movement_cost_of_path(self, path):
         """Calculate movement cost of list of hex tiles."""

@@ -341,7 +341,6 @@ class GameState:
         self._civs[civ].build_city_on_tile(unit, city_id)
         return ([tile], city_id)
 
-
     def handle_research_action(self, civ, action):
         """Handle incoming research actions and update game state."""
         node_id = action.node_id
@@ -350,9 +349,11 @@ class GameState:
         return [self._civs[civ].unlock_research(node_id)]
 
     def validate_unit(self, civ, unit):
+        """Return valid unit."""
         return self._civs[civ].units[unit.id]
 
     def validate_tile(self, tile):
+        """Return valid tile."""
         return self._grid.get_hextile(tile.coords)
 
     def handle_action(self, civ, action):
