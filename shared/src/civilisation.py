@@ -240,17 +240,17 @@ class Civilisation(object):
         else:
             self._logger.debug("Unable to build structure.")
 
-    def unlock_research(self, node_id):
+    def unlock_research(self, branch):
         """
         Unlock node on research tree.
 
         Nodes ID go from 0-9.
         :param node_id: int ID of research node
         """
-        node = self._tree._nodes[node_id]
-        if node.unlock_cost <= self.science and self._tree.unlockable(node_id):
+        node = self._tree.get_next_unlockable()
+        if node is not None and node.unlock_cost <= self.science:
             self.science -= node.unlock_cost
-            self._tree.unlock_node(node_id)
+            self._tree.unlock_node(branch, node)
         else:
             self._logger.debug("Unable to unlock research node.")
 

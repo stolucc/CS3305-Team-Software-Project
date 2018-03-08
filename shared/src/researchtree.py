@@ -12,6 +12,7 @@ class ResearchTree(object):
         """
         self._civilisation = civilisation
         self._branches = {}
+        self._tier = {}
         self._unlocked = []
         self._unlockable = []
         self.tree_setup()
@@ -58,6 +59,7 @@ class ResearchTree(object):
             else:
                 new_node = ResearchNode(node, branch, False, False, 20)
             self._branches[branch] += [new_node]
+            self._tier[branch] = 1
 
     def add_end_node(self):
         """Add end/win node."""
@@ -68,9 +70,8 @@ class ResearchTree(object):
         """Check if node is able to be unlocked, based on id."""
         return self._branches[node_id]._unlockable
 
-    def unlock_node(self, branch):
+    def unlock_node(self, branch, node):
         """Unlock node."""
-        node = self.get_next_unlockable(branch)
         node._unlockable = False
         node._unlocked = True
         if node._id < 2 and branch != 'Win':
