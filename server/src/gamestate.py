@@ -196,7 +196,8 @@ class GameState:
                                                     self._turn_count)
                 for key in self._queues:
                     self._queues[key].put(start_turn_update)
-                    unit = self._civs[key].units[list(self._civs[key].units.keys())[0]]
+                    unit = self._civs[key].units[list(self._civs[key].units.
+                                                      keys())[0]]
                     self.populate_queues([unit])
 
             return self._game_id, user_id
@@ -278,7 +279,8 @@ class GameState:
                 or self._civs[civ].id == action.defender._civ_id:
             return ([], ServerError(4))
         attacker = self.validate_unit(civ, action.attacker)
-        defender = self.validate_unit(self._civs[action.defender._civ_id], action.defender)
+        defender = self.validate_unit(self._civs[action.defender._civ_id],
+                                      action.defender)
         self._civs[civ].attack_unit(attacker, defender)
         enemy = action.defender
         database_API.Unit.update(self._session, enemy.id,

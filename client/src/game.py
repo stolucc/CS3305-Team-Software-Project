@@ -504,7 +504,8 @@ class Game:
                     hexagon_coords = layout.hex_to_pixel(hexagon)
                     self.draw_sprite(hexagon_coords,
                                      self._scaled_resource_images[
-                                         resource.resource_type])
+                                          resource.resource_type])
+
                 if hexagon.unit is not None and hexagon in my_vision:
                     unit = hexagon.unit
                     unit_level = unit.level
