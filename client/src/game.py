@@ -35,7 +35,7 @@ class Game:
         self._threads = []
         self._game_state = game_state
         self._civ_colours = dict((civ, colour)
-                                 for (civ, colour)in
+                                 for (civ, colour) in
                                  zip(sorted(self._game_state.civs),
                                      civ_borders))
         self._flags = (pygame.DOUBLEBUF |
@@ -119,10 +119,10 @@ class Game:
                     self.quit()
                 elif pressed[32] == 1:
                     self._server_api.end_turn()
-                # elif pressed[98] == 1:
-                #     self.build_structure(self._layout, BuildingType.CITY)
-                # elif pressed[102] == 1:
-                #     self.build_structure(self._layout, BuildingType.FARM)
+                    # elif pressed[98] == 1:
+                    #     self.build_structure(self._layout, BuildingType.CITY)
+                    # elif pressed[102] == 1:
+                    #     self.build_structure(self._layout, BuildingType.FARM)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.mouse_button_down(event)
             if event.type == pygame.MOUSEBUTTONUP:
@@ -226,6 +226,11 @@ class Game:
             self.draw_map()
 
     def select_object(self, layout):
+        """
+        Select a unit or city and display the menu options.
+
+        :param layout: The layout object being used
+        """
         click = pygame.mouse.get_pos()
         c_hex = layout.pixel_to_hex(click)
         c_hex_coords = self._grid.hex_round((c_hex.x, c_hex.y, c_hex.z))
@@ -242,56 +247,20 @@ class Game:
                 self._currently_selected_object = None
                 self._current_available_moves = {}
                 self._currently_selected_tile = None
-            elif isinstance(self._currently_selected_unit, Soldier)  \
+            elif isinstance(self._currently_selected_unit, Soldier) \
                     and hexagon.unit != self._currently_selected_unit \
                     and hexagon.unit is not None:
                 self._server_api.attack(self._currently_selected_unit,
                                         hexagon.unit)
-            elif hexagon.unit not in [None, self._currently_selected_object]:
+            elif hexagon.unit not in [None, self._currently_selected_object] \
+                    and hexagon.unit.civ_id == self._game_state.my_id:
                 self._currently_selected_object = hexagon.unit
                 self.unit_menu(layout)
             elif hexagon.building is not None:
-                self._currently_selected_object = hexagon.building
-                if hexagon.building.building_type == BuildingType.CITY:
+                if hexagon.building.building_type == BuildingType.CITY \
+                        and hexagon.building.civ_id == self._game_state.my_id:
+                    self._currently_selected_object = hexagon.building
                     self.unit_menu(layout)
-
-    # def highlight_new_movement(self, layout):
-    #     """
-    #     Highlight tiles which can be moved to by newly selected unit.
-    #
-    #     :param layout: the layout object being drawn on.
-    #     """
-    #     click = pygame.mouse.get_pos()
-    #     c_hex = layout.pixel_to_hex(click)
-    #     c_hex_coords = self._grid.hex_round((c_hex.x, c_hex.y, c_hex.z))
-    #     hexagon = self._grid.get_hextile(c_hex_coords)
-    #     unit = self._currently_selected_unit
-    #     self._current_available_moves = self._grid.dijkstra(
-    #         hexagon, unit.movement_range)
-    #
-    #     if self._currently_selected_tile != hexagon:
-    #         if unit is not None:
-    #             if hexagon in self._current_available_moves:
-    #                 self._server_api.move_unit(unit, hexagon)
-    #                 self._game_state.get_civ(
-    #                     self._game_state.my_id).calculate_vision()
-    #             elif type(unit) != Worker \
-    #                     and hexagon.unit is not None:
-    #                 self._server_api.attack(unit, hexagon.unit)
-    #             self._currently_selected_tile = None
-    #             self._currently_selected_unit = None
-    #             self._current_available_moves = {}
-    #         else:
-    #             self._currently_selected_tile = hexagon
-    #             self._current_available_moves = {}
-    #             if hexagon.unit is not None:
-    #                 unit = hexagon.unit
-    #                 self._currently_selected_unit = unit
-    #                 if unit.position == hexagon:
-    #                     self._current_available_moves = self._grid.dijkstra(
-    #                         hexagon,
-    #                         unit.movement_range)
-    #     self.draw_map()
 
     def highlight_selected_movement(self, layout):
         """
@@ -310,7 +279,7 @@ class Game:
 
     def unit_menu(self, layout):
         """
-        Build a structure using selected worker.
+        Create a menu pertaining to unit actions.
 
         :param layout: Layout object being drawn on.
 
@@ -323,11 +292,13 @@ class Game:
         self._current_available_moves = {}
 
         def move_unit():
+            """Move a unit and redraw the map."""
             self._current_available_moves = self._grid.dijkstra(
                 hexagon, unit.movement_range)
             self.draw_map()
 
         def build_city():
+            """Build a city and redraw the map."""
             self._server_api.build_city(unit)
             self._game_state.get_civ(self._game_state.my_id).calculate_vision()
             self._currently_selected_object = None
@@ -335,6 +306,7 @@ class Game:
             self.draw_map()
 
         def build_farm():
+            """Build a farm and redraw the map"""
             self._server_api.build(unit, BuildingType.FARM)
             self._game_state.get_civ(self._game_state.my_id).calculate_vision()
             self._currently_selected_object = None
@@ -480,7 +452,7 @@ class Game:
             hexagon = self._grid.get_hextile(hex_point)
             hexagon_coords = layout.hex_to_pixel(hexagon)
             if size[0] + 100 > hexagon_coords[0] > -100 and \
-               size[1] + 100 > hexagon_coords[1] > -100:
+                                            size[1] + 100 > hexagon_coords[1] > -100:
                 terrain = hexagon.terrain
                 terrain_image = self._scaled_terrain_images[
                     (terrain.terrain_type.value, terrain.biome.value)]
@@ -506,7 +478,7 @@ class Game:
                     hexagon_coords = layout.hex_to_pixel(hexagon)
                     self.draw_sprite(hexagon_coords,
                                      self._scaled_resource_images[
-                                          resource.resource_type])
+                                         resource.resource_type])
 
                 if hexagon.unit is not None and hexagon in my_vision:
                     unit = hexagon.unit
@@ -525,7 +497,7 @@ class Game:
                                          + str(unit_level)])
                     self.draw_sprite(hexagon_coords,
                                      self._scaled_health_bar_images[
-                                        unit_health])
+                                         unit_health])
                 if hexagon not in my_vision:
                     self._screen.blit(
                         self._scaled_terrain_images["fogofwar"],
