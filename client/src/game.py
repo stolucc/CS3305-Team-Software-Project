@@ -235,7 +235,8 @@ class Game:
             self._select_menu.menu_click(click)
         else:
             if hexagon in self._current_available_moves:
-                self._server_api.move_unit(self._currently_selected_object, hexagon)
+                self._server_api.move_unit(self._currently_selected_object,
+                                           hexagon)
                 self._game_state.get_civ(
                     self._game_state.my_id).calculate_vision()
                 self._currently_selected_object = None
@@ -244,7 +245,8 @@ class Game:
             elif isinstance(self._currently_selected_unit, Soldier)  \
                     and hexagon.unit != self._currently_selected_unit \
                     and hexagon.unit is not None:
-                self._server_api.attack(self._currently_selected_unit, hexagon.unit)
+                self._server_api.attack(self._currently_selected_unit,
+                                        hexagon.unit)
             elif hexagon.unit not in [None, self._currently_selected_object]:
                 self._currently_selected_object = hexagon.unit
                 self.unit_menu(layout)
