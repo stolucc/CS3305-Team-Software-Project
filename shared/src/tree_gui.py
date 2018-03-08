@@ -21,35 +21,53 @@ class TreeGUI(Menu):
         self.options = []
         self._start = []
         self._end = []
-        option_width, option_height = 100, 40
-        self.draw_background()
-        branch = ""
-        x_coordinate = 100
-        y_coordinate = 50
-        upgrade = 1
-        print(tree.get_unlocked())
+        option_width, option_height = 150, 40
+        wrapper_x, wrapper_y = self.draw_background()
+        branch = None
+        branch_number = 1
+        x_coordinate = 25 + wrapper_x
+        y_coordinate = 50 + wrapper_y
+        upgrade = 0
+        unlockable = tree.get_unlockable()
+        print(unlockable)
         for node in tree.get_unlocked():
-            print(node)
+            if branch is None:
+                branch = node.branch
             if node.branch != branch:
-                y_coordinate += 100
-                x_coordinate = 100
+                if upgrade < 3:
+                    for unlockableNode in unlockable:
+                        if unlockableNode.branch == branch:
+                            option_block = pygame.Rect(
+                                x_coordinate, y_coordinate,
+                                option_width, option_height)
+                            self.draw_option(option_block,
+                                             str(unlockableNode.unlock_cost))
+                branch_number += 1
+                x_coordinate += 250
+                y_coordinate = 50 + wrapper_y
                 branch = node.branch
             else:
                 upgrade += 1
             option_block = pygame.Rect(
                 x_coordinate, y_coordinate,
                 option_width, option_height)
-            self.draw_option(option_block, branch + str(upgrade))
-            x_coordinate += 100
+            self.draw_option(option_block, branch + " " + str(upgrade))
+            y_coordinate += 100
+
+        for node in tree.get_unlockable():
+            pass
         pygame.display.flip()
 
     def draw_background(self):
         """Draw background for Tree."""
+        x_cord = (self._screen.get_width()-700)/2
+        y_cord = 100
         block = pygame.Rect(
-            (self._screen.get_width()-700)/2, 100,
+            x_cord, y_cord,
             700, 500)
         pygame.draw.rect(self._screen, self._background_colour, block)
         pygame.draw.rect(self._screen, self._border, block, 3)
+        return x_cord, y_cord
 
 if __name__ == "__main__":
     screen = pygame.display.set_mode((1280, 720))
