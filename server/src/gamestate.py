@@ -303,13 +303,14 @@ class GameState:
             return ([], ServerError(4))
         building_type = action.building_type
         tile = self.validate_tile(action.unit.position)
+        unit = self.validate_unit(civ, action.unit)
         bld_id = database_API.Building.insert(self._session,
                                               self._civs[civ]._id,
                                               True, Building.get_type
                                               (building_type),
                                               tile.x, tile.y, tile.z)
-        self._civs[civ].build_structure(action.unit,
-                                        action.building_type,
+        self._civs[civ].build_structure(unit,
+                                        building_type,
                                         bld_id)
         return ([tile], bld_id)
 
