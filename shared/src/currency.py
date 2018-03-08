@@ -48,3 +48,12 @@ class Currency():
         :return: the value of the currency
         """
         return self._value
+
+    @property
+    def type(self):
+        """
+        Getter for type.
+
+        :return: the type of the currency
+        """
+        return self._type
