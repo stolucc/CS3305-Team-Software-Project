@@ -428,7 +428,9 @@ class Civilisation(object):
             vision |= set(unit_vision)
 
         for city_id in self.cities:
-            buildings = self.cities[city_id].buildings
+            city = self.cities[city_id]
+            buildings = city.buildings
+            vision |= set(self._grid.vision(city.position, 3))
             for building in buildings:
                 vision_range = 2
                 tile = buildings[building].position

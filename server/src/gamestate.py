@@ -303,15 +303,16 @@ class GameState:
             return ([], ServerError(4))
         building_type = action.building_type
         tile = self.validate_tile(action.unit.position)
+        unit = self.validate_unit(civ, action.unit)
         bld_id = database_API.Building.insert(self._session,
                                               self._civs[civ]._id,
                                               True, Building.get_type
                                               (building_type),
                                               tile.x, tile.y, tile.z)
-        self._civs[civ].build_structure(action.unit,
-                                        action.building_type,
+        self._civs[civ].build_structure(unit,
+                                        building_type,
                                         bld_id)
-        return ([action.unit.position], bld_id)
+        return ([tile], bld_id)
 
     def handle_purchase_action(self, civ, action):
         """Handle incoming purchase actions and update game state."""
@@ -319,6 +320,7 @@ class GameState:
             return ([], ServerError(4))
         level = action.level
         unit_type = action.unit_type
+        # action.building = self._validate_building(self, action.building)
         position = self.validate_tile(action.building.position)
         unit_id = database_API.Unit.insert(self._session,
                                            self._civs[civ]._id, level,
