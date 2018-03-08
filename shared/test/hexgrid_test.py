@@ -217,9 +217,6 @@ class HexGridTest(unittest.TestCase):
         hexagon = Hex(-2, 2, 0)
         grid.get_hextile((-1, 1, 0)).terrain = Terrain(TerrainType.MOUNTAIN,
                                                        BiomeType.GRASSLAND)
-
-        print(grid.vision(hexagon, 2), "vision")
-        print(len(grid.vision(hexagon, 2)), "length")
         result = [Hex(-1, 1, 0),
                   Hex(0, 2, -2),
                   Hex(-2, 0, 2),

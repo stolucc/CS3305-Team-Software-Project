@@ -262,12 +262,15 @@ class GameState:
         unit = self.validate_unit(civ, action.unit)
         tile = self.validate_tile(action.destination)
 
-        self._civs[civ].move_unit_to_hex(unit, tile)
+        city_destroyed_update = self._civs[civ].move_unit_to_hex(unit, tile)
         database_API.Unit.update(self._session, unit.id, x=tile.x,
                                  y=tile.y, z=tile.z)
         result_tiles = self._grid.vision(unit.position, 3)
-        return ([action.unit.position, unit.position],
-                TileUpdates(self._grid.vision(unit.position, 3)))
+        results = [action.unit.position, unit.position] + \
+            (city_destroyed_update if
+             city_destroyed_update is not None else [])
+        return (results,
+                TileUpdates(result_tiles))
 
     def handle_combat_action(self, civ, action):
         """Handle incoming combat actions and update game state."""
