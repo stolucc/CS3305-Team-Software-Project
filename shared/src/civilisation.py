@@ -139,7 +139,7 @@ class Civilisation(object):
             values[resource] = 0
         for key, city in self._cities.items():
             for resource in list(ResourceType):
-                values[resource] += city.resources
+                values[resource] += city.resources[resource]
         return values
 
     @property
