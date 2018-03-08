@@ -101,6 +101,10 @@ class Building():
         """Location of the building."""
         return self._location
 
+    @position.setter
+    def position(self, location):
+        self._location = location
+
     @property
     def building_type(self):
         """Location of the building."""

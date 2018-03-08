@@ -31,6 +31,7 @@ class Game:
         pygame.font.init()
         civ_borders = ["civ1_border", "civ2_border", "civ3_border",
                        "civ4_border"]
+        self._shutdown = False
         self._threads = []
         self._game_state = game_state
         self._civ_colours = dict((civ, colour)
@@ -129,7 +130,7 @@ class Game:
     def quit(self):
         """Close game."""
         for thread in self._threads:
-            thread.shutdown = True
+            self._shutdown = True
             thread.join()
         sys.exit()
 
@@ -529,7 +530,7 @@ class Game:
 
     def render_hud(self):
         """Render heads up display."""
-        while True:
+        while not self._shutdown:
             self._hud.draw()
             time.sleep(1)
 

@@ -37,7 +37,6 @@ class Server():
         try:
             self._connection_handler.start(config["server"]["port"])
         except KeyboardInterrupt:
-            print("I happened")
             self._connection_handler.stop()
             sys.exit()
 
