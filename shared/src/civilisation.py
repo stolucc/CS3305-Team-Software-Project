@@ -340,7 +340,7 @@ class Civilisation(object):
         """Check if unit is dead and remove references if True."""
         if unit.health == 0:
             unit.position.unit = None
-            del unit._civilisation.units[unit.id]
+            del self.units[unit.id]
 
     def buy_unit(self, city, unit_type, level, unit_id):
         """

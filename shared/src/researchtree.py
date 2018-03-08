@@ -11,9 +11,9 @@ class ResearchTree(object):
         :param civilisation: reference to civilisation class
         """
         self._civilisation = civilisation
-        self._nodes = {}
-        self._branches = 3
-        self._tier = {'worker': 1, 'archer': 1, 'swordsman': 1}
+        self._branches = {}
+        self._unlocked = []
+        self._unlockable = []
         self.tree_setup()
 
     @property
@@ -31,75 +31,88 @@ class ResearchTree(object):
 
         Add correct nodes to Tree and the end node to tie branches together.
         """
-        self.add_node(0, 'worker', True, 0)
-        self.add_node(1, 'worker', False, 10)
-        self.add_node(2, 'worker', False, 20)
-        self.add_node(3, 'archer', True, 0)
-        self.add_node(4, 'archer', False, 10)
-        self.add_node(5, 'archer', False, 20)
-        self.add_node(6, 'swordsman', True, 0)
-        self.add_node(7, 'swordsman', False, 10)
-        self.add_node(8, 'swordsman', False, 20)
-        self.add_node(9, 'win', False, 50)
+        self.add_branch('worker')
+        self.add_branch('archer')
+        self.add_branch('swordsman')
+        self.add_end_node()
+        self._unlocked = self.unlocked_nodes()
+        self._unlockable = self.unlockable_nodes()
 
-    def add_node(self, id, branch, unlocked, cost):
-        """
-        Add node on specific branch.
+    def add_branch(self, branch, nodes):
+        """Add branch to tree with 3 nodes."""
+        self._branches[branch] = []
+        for node in range(3):
+            if node == 0:
+                new_node = ResearchNode(node, branch, False, True, 0)
+            elif node == 1:
+                new_node = ResearchNode(node, branch, True, False, 10)
+            else:
+                new_node = ResearchNode(node, branch, False, False, 20)
+            self._branches[branch] += [new_node]
 
-        :param branch: string branch to add node to
-        """
-        node = ResearchNode(id, branch, unlocked, cost)
-        self._nodes[id] = node
+    def add_end_node(self):
+        """Add end/win node."""
+        node = ResearchNode(0, 'win', False, False, 0)
+        self._branches['win'] = [node]
 
-    def unlockable(self, node_id):
+    def unlockable(self, node_id, branch):
         """Check if node is able to be unlocked, based on id."""
-        nodes = self._nodes
-        if node_id == 2 or node_id == 5 or node_id == 8:
-            if nodes[node_id - 1]._unlocked:
-                return True
-            return False
-        elif node_id == 9:
-            if nodes[2] and nodes[5] and nodes[8]:
-                return True
-            return False
-        return True
+        return self._branches[node_id]._unlockable
 
-    def unlock_node(self, node_id):
+    def unlock_node(self, node_id, branch):
         """Unlock node."""
-        if node_id in self._nodes:
-            node = self._nodes[node_id]
-            node._unlocked = True
-            self._tier[node._branch] += 1
+        node = self._branches[branch][node_id]
+        node._unlockable = False
+        node._unlocked = True
+        if node_id < 2 and branch != 'win':
+            next_node = self._branches[branch][node_id + 1]
+            next_node._unlockable = True
+        self.win_node_unlockable()
+        self._unlocked = self.unlocked_nodes()
+        self._unlockable = self.unlockable_nodes()
 
-    def get_unlocked(self):
-        """Get unlocked nodes."""
-        unlocked_nodes = []
-        for id in self._nodes:
-            if self._nodes[id]._unlocked:
-                unlocked_nodes += [self._nodes[id]]
-        return unlocked_nodes
+    def win_node_unlockable(self):
+        """Make win node unlockable if all other nodes unlocked."""
+        branches = self._branches
+        if branches['worker'][2]._unlocked and branches['archer'][2]._unlocked\
+                and branches['swordsman'][2]._unlocked:
+            branches['win'][0]._unlockable = True
 
-    def get_unlockable(self):
-        """Get unlockable nodes."""
-        unlockable_nodes = []
-        for id in self._nodes:
-            if self.unlockable(id):
-                unlockable_nodes += [self._nodes[id]]
-        return unlockable_nodes
+    def unlockable_nodes(self):
+        """Return list of unlockable nodes."""
+        unlockable = []
+        for branch_id in self._branches:
+            branch = self._branches[branch_id]
+            for node in branch:
+                if node._unlockable:
+                    unlockable += [node]
+        return unlockable
+
+    def unlocked_nodes(self):
+        """Return list of unlocked nodes."""
+        unlocked = []
+        for branch_id in self._branches:
+            branch = self._branches[branch_id]
+            for node in branch:
+                if node._unlocked:
+                    unlocked += [node]
+        return unlocked
 
     def __repr__(self):
         """Return string representation of Research Tree."""
         string = ""
-        for node_id in self._nodes:
-            string += str(self._nodes[node_id])
-            string += "\n"
+        for branch_id in self._branches:
+            branch = self._branches[branch_id]
+            for node in branch:
+                string += str(node)
+                string += "\n"
         return string
 
 
 class ResearchNode(object):
     """Class for nodes of Research Tree."""
 
-    def __init__(self, id, branch, unlocked, unlock_cost):
+    def __init__(self, id, branch, unlockable, unlocked, unlock_cost):
         """
         Initialise Research Nodes attributes.
 
@@ -109,6 +122,7 @@ class ResearchNode(object):
         self._branch = branch
         self._unlock_cost = unlock_cost
         self._unlocked = unlocked
+        self._unlockable = unlockable
         self._id = id
 
     @property
@@ -149,6 +163,7 @@ class ResearchNode(object):
 
     def __repr__(self):
         """Return string representation of Research Node."""
-        string = "Branch: %s, ID: %i, Unlocked: %s, Cost: %i"\
-            % (self._branch, self._id, str(self._unlocked), self._unlock_cost)
+        string = "Branch: %s, ID: %i, Unlocked: %s, Unlockable: %s, Cost: %i"\
+            % (self._branch, self._id, str(self._unlocked),
+               str(self._unlockable), self._unlock_cost)
         return string
