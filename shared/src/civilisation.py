@@ -78,6 +78,15 @@ class Civilisation(object):
         self._cities = cities
 
     @property
+    def tree(self):
+        """
+        Getter for tree.
+
+        :return: Research Tree.
+        """
+        return self._tree
+
+    @property
     def gold(self):
         """
         Gold of civilisation.
