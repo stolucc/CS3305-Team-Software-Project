@@ -41,7 +41,7 @@ class ResearchTree(object):
         self.add_node(8, 'swordsman', False, 20)
         self.add_node(9, 'win', False, 50)
 
-    def add_node(self, branch, id, unlocked, cost):
+    def add_node(self, id, branch, unlocked, cost):
         """
         Add node on specific branch.
 

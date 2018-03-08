@@ -28,6 +28,7 @@ class Unit:
         self._position = hextile
         self._id = identifier
         self._civ_id = civilisation_id
+        self._civilisation = None
         self._actions = 0
 
     @property
