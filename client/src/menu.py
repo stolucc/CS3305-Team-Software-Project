@@ -156,6 +156,14 @@ if __name__ == "__main__":
     menu = Menu(screen, [("Resume", test), ("Options", test),
                          ("Help", test), ("Exit", sys.exit)])
     menu.display_menu()
+
+    import music
+
+    song = "../resources/music/Egmont_Overture_Op_84.mp3"
+    pygame.mixer.init()
+    music.Music(song)
+
+
     while True:
         for event in pygame.event.get():   # User did something
             if event.type == pygame.QUIT:
