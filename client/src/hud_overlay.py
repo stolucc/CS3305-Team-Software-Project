@@ -5,6 +5,7 @@ import math
 from layout import Layout
 from mapresource import ResourceType
 from currency import CurrencyType
+from tree_gui import TreeGUI
 
 
 class HudOverlay:
@@ -26,6 +27,8 @@ class HudOverlay:
         self._quick_surface = quick_surface
         self._resolution = resolution
         self._layout = layout
+        civ = game_state.get_civ(game_state.my_id)
+        self._GUI_tree = TreeGUI(quick_surface, civ.tree)
         self.font = pygame.font.Font('freesansbold.ttf', 12)
         path = "../resources/images/hud/"
         x, y = 50, 50
@@ -221,3 +224,7 @@ class HudOverlay:
                     (hexagon_coords[0]
                      - math.ceil(self._map_layout.size * (math.sqrt(3) / 2)),
                      hexagon_coords[1] - self._map_layout.size))
+
+    def draw_tree(self):
+        """Draw Research Tree."""
+        self._GUI_tree.display_menu()
