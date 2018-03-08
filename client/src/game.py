@@ -276,7 +276,6 @@ class Game:
 
         :param layout: Layout object being drawn on.
         """
-
         click = pygame.mouse.get_pos()
         c_hex = layout.pixel_to_hex(click)
         c_hex_coords = self._grid.hex_round((c_hex.x, c_hex.y, c_hex.z))
@@ -460,7 +459,8 @@ class Game:
                                           resource.resource_type])
                 if hexagon.civ_id is not None:
                     self._screen.blit(
-                        self._scaled_terrain_images[self._civ_colours[hexagon.civ_id]],
+                        self._scaled_terrain_images[self._civ_colours[hexagon.
+                                                    civ_id]],
                         (hexagon_coords[0]
                          - math.ceil(self._layout.size * (math.sqrt(3) / 2)),
                          hexagon_coords[1] - self._layout.size))
