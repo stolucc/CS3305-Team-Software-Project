@@ -260,7 +260,6 @@ class GameState:
     def validate_tile(self, tile):
         return self._grid.get_hextile(tile.coords)
 
-
     def handle_action(self, civ, action):
         """
         Handle incoming client-actions and update game state accordingly.
