@@ -1,18 +1,22 @@
 import pygame, sys
 from pygame.locals import *
 
-pygame.init()
+class Music:
 
-DISPLAYSURF = pygame.display.set_mode((0, 0))
-#pygame.display.set_caption('Music')
+    def __init__(self, song):
 
-pygame.mixer.music.load("bla.mp3") # replace this with whatever song we're using
-pygame.mixer.music.play(-1)
+        pygame.mixer.music.load(song)
+        pygame.mixer.music.play(-1)
 
-while True: # Main Loop
+if __name__ == "__main__":
+    pygame.init()
+    DISPLAYSURF = pygame.display.set_mode((0, 0))
+    pygame.display.set_caption('Music')
+    music = Music("bla.mp3")
+    while True: # Main Loop
 
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
-    pygame.display.update()
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+        pygame.display.update()
