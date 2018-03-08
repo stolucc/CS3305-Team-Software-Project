@@ -34,8 +34,8 @@ class SelectMenu(Menu):
         """
         if len(self._options) < 1:
             return False
-        x_coordinate = pos[0]
-        y_coordinate = pos[1]
+        x_coordinate = self._pos[0]
+        y_coordinate = self._pos[1]
         option_width, option_height = 100, 40
         self._start = []
         self._end = []
@@ -67,6 +67,7 @@ class SelectMenu(Menu):
 
     def set_options(self, pos, options):
         """Set options to be displayed."""
+        self._options = []
         self._pos = pos
         for i in options:
             self._options += [MenuOption(i[0], i[1])]
