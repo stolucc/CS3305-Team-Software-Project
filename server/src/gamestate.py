@@ -416,7 +416,7 @@ class GameState:
         to_be_removed = []
         for civ_id in self._civs:
             civ = self._civs[civ_id]
-            if not (self.civ_has_workers(civ) and self.civ_has_cities(civ)):
+            if not (self.civ_has_workers(civ) or self.civ_has_cities(civ)):
                 to_be_removed += [civ_id]
         for removed in to_be_removed:
             self._civs[removed].destroy_civilisation()
@@ -434,7 +434,7 @@ class GameState:
 
     def civ_has_cities(self, civ):
         """Check if a civ still has any cities."""
-        return len(civ.cities) == 0
+        return len(civ.cities) != 0
 
     def handle_action(self, civ, action):
         """
