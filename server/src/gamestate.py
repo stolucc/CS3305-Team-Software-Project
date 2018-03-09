@@ -323,7 +323,7 @@ class GameState:
             return ([], ServerError(4))
         level = action.level
         unit_type = action.unit_type
-        action.building = self._validate_building(self, action.building)
+        action.building = self.validate_city(civ, action.building)
         position = self.validate_tile(action.building.position)
         unit_id = database_API.Unit.insert(self._session,
                                            self._civs[civ]._id, level,
@@ -370,6 +370,14 @@ class GameState:
     def validate_tile(self, tile):
         """Return valid tile."""
         return self._grid.get_hextile(tile.coords)
+
+    def validate_city(self, civ, city):
+        """Return valid tile."""
+        return self._civs[civ].cities[city.id]
+
+    def validate_building(self, civ, building):
+        """Return valid tile."""
+        return self._civs[civ].get_building(building.id)
 
     def check_win_conditions(self):
         """

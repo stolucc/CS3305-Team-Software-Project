@@ -78,7 +78,7 @@ class City():
             resource = tile.terrain.resource
             if resource is not None \
                and resource.is_worked:
-                    resources[resource] += resource.quantity
+                    resources[resource.resource_type] += resource.quantity
         return resources
 
     @property
