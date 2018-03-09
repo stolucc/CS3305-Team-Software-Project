@@ -7,8 +7,8 @@ from unit import Unit
 from action import ServerError, GAME_FULL_ERROR, UNKNOWN_ACTION, \
     StartTurnUpdate, TileUpdates, UnitUpdate, MovementAction, \
     CombatAction, UpgradeAction, BuildAction, PurchaseAction, \
-    PlayerJoinedUpdate, ResearchAction, BuildCityAction, WinUpdate,\
-    WorkResourceAction
+    PlayerJoinedUpdate, ResearchAction, BuildCityAction, WinUpdate, \
+    CivDestroyedUpdate, WorkResourceAction
 from unit import Worker
 import random
 from queue import Queue
@@ -420,7 +420,7 @@ class GameState:
             del self._civs[removed]
             self._num_players -= 1
             for queue in self._queues:
-                self._queues[queue].put()
+                self._queues[queue].put(CivDestroyedUpdate(removed))
 
     def civ_has_workers(self, civ):
         """Check if a civ still has any workers."""
