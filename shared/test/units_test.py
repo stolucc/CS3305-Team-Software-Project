@@ -74,7 +74,6 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(worker._health, 110)
         self.assertEqual(worker._movement_range, 5)
         self.assertEqual(worker._cost, {'food': 2, 'gold': 0, 'science': 0})
-        self.assertEqual(worker._build_speed, 2)
 
     def test_worker_level_up(self):
         """Test that worker unit levels up and attributes increase."""
@@ -90,12 +89,10 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(worker1._cost, {'food': 2, 'gold': 0, 'science': 0})
         self.assertEqual(worker1._health, 120)
         self.assertEqual(worker1._movement_range, 5)
-        self.assertEqual(worker1._build_speed, 2)
 
         self.assertEqual(worker2._cost, {'food': 3, 'gold': 0, 'science': 0})
         self.assertEqual(worker2._health, 120)
         self.assertEqual(worker2._movement_range, 6)
-        self.assertEqual(worker2._build_speed, 3)
 
     def test_soldier_attributes(self):
         """Test that soldier's attributes are initialised correctly."""
