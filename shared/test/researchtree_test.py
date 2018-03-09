@@ -16,7 +16,8 @@ class ResearchTreeTest(unittest.TestCase):
 
     def test_research_tree_constructor_and_tree_setup(self):
         """
-        Test the tree constructor and getters (and also the tree_setup
+        Test the tree constructor and getters (and also the tree_setup.
+
         function which is called in the constructor).
         """
         civ = Civilisation("myCiv", grid, logger)
@@ -39,7 +40,7 @@ class ResearchTreeTest(unittest.TestCase):
                                  3: archer1, 4: archer2, 5: archer3,
                                 6: swordsman1, 7: swordsman2, 8: swordsman3}))
         self.assertEqual(tree._tier,
-                         {'worker': 1, 'archer': 1, 'swordsman': 1})
+                         {'Worker': 1, 'Archer': 1, 'Swordsman': 1})
 
     def test_add_node(self):
         """Test the add_node function."""

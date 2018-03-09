@@ -361,7 +361,8 @@ class Civilisation(object):
         :param enemy: enemy unit of opponent
         """
         distance = self.grid.hex_distance(soldier.position, enemy.position)
-        if soldier.attack_range >= distance and soldier.actions > 0:
+        if soldier.attack_range >= distance and soldier.actions > 0\
+                and soldier.civ_id != enemy.civ_id:
             damage = soldier.attack_power()
             enemy.receive_damage(damage)
             self.is_dead(enemy)
