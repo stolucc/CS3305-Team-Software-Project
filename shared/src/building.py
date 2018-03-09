@@ -1,6 +1,7 @@
 """Enumerated Building classes."""
 from enum import Enum
 from currency import CurrencyType
+from mapresources import ResourceType
 
 
 class BuildingType(Enum):
@@ -10,7 +11,7 @@ class BuildingType(Enum):
     TRADE_POST = 1
     UNIVERSITY = 2
     CITY = 3
-    # RESOURCE_IMPROVEMENT = 4
+    BANK = 4
 
 
 class Building():
@@ -76,9 +77,22 @@ class Building():
     def buy_cost(type):
         """Cost in gold to purchase building."""
         values = {
-            BuildingType.FARM: 10,
-            BuildingType.TRADE_POST: 10,
-            BuildingType.UNIVERSITY: 10
+            BuildingType.FARM: {
+                CurrencyType.GOLD: 10,
+                ResourceType.GEMS: 0
+            },
+            BuildingType.TRADE_POST: {
+                CurrencyType.GOLD: 10,
+                ResourceType.GEMS: 0
+            },
+            BuildingType.UNIVERSITY: {
+                CurrencyType.GOLD: 10,
+                ResourceType.GEMS: 0
+            },
+            BuildingType.BANK: {
+                CurrencyType.GOLD: 250,
+                ResourceType.GEMS: 5
+            }
         }
         return values[type]
 
