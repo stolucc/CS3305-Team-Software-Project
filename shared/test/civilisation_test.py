@@ -53,6 +53,7 @@ class CivilisationTest(unittest.TestCase):
         hextile = Hex(0, 0, 0)
         civ = Civilisation("myCiv", grid, logger)
         worker = Worker("worker", 1, hextile, 1)
+        worker.actions = 2
 
         grid.create_grid()
 
@@ -181,7 +182,6 @@ class CivilisationTest(unittest.TestCase):
         unit = civ.buy_unit(city, Archer, 1, 1)
 
         self.assertEqual(civ.units[1], unit)
-        self.assertEqual(unit._civilisation, civ)
         self.assertEqual(civ.gold, 65)
 
     def test_per_turn(self): # tbc
@@ -310,4 +310,4 @@ class CivilisationTest(unittest.TestCase):
         civ.build_structure(worker, BuildingType.UNIVERSITY, 1)
         civ.calculate_vision()
 
-        self.assertEqual(len(civ._vision), 37)
+        self.assertEqual(len(civ._vision), 44)
