@@ -117,4 +117,4 @@ class GameState:
         """Remove orphaned buildings."""
         for building in self._orphaned_buildings:
             if building._civ_id == civ:
-                building._hex._building = None
+                building._location._building = None
