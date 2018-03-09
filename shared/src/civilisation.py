@@ -331,7 +331,8 @@ class Civilisation(object):
         """Remove all references for the city and its buildings."""
         city_tiles = self._grid.spiral_ring(tile, 4)
         for city_tile in city_tiles:
-            self.destroy_building(city_tile)
+            if city_tile.city_id == tile.city_id:
+                self.destroy_building(city_tile)
             if city_tile.terrain.resource is not None:
                 city_tile.terrain.resource.stop_work()
         self.destroy_building(tile)
