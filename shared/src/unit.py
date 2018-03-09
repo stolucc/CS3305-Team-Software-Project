@@ -302,7 +302,6 @@ class Worker(Unit):
         cost = {'food': level, 'gold': 0, 'science': 0}
         super().__init__(identifier, health, level, movement, cost,
                          10*level, hex, civilisation_id)
-        self._build_speed = level
 
     @staticmethod
     def get_health(level):
@@ -323,24 +322,6 @@ class Worker(Unit):
     def get_string():
         """Return string."""
         return "worker"
-
-    @property
-    def build_speed(self):
-        """
-        Build speed of worker.
-
-        :return: int current build speed of worker
-        """
-        return self._build_speed
-
-    @build_speed.setter
-    def build_speed(self, build_speed):
-        """
-        Set new build speed of worker.
-
-        :param build_speed: int new build speed of worker
-        """
-        self._build_speed = build_speed
 
     def level_up(self):
         """
@@ -430,6 +411,17 @@ class Soldier(Unit):
         """
         power = self.strength * (self.health/self.max_health)
         return power
+
+    @staticmethod
+    def resource_cost(level):
+        """
+        Get the resource cost of the unit at a given level.
+
+        :param level: The level of the unit
+        """
+        if level > 1:
+            return ResourceType.IRON
+        return None
 
 
 class Swordsman(Soldier):

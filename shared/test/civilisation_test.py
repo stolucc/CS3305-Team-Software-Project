@@ -1,24 +1,23 @@
-"""Civilisation unit testing"""
+"""Civilisation unit testing."""
 
 import unittest
 
 from building import BuildingType
-from civilisation import *
+from civilisation import Civilisation
 from file_logger import Logger
 from hexgrid import Grid, Hex
 from terrain import Terrain, TerrainType, BiomeType
-from unit import Archer
+from unit import Archer, Worker, Swordsman
 
 grid = Grid(10)
 logger = Logger("log.txt", "logger", "1")
 
 
 class CivilisationTest(unittest.TestCase):
-    """Unittest class for civilisation"""
+    """Unittest class for civilisation."""
 
     def test_civilisation_constructor(self):
         """Test the constructor for the civilisation class."""
-
         civ = Civilisation("myCiv", grid, logger)
         tree = civ._tree
 
@@ -36,7 +35,6 @@ class CivilisationTest(unittest.TestCase):
 
     def test_set_up(self):
         """Test the set_up function."""
-
         hextile = Hex(0, 0, 0)
         civ = Civilisation("myCiv", grid, logger)
 
@@ -49,7 +47,6 @@ class CivilisationTest(unittest.TestCase):
 
     def test_build_city_on_tile(self):
         """Test the build_city_on_tile function."""
-
         hextile = Hex(0, 0, 0)
         civ = Civilisation("myCiv", grid, logger)
         worker = Worker("worker", 1, hextile, 1)
@@ -96,7 +93,6 @@ class CivilisationTest(unittest.TestCase):
 
     def test_unlock_research(self):
         """Test the unlock_research function."""
-        hextile = Hex(0, 0, 0)
         civ = Civilisation("myCiv", grid, logger)
         civ.science = 50
         civ.unlock_research(1)
@@ -106,7 +102,7 @@ class CivilisationTest(unittest.TestCase):
     def test_upgrade_unit(self):
         """Test the upgrade_unit method."""
         civ = Civilisation("myCiv", grid, logger)
-        civ.unlock_research(3) #archer upgrade
+        civ.unlock_research(3)
         hextile = Hex(0, 0, 0)
         archer = Archer(1, 1, "myCiv", hextile)
         archer.actions = 2
@@ -116,7 +112,7 @@ class CivilisationTest(unittest.TestCase):
         self.assertEqual(archer.actions, 1)
 
     def test_move_unit_to_hex(self):
-        """Test the move_unit_to_hex method"""
+        """Test the move_unit_to_hex method."""
         civ = Civilisation("myCiv", grid, logger)
         hextile = Hex(0, 0, 0)
         hextile2 = Hex(1, 0, -1)
@@ -128,7 +124,7 @@ class CivilisationTest(unittest.TestCase):
         self.assertEqual(archer.actions, 1)
 
     def test_movement_cost_of_path(self):
-        """Tests the movement_cost_of_path function"""
+        """Test the movement_cost_of_path function."""
         civ = Civilisation("myCiv", grid, logger)
         hextile = Hex(0, 0, 0)
         hextile2 = Hex(1, 0, -1)
@@ -184,7 +180,7 @@ class CivilisationTest(unittest.TestCase):
         self.assertEqual(civ.units[1], unit)
         self.assertEqual(civ.gold, 65)
 
-    def test_per_turn(self): # tbc
+    def test_per_turn(self):  # tbc
         civ = Civilisation("myCiv", grid, logger)
         hextile = Hex(0, 0, 0)
         worker = Worker("worker", 1, hextile, "myCiv")
@@ -250,8 +246,6 @@ class CivilisationTest(unittest.TestCase):
         hextile3 = grid.get_neighbour_in_direction(hextile, 4)
         worker.position = hextile3
         civ.build_structure(worker, BuildingType.FARM, 2)
-        curr = civ.currency_of_buildings()
-        cost = civ.cost_of_units()
 
         civ.currency_per_turn()
         self.assertEqual(civ.food, 99)
@@ -271,7 +265,6 @@ class CivilisationTest(unittest.TestCase):
         self.assertEqual(cost["food"], 3)
         self.assertEqual(cost["gold"], 0)
         self.assertEqual(cost["science"], 0)
-
 
     def test_currency_of_buildings(self):
         civ = Civilisation("myCiv", grid, logger)

@@ -1,24 +1,24 @@
-"""Research tree unit testing"""
+"""Research tree unit testing."""
 
 import unittest
 
-from civilisation import *
-from researchtree import *
+from civilisation import Civilisation
+from researchtree import ResearchTree, ResearchNode
 from file_logger import Logger
-from hexgrid import Grid, Hex
+from hexgrid import Grid
 
 grid = Grid(10)
 logger = Logger("log.txt", "logger", "1")
 
+
 class ResearchTreeTest(unittest.TestCase):
-    """Unittest class for research tree"""
+    """Unittest class for research tree."""
 
     def test_research_tree_constructor_and_tree_setup(self):
         """
-        Tests the tree constructor and getters (and also the tree_setup
-        function which is called in the constructor)
+        Test the tree constructor and getters (and also the tree_setup
+        function which is called in the constructor).
         """
-
         civ = Civilisation("myCiv", grid, logger)
         tree = ResearchTree(civ)
 
@@ -42,8 +42,7 @@ class ResearchTreeTest(unittest.TestCase):
                          {'worker': 1, 'archer': 1, 'swordsman': 1})
 
     def test_add_node(self):
-        """Tests the add_node function"""
-
+        """Test the add_node function."""
         civ = Civilisation("myCiv", grid, logger)
         tree = ResearchTree(civ)
         length = len(tree._nodes)
@@ -52,8 +51,7 @@ class ResearchTreeTest(unittest.TestCase):
         self.assertEqual(len(tree._nodes), length + 1)
 
     def test_unlockable(self):
-        """Tests the unlockable function"""
-
+        """Test the unlockable function."""
         civ = Civilisation("myCiv", grid, logger)
         tree = ResearchTree(civ)
         unlock1 = tree.unlockable(1)
@@ -62,8 +60,7 @@ class ResearchTreeTest(unittest.TestCase):
         self.assertEqual(unlock2, False)
 
     def test_unlock_node(self):
-        """Tests the unlock_node function"""
-
+        """Test the unlock_node function."""
         civ = Civilisation("myCiv", grid, logger)
         tree = ResearchTree(civ)
         tree.unlock_node(1)
@@ -72,8 +69,7 @@ class ResearchTreeTest(unittest.TestCase):
         self.assertEqual(unlock, True)
 
     def test_research_node_constructor(self):
-        """Tests the research node constructor"""
-
+        """Test the research node constructor."""
         rnode = ResearchNode(10, "test", False, 5)
         self.assertEqual(rnode.id, 10)
         self.assertEqual(rnode.branch, "test")
