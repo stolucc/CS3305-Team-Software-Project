@@ -332,7 +332,6 @@ class Worker(Unit):
         if self.level < 3:
             self.cost_increase(food=1, gold=0, science=0)
             super().level_up(health_increase=20, movement_increase=1)
-            self.build_speed += 1
 
     def __repr__(self):
         """
