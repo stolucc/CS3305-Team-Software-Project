@@ -318,11 +318,11 @@ class GameState:
 
     def handle_purchase_action(self, civ, action):
         """Handle incoming purchase actions and update game state."""
-        if self._civs[civ].id != action.unit._civ_id:
+        if self._civs[civ].id != action.building._civ_id:
             return ([], ServerError(4))
         level = action.level
         unit_type = action.unit_type
-        # action.building = self._validate_building(self, action.building)
+        action.building = self._validate_building(self, action.building)
         position = self.validate_tile(action.building.position)
         unit_id = database_API.Unit.insert(self._session,
                                            self._civs[civ]._id, level,
