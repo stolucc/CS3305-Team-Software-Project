@@ -320,7 +320,7 @@ class Civilisation(object):
                 tile.unit = unit
                 pos.unit = None
                 unit.actions -= 1
-                if tile.city_id is not None and issubclass(unit, Soldier)\
+                if tile.city_id is not None and isinstance(unit, Soldier)\
                         and tile.civ_id != self._id:
                     return self.destroy_city(tile)
             else:
