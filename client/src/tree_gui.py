@@ -26,6 +26,8 @@ class TreeGUI(Menu):
         self._start = []
         self._end = []
         self._unlockable_nodes = []
+        self._wrapper = [(self._screen.get_width()-700)/2, 100,
+                         ((self._screen.get_width()-700)/2) + 700, 100 + 500]
 
     def display_menu(self):
         """Display the menu and save it to the object."""
@@ -45,14 +47,17 @@ class TreeGUI(Menu):
                 x_coordinate = 275 + wrapper_x
                 y_coordinate = 400 + wrapper_y
             for i in range(len(branches[branch])):
+                name = branch + " " + str(i+1)
+                if branch == "Win":
+                    name = branch
                 option_block = pygame.Rect(
                     x_coordinate, y_coordinate,
                     option_width, option_height)
                 node = branches[branch][i]
                 if node in unlocked:
-                    self.draw_option(option_block, branch + " " + str(i+1))
+                    self.draw_option(option_block, name)
                 elif node in unlockable:
-                    self.draw_locked(option_block, branch + " " + str(i+1),
+                    self.draw_locked(option_block, name,
                                      node.unlock_cost)
                     self._unlockable_nodes += [node]
                     self._start += [(x_coordinate, y_coordinate)]
@@ -86,14 +91,13 @@ class TreeGUI(Menu):
 
     def draw_background(self):
         """Draw background for Tree."""
-        x_cord = (self._screen.get_width()-700)/2
-        y_cord = 100
+        self._wrapper
         block = pygame.Rect(
-            x_cord, y_cord,
-            700, 500)
+            self._wrapper[0], self._wrapper[1],
+            self._wrapper[2], self._wrapper[3])
         pygame.draw.rect(self._screen, self._background_colour, block)
         pygame.draw.rect(self._screen, self._border, block, 3)
-        return x_cord, y_cord
+        return self._wrapper[0], self._wrapper[1]
 
     def menu_click(self, pos):
         """
@@ -107,8 +111,14 @@ class TreeGUI(Menu):
                 if pos[1] >= self._start[i][1] and pos[1] <= self._end[i][1]:
                     node = self._unlockable_nodes[i]
                     self._tree.unlock_node(node.id, node.branch)
-                    return True
-        return False
+        if pos[0] <= self._wrapper[0] and pos[0] >= self._wrapper[2]:
+            if pos[1] <= self._wrapper[1] and pos[1] >= self._wrapper[3]:
+                return True
+            else:
+                return False
+        else:
+            return False
+
 
 if __name__ == "__main__":
     screen = pygame.display.set_mode((1280, 720))

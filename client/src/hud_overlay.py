@@ -69,6 +69,8 @@ class HudOverlay:
         self._color1 = (0, 0, 0)
         self._color2 = (255, 255, 255)
         self._color3 = (124, 252, 0)
+        self._options = []
+        self._tree_drawn = False
 
     def _load_img(self, img, size_w, size_h):
         image = pygame.image.load(img).convert_alpha()
@@ -84,6 +86,8 @@ class HudOverlay:
         self.draw_info_panel()
         self.draw_minimap()
         self.draw_button_panel()
+        if self._tree_drawn:
+            self.draw_tree()
 
     def draw_quick_surface(self, layouts):
         """Draw quick moving HUD elements."""
@@ -158,7 +162,7 @@ class HudOverlay:
             color = self._color3
         else:
             color = self._color2
-        value = "Player{}\'s Turn".format(self._game_state._current_player)
+        value = "Player{}\'s Turn".format(current_player)
         self.draw_text(value,
                        (offset + 20, 20),
                        color)
@@ -184,6 +188,7 @@ class HudOverlay:
         logo_background = self._hud_images[1]
         logo_forground = self._hud_images[0]
         x, y = self._resolution[0] - 55, self._resolution[1] - 55
+        self._options[0] = [x, y, x+50, y+50]
         self._screen.blit(logo_background, (x, y))
         z = 50
         self._screen.blit(logo_forground, (x+((z//5)+(z//10)//2),
@@ -194,6 +199,7 @@ class HudOverlay:
         else:
             image = self._hud_images[2]
         x, y = self._resolution[0] - 170, self._resolution[1] - 55
+        self._options[1] = [x, y, x+100, y+50]
         self._screen.blit(image, (x, y))
         self.draw_text("End Turn", (x+30, y+25), self._color1)
 
@@ -228,3 +234,23 @@ class HudOverlay:
     def draw_tree(self):
         """Draw Research Tree."""
         self._GUI_tree.display_menu()
+
+    def click_hud(self, pos):
+        """
+        Run function user clicks on.
+
+        :param pos:  A tuple with coordinates where mouse clicked.
+        :return: True if an option is clicked, False if an option is not.
+        """
+        if self._tree_drawn:
+            self._tree_drawn = self._GUI_tree.menu_click(pos)
+        for i in range(len(self._options)):
+            if pos[0] <= self._options[i][0] and pos[0] >= self._options[i][2]:
+                if pos[1] <= self._options[i][1]:
+                    if pos[1] >= self._options[i][3]:
+                        if i == 0:
+                            self._tree_drawn = self.draw_tree()
+                            return True
+                        elif i == 1:
+                            return False
+        return False
