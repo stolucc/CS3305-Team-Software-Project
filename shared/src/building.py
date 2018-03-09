@@ -1,7 +1,7 @@
 """Enumerated Building classes."""
 from enum import Enum
 from currency import CurrencyType
-from mapresources import ResourceType
+from mapresource import ResourceType
 
 
 class BuildingType(Enum):
