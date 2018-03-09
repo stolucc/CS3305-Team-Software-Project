@@ -327,7 +327,7 @@ class Worker(Unit):
         """
         Worker unit levels up.
 
-        Health increases by 20, movement and build_speed by 1, each level
+        Health increases by 20, movement, each level
         """
         if self.level < 3:
             self.cost_increase(food=1, gold=0, science=0)

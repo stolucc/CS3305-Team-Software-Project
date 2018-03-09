@@ -190,15 +190,6 @@ class Civilisation(object):
         return self._tiles
 
     @property
-    def tree(self):
-        """
-        Research Tree of civilisation.
-
-        :return: Research tree
-        """
-        return self._tree
-
-    @property
     def buildings(self):
         """
         Research Tree of civilisation.
@@ -396,7 +387,7 @@ class Civilisation(object):
         :param city: city to spawn worker at
         :param unit_type: Worker, Archer, or Swordsman class
         """
-        position = city.no_unit_tile()
+        position = city.position
         if issubclass(unit_type, Unit) and self.gold >= \
                 unit_type.gold_cost(level) and position is not None:
             unit = unit_type(unit_id, level, position, self._id)
