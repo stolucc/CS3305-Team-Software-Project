@@ -100,8 +100,3 @@ class City():
     def building_type(self):
         """Property to get building type."""
         return self._type
-
-    @property
-    def civ_id(self):
-        """Property to get civ id."""
-        return self._civ_id
