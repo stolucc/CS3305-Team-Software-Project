@@ -256,6 +256,10 @@ class ServerAPI:
                 hex_tile = self._game_state._grid.get_hextile(coords)
                 civ._units[unit._id].position = hex_tile
                 hex_tile._unit = civ._units[unit._id]
+            else:
+                coords = unit.position.coords
+                hex_tile = self._game_state._grid.get_hextile(coords)
+                hex_tile._unit = None
 
     def handle_tile_update(self, tile):
         """Handle tile update."""
