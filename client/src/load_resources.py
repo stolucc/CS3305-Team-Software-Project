@@ -41,6 +41,7 @@ class LoadImages:
             (3, 0): LoadImages.load_image("tiles/ocean.png"),
             (3, 1): LoadImages.load_image("tiles/ocean.png"),
             (3, 2): LoadImages.load_image("tiles/ocean.png"),
+            "fogofwar": LoadImages.load_image("tiles/fog-of-war.png")
         }
         self._sprite_images = {
             "Archer1": LoadImages.load_image("units/archers1.png"),

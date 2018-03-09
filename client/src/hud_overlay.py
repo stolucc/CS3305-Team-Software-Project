@@ -2,21 +2,9 @@
 
 import pygame
 import math
-from enum import Enum
 from layout import Layout
-
-
-class InfoType(Enum):
-    """Enum for types of information."""
-
-    GOLD = 0
-    FOOD = 1
-    SCIENCE = 2
-    PRODUCTION = 3
-    GEMS = 4
-    LOGS = 5
-    COAL = 6
-    IRON = 7
+from mapresource import ResourceType
+from currency import CurrencyType
 
 
 class HudOverlay:
@@ -42,15 +30,14 @@ class HudOverlay:
         path = "../resources/images/hud/"
         x, y = 50, 50
         self._hud_images = {
-            InfoType.GOLD: self._load_img(path+"gold_logo.png", x, y),
-            InfoType.FOOD: self._load_img(path+"food_logo.png", x, y),
-            InfoType.SCIENCE: self._load_img(path+"science_logo.png", x, y),
-            InfoType.PRODUCTION: self._load_img(path+"production_logo.png", x,
-                                                y),
-            InfoType.GEMS: self._load_img(path+"gems.png", x, y),
-            InfoType.LOGS: self._load_img(path+"logs.png", x, y),
-            InfoType.COAL: self._load_img(path+"coal.png", x, y),
-            InfoType.IRON: self._load_img(path+"iron.png", x, y),
+            CurrencyType.GOLD: self._load_img(path+"gold_logo.png", x, y),
+            CurrencyType.FOOD: self._load_img(path+"food_logo.png", x, y),
+            CurrencyType.SCIENCE: self._load_img(path+"science_logo.png",
+                                                 x, y),
+            ResourceType.GEMS: self._load_img(path+"gems.png", x, y),
+            ResourceType.LOGS: self._load_img(path+"logs.png", x, y),
+            ResourceType.COAL: self._load_img(path+"coal.png", x, y),
+            ResourceType.IRON: self._load_img(path+"iron.png", x, y),
             }
         path = "../resources/images/tiles/"
         scale = round(200 / self._grid.size)
@@ -119,14 +106,14 @@ class HudOverlay:
 
     def draw_resource_panel(self):
         """Draw resource panel."""
-        resources = {InfoType.GOLD: self._myciv.gold,
-                     InfoType.FOOD: self._myciv.food,
-                     InfoType.SCIENCE: self._myciv.science,
-                     InfoType.PRODUCTION: None,
-                     InfoType.GEMS: 0,  # self._myciv.gems,
-                     InfoType.LOGS: 0,  # self._myciv.logs,
-                     InfoType.COAL: 0,  # self._myciv.coal,
-                     InfoType.IRON: 0}  # self._myciv.iron}
+        mapresources = self._myciv.resources
+        resources = {CurrencyType.GOLD: self._myciv.gold,
+                     CurrencyType.FOOD: self._myciv.food,
+                     CurrencyType.SCIENCE: self._myciv.science,
+                     ResourceType.GEMS: mapresources[ResourceType.GEMS],
+                     ResourceType.LOGS: mapresources[ResourceType.LOGS],
+                     ResourceType.COAL: mapresources[ResourceType.COAL],
+                     ResourceType.IRON: mapresources[ResourceType.IRON]}
         points = [(450, 0),
                   (0, 0),
                   (0, 60),
@@ -156,13 +143,12 @@ class HudOverlay:
                        (offset, 20),
                        self._color2)
         offset += 80
-        current_player = 1  # self._game_state.current_player
         my_turn = True  # self._game_state.my_turn()
         if my_turn:
             color = self._color3
         else:
             color = self._color2
-        value = "Player{}\'s Turn".format(current_player)
+        value = "Player{}\'s Turn".format(self._game_state._current_player)
         self.draw_text(value,
                        (offset + 20, 20),
                        color)

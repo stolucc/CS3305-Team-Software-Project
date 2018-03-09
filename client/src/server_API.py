@@ -48,15 +48,15 @@ class ServerAPI:
         reply = self.send_action(join_game_action, self.con)
         if reply.type == "ServerError":
             self._log.error(reply.obj)
-            raise action.ServerError(reply.obj)
+            # raise action.ServerError(reply.obj)
         else:
             self._log.info("Joined game player id = " + str(reply.obj))
             game_id, self.id = reply.obj
-            grid = Grid(103)
+            grid = Grid(20)
             self._game_state = GameState(game_id, 1, grid, self._log)
             self._game_state._grid.create_grid()
-            civ = Civilisation(self.id, self._game_state._grid, self._log,
-                               None)
+            self._game_state._grid.static_map()
+            civ = Civilisation(self.id, self._game_state._grid, self._log)
             self._game_state.add_civ(civ)
             self._game_state._my_id = self.id
 
@@ -66,7 +66,7 @@ class ServerAPI:
         reply = self.send_action(end_turn_action, self.con)
         if reply.type == "ServerError":
             self._log.error(reply.obj)
-            raise action.ServerError(reply.obj)
+            # raise action.ServerError(reply.obj)
         else:
             self._log.info("Turn ended")
 
@@ -76,7 +76,7 @@ class ServerAPI:
         reply = self.send_action(leave_game_action, self.con)
         if reply.type == "ServerError":
             self._log.error(reply.obj)
-            raise action.ServerError(reply.obj)
+            # raise action.ServerError(reply.obj)
         else:
             self._log.info("Left game = " + str(reply.obj))
 
@@ -91,9 +91,12 @@ class ServerAPI:
         reply = self.send_action(move_action, self.con)
         if reply.type == "ServerError":
             self._log.error(reply.obj)
-            raise action.ServerError(reply.obj)
+            # raise action.ServerError(reply.obj)
         else:
             self._game_state._civs[self.id].move_unit_to_hex(unit, hexagon)
+            tile_updates = reply.obj
+            for tile in tile_updates._tiles:
+                self.handle_tile_update(tile)
 
     def attack(self, attacker, defender):
         """
@@ -106,7 +109,7 @@ class ServerAPI:
         reply = self.send_action(combat_action, self.con)
         if reply.type == "ServerError":
             self._log.error(reply.obj)
-            raise action.ServerError(reply.obj)
+            # raise action.ServerError(reply.obj)
         else:
             self._game_state._civs[self.id].attack_unit(attacker, defender)
 
@@ -120,7 +123,7 @@ class ServerAPI:
         reply = self.send_action(upgrade_action, self.con)
         if reply.type == "ServerError":
             self._log.error(reply.obj)
-            raise action.ServerError(reply.obj)
+            # raise action.ServerError(reply.obj)
         else:
             self._game_state._civs[self.id].upgrade_unit(unit)
 
@@ -135,7 +138,7 @@ class ServerAPI:
         reply = self.send_action(build_action, self.con)
         if reply.type == "ServerError":
             self._log.error(reply.obj)
-            raise action.ServerError(reply.obj)
+            # raise action.ServerError(reply.obj)
         else:
             building_id = reply.obj
             self._game_state._civs[self.id].build_structure(unit,
@@ -152,7 +155,7 @@ class ServerAPI:
         reply = self.send_action(build_city_action, self.con)
         if reply.type == "ServerError":
             self._log.error(reply.obj)
-            raise action.ServerError(reply.obj)
+            # raise action.ServerError(reply.obj)
         else:
             city_id = reply.obj
             self._game_state._civs[self.id].build_city_on_tile(unit,
@@ -170,7 +173,7 @@ class ServerAPI:
         reply = self.send_action(purchase_action, self.con)
         if reply.type == "ServerError":
             self._log.error(reply.obj)
-            raise action.ServerError(reply.obj)
+            # raise action.ServerError(reply.obj)
         else:
             unit_id = reply.obj
             self._game_state._civs[self.id].buy_unit(city, unit_type, level,
@@ -182,7 +185,7 @@ class ServerAPI:
         reply = self.send_action(check_for_updates_action, self.con2)
         if reply.type == "ServerError":
             self._log.error(reply.obj)
-            raise action.ServerError(reply.obj)
+            # raise action.ServerError(reply.obj)
         else:
             for update in reply.obj:
                 self.handle_update(update)
@@ -195,9 +198,11 @@ class ServerAPI:
             self.handle_player_joined_update(update)
         elif update.__class__.__name__ == "UnitUpdate":
             self.handle_unit_update(update)
+            self._game_state.get_civ(self._game_state.my_id).calculate_vision()
         elif update.__class__.__name__ == "TileUpdates":
             for tile in update._tiles:
                 self.handle_tile_update(tile)
+            self._game_state.get_civ(self._game_state.my_id).calculate_vision()
 
     def handle_start_turn_update(self, update):
         """Handle start turn update."""
@@ -211,8 +216,7 @@ class ServerAPI:
         """Handle player joined update."""
         for id in update._players:
             if id not in self._game_state._civs:
-                new_civ = Civilisation(id, self._game_state._grid, self._log,
-                                       None)
+                new_civ = Civilisation(id, self._game_state._grid, self._log)
                 self._game_state._civs[id] = new_civ
 
     def handle_unit_update(self, update):
@@ -246,6 +250,7 @@ class ServerAPI:
         if unit is not None:
             civ = self._game_state._civs[unit._civ_id]
             if unit._id in civ._units:
+                civ._units[unit._id].position.unit = None
                 civ._units[unit._id].position = old_tile
                 old_tile._unit = civ._units[unit._id]
             else:
@@ -267,16 +272,24 @@ class ServerAPI:
                 old_tile._building = civ._cities[building.id]
             else:
                 civ = self._game_state._civs[building._civ_id]
-                city = civ._cities[building._id]
-                buildings = city._buildings
-                if building._id in buildings:
-                    pass
+                if building._city_id in civ._cities:
+                    city = civ._cities[building._city_id]
+                    buildings = city._buildings
+                    if building._id in buildings:
+                        pass
+                    else:
+                        buildings[building._id] = building
+                        coords = building._location.coords
+                        hex_tile = self._game_state._grid.get_hextile(coords)
+                        buildings[building._id].position = hex_tile
+                        old_tile._building = buildings[building._id]
                 else:
-                    buildings[building._id] = building
-                    coords = building._location.coords
+                    old_tile._building = building
+                    old_tile._civ_id = building._civ_id
+                    coords = building._hex.coords
                     hex_tile = self._game_state._grid.get_hextile(coords)
-                    buildings[building._id].position = hex_tile
-                    old_tile._building = buildings[building._id]
+                    old_tile._building._hex = hex_tile
+
         else:
             old_tile._building = None
         old_tile._civ_id = tile._civ_id

@@ -20,8 +20,10 @@ class SelectMenu(Menu):
         self._border = (63, 142, 252)
         self._text_colour = (0, 0, 0)
         self._text_size = 20
+        self._options = []
+        self._pos = (0, 0)
 
-    def display_menu(self, pos, options):
+    def display_menu(self):
         """
         Display the Select Menu.
 
@@ -30,12 +32,11 @@ class SelectMenu(Menu):
 
         :return: True to represent that a menu is displayed.
         """
-        self._options = []
-        for i in options:
-            self._options += [MenuOption(i[0], i[1])]
-        x_coordinate = pos[0]
-        y_coordinate = pos[1]
-        option_width, option_height = 100, 40
+        if len(self._options) < 1:
+            return False
+        x_coordinate = self._pos[0]
+        y_coordinate = self._pos[1]
+        option_width, option_height = 150, 40
         self._start = []
         self._end = []
         if x_coordinate > self._screen_width/2:
@@ -64,6 +65,13 @@ class SelectMenu(Menu):
         pygame.display.flip()
         return True
 
+    def set_options(self, pos, options):
+        """Set options to be displayed."""
+        self._options = []
+        self._pos = pos
+        for i in options:
+            self._options += [MenuOption(i[0], i[1])]
+
 
 if __name__ == "__main__":
     screen = pygame.display.set_mode((1280, 720))
@@ -84,10 +92,11 @@ if __name__ == "__main__":
                 pos = pygame.mouse.get_pos()
                 print(pos)
                 if isMenu is False:
-                    isMenu = menu.display_menu(pos, [("Move", test),
-                                                     ("Upgrade", test),
-                                                     ("Help", test),
-                                                     ("Exit", sys.exit)])
+                    menu.set_options(pos, [("Move", test),
+                                           ("Upgrade", test),
+                                           ("Help", test),
+                                           ("Exit", sys.exit)])
+                    isMenu = menu.display_menu()
                 else:
                     isMenu = menu.menu_click(pos)
                     if not isMenu:

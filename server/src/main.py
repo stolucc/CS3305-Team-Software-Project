@@ -29,14 +29,14 @@ class Server():
         self._log = logger.get_logger()
         self._connection_handler = ConnectionHandler(self.handle_message,
                                                      self._log)
-        grid = Grid(103)
+        grid = Grid(20)
         grid.create_grid()
+        grid.static_map()
         game_id = database_API.Game.insert(self._session, 1, True)
         self._gamestate = GameState(game_id, 1, grid, self._log, self._session)
         try:
             self._connection_handler.start(config["server"]["port"])
         except KeyboardInterrupt:
-            print("I happened")
             self._connection_handler.stop()
             sys.exit()
 

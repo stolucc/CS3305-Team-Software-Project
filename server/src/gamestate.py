@@ -16,6 +16,8 @@ from queue import Queue
 class GameState:
     """Game state class."""
 
+    NUM_PLAYERS = 2
+
     def __init__(self, game_id, seed, grid, logger, session):
         """
         Initialise GameState attributes.
@@ -31,12 +33,12 @@ class GameState:
         self._grid = grid
         self._civs = {}
         self._my_id = None
-        self._turn_count = 1
+        self._turn_count = 0
         self._current_player = None
         self._game_started = False
         self._queues = {}
-        self._start_locations = [(0, 0, 0), (50, -25, -25),
-                                 (-50, 25, 25), (25, -50, 25)]
+        self._start_locations = [(4, -2, -2), (-3, -2, 5),
+                                 (-2, 4, -2), (4, -5, 1)]
 
     @property
     def game_id(self):
@@ -122,10 +124,11 @@ class GameState:
             return self.add_player(message)
         elif message.type == "LeaveGameAction":
             return self.remove_player(message)
-        elif message.type == "EndTurnAction":
-            return self.end_turn(message)
+
         if message.id == self._current_player:
-            if message.type in civ_actions:
+            if message.type == "EndTurnAction":
+                return self.end_turn(message)
+            elif message.type in civ_actions:
                 (result_set, return_value) = self.handle_action(message.id,
                                                                 message.obj)
                 self.populate_queues(result_set)
@@ -143,11 +146,11 @@ class GameState:
             is_tile = False
         for civ in self._civs:
             self._civs[civ].calculate_vision()
-            vision = self._civs[civ].vision
+            # vision = self._civs[civ].vision - this is never used
             relevant = []
             for tile in range(len(impacted_tiles)):
-                if impacted_tiles[tile] in vision:
-                    relevant += [tile]
+                # if impacted_tiles[tile] in vision:
+                relevant += [tile]
             if is_tile:
                 self._queues[civ].put(
                     TileUpdates([result_set[x] for x in relevant]))
@@ -162,14 +165,13 @@ class GameState:
         :param message: The message object sent from the client.
         :return: The id of the new player
         """
-        if len(self._civs) < 4:
+        if len(self._civs) < GameState.NUM_PLAYERS:
             user_id = database_API.User.insert(self._session,
                                                self._game_id,
                                                active=True, gold=100,
                                                food=100, science=0,
                                                production=0)
-            self.add_civ(Civilisation(user_id, self._grid, self._logger,
-                         self._session))
+            self.add_civ(Civilisation(user_id, self._grid, self._logger))
             self._logger.info("New Civilisation joined with id " +
                               str(user_id))
             # NOTE: Not needed when loading from db
@@ -183,9 +185,9 @@ class GameState:
             self._queues[user_id] = Queue()
             self._queues[user_id].put(UnitUpdate(
                 self._civs[user_id].units[unit_id]))
-            if(len(self._civs) == 4):
+            if(len(self._civs) == GameState.NUM_PLAYERS):
                 self._game_started = True
-                self._turn_count = 1
+                self._turn_count += 1
                 player_ids = [x for x in self._civs]
                 for civ in self._civs:
                     self._queues[civ].put(PlayerJoinedUpdate(player_ids))
@@ -194,8 +196,9 @@ class GameState:
                                                     self._turn_count)
                 for key in self._queues:
                     self._queues[key].put(start_turn_update)
-
-                # TODO: Tell Clients game has begun and who's turn it is
+                    unit = self._civs[key].units[list(self._civs[key].units.
+                                                      keys())[0]]
+                    self.populate_queues([unit])
 
             return self._game_id, user_id
         else:
@@ -237,7 +240,7 @@ class GameState:
         """
         civs = list(self._civs.keys())
         current_civ_index = civs.index(self._current_player)
-        next_civ_index = (current_civ_index + 1) % 4
+        next_civ_index = (current_civ_index + 1) % GameState.NUM_PLAYERS
         next_civ = civs[next_civ_index]
         self._current_player = next_civ
         self._civs[self._current_player].reset_unit_actions_and_movement()
@@ -252,6 +255,111 @@ class GameState:
         """Update the person whose turn it is."""
         self._current_player = current_player
 
+    def handle_movement_action(self, civ, action):
+        """Handle incoming movement actions and update game state."""
+        if self._civs[civ].id != action.unit._civ_id:
+            return ([], ServerError(4))
+
+        unit = self.validate_unit(civ, action.unit)
+        tile = self.validate_tile(action.destination)
+
+        city_destroyed_update = self._civs[civ].move_unit_to_hex(unit, tile)
+        database_API.Unit.update(self._session, unit.id, x=tile.x,
+                                 y=tile.y, z=tile.z)
+        result_tiles = self._grid.vision(unit.position, 3)
+        results = [action.unit.position, unit.position] + \
+            (city_destroyed_update if
+             city_destroyed_update is not None else [])
+        return (results,
+                TileUpdates(result_tiles))
+
+    def handle_combat_action(self, civ, action):
+        """Handle incoming combat actions and update game state."""
+        if self._civs[civ].id != action.attacker._civ_id \
+                or self._civs[civ].id == action.defender._civ_id:
+            return ([], ServerError(4))
+        attacker = self.validate_unit(civ, action.attacker)
+        defender = self.validate_unit(self._civs[action.defender._civ_id],
+                                      action.defender)
+        self._civs[civ].attack_unit(attacker, defender)
+        enemy = action.defender
+        database_API.Unit.update(self._session, enemy.id,
+                                 health=enemy.health)
+        return ([attacker, defender], True)
+
+    def handle_upgrade_action(self, civ, action):
+        """Handle incoming upgrade actions and update game state."""
+        if self._civs[civ].id != action.unit._civ_id:
+            return ([], ServerError(4))
+        self._civs[civ].upgrade_unit(action.unit)
+        unit = self.validate_unit(civ, action.unit)
+        database_API.Unit.update(self._session, unit._id,
+                                 level=unit.level, health=unit.health)
+        return [unit]
+
+    def handle_build_action(self, civ, action):
+        """Handle incoming build actions and update game state."""
+        if self._civs[civ].id != action.unit._civ_id:
+            return ([], ServerError(4))
+        building_type = action.building_type
+        tile = self.validate_tile(action.unit.position)
+        unit = self.validate_unit(civ, action.unit)
+        bld_id = database_API.Building.insert(self._session,
+                                              self._civs[civ]._id,
+                                              True, Building.get_type
+                                              (building_type),
+                                              tile.x, tile.y, tile.z)
+        self._civs[civ].build_structure(unit,
+                                        building_type,
+                                        bld_id)
+        return ([tile], bld_id)
+
+    def handle_purchase_action(self, civ, action):
+        """Handle incoming purchase actions and update game state."""
+        if self._civs[civ].id != action.unit._civ_id:
+            return ([], ServerError(4))
+        level = action.level
+        unit_type = action.unit_type
+        # action.building = self._validate_building(self, action.building)
+        position = self.validate_tile(action.building.position)
+        unit_id = database_API.Unit.insert(self._session,
+                                           self._civs[civ]._id, level,
+                                           unit_type.get_type(),
+                                           unit_type.get_health(level),
+                                           position.x, position.y,
+                                           position.z)
+        return ([self._civs[civ].buy_unit(unit_id, action.building,
+                                          action.unit_type, action.level)],
+                unit_id)
+
+    def handle_build_city_action(self, civ, action):
+        """Handle incoming city-building actions and update game state."""
+        if self._civs[civ].id != action.unit._civ_id:
+            return ([], ServerError(4))
+        unit = self.validate_unit(civ, action.unit)
+        tile = self.validate_tile(unit.position)
+        city_id = database_API.Building.insert(self._session,
+                                               self._civs[civ]._id,
+                                               True, 3, tile.x, tile.y,
+                                               tile.z)
+        self._civs[civ].build_city_on_tile(unit, city_id)
+        return ([tile], city_id)
+
+    def handle_research_action(self, civ, action):
+        """Handle incoming research actions and update game state."""
+        node_id = action.node_id
+        database_API.Technology.insert(self._session, self._civs[civ]._id,
+                                       node_id)
+        return [self._civs[civ].unlock_research(node_id)]
+
+    def validate_unit(self, civ, unit):
+        """Return valid unit."""
+        return self._civs[civ].units[unit.id]
+
+    def validate_tile(self, tile):
+        """Return valid tile."""
+        return self._grid.get_hextile(tile.coords)
+
     def handle_action(self, civ, action):
         """
         Handle incoming client-actions and update game state accordingly.
@@ -260,62 +368,16 @@ class GameState:
         """
         # NOTE: Assume validation has already ocurred
         if isinstance(action, MovementAction):
-            self._civs[civ].move_unit_to_hex(action.unit, action.destination)
-            unit = action.unit
-            tile = action.destination
-            database_API.Unit.update(self._session, unit.id, x=tile.x,
-                                     y=tile.y, z=tile.z)
-            return ([action.unit.position, action.destination], True)
+            return self.handle_movement_action(civ, action)
         elif isinstance(action, CombatAction):
-            self._civs[civ].attack_unit(action.attacker, action.defender)
-            enemy = action.defender
-            database_API.Unit.update(self._session, enemy.id,
-                                     health=enemy.health)
-            return ([action.attacker, action.defender], True)
+            return self.handle_combat_action(civ, action)
         elif isinstance(action, UpgradeAction):
-            self._civs[civ].upgrade_unit(action.unit)
-            unit = action.unit
-            database_API.Unit.update(self._session, unit._id,
-                                     level=unit.level, health=unit.health)
-            return [action.unit]
+            return self.handle_upgrade_action(civ, action)
         elif isinstance(action, BuildAction):
-            building_type = action.building_type
-            tile = action.unit.position
-            bld_id = database_API.Building.insert(self._session,
-                                                  self._civs[civ]._id,
-                                                  True, Building.get_type
-                                                  (building_type),
-                                                  tile.x, tile.y, tile.z)
-            self._civs[civ].build_structure(action.unit,
-                                            action.building_type,
-                                            bld_id)
-            return ([action.unit.position], bld_id)
+            return self.handle_build_action(civ, action)
         elif isinstance(action, PurchaseAction):
-            level = action.level
-            unit_type = action.unit_type
-            position = action.building.position
-            unit_id = database_API.Unit.insert(self._session,
-                                               self._civs[civ]._id, level,
-                                               unit_type.get_type(),
-                                               unit_type.get_health(level),
-                                               position.x, position.y,
-                                               position.z)
-            return ([self._civs[civ].buy_unit(unit_id, action.building,
-                                              action.unit_type, action.level)],
-                    unit_id)
-
+            return self.handle_purchase_action(civ, action)
         elif isinstance(action, BuildCityAction):
-            unit = action.unit
-            tile = unit.position
-            city_id = database_API.Building.insert(self._session,
-                                                   self._civs[civ]._id,
-                                                   True, 3, tile.x, tile.y,
-                                                   tile.z)
-            self._civs[civ].build_city_on_tile(unit, city_id)
-            return ([tile], city_id)
-
+            return self.handle_build_city_action(civ, action)
         elif isinstance(action, ResearchAction):
-            node_id = action.node_id
-            database_API.Technology.insert(self._session, self._civs[civ]._id,
-                                           node_id)
-            return [self._civs[civ].unlock_research(node_id)]
+            return self.handle_research_action(civ, action)

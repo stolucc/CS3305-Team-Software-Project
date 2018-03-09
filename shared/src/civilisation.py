@@ -1,16 +1,17 @@
 """Civilisation representation."""
 
-from unit import Worker, Swordsman, Unit
+from unit import Worker, Swordsman, Soldier, Unit
 from city import City
 from building import Building
 from currency import CurrencyType
 from researchtree import ResearchTree
+from mapresource import ResourceType
 
 
 class Civilisation(object):
     """Civilisation class."""
 
-    def __init__(self, identifier, grid, logger, session):
+    def __init__(self, identifier, grid, logger):
         """
         Initialise Civilisation attributes.
 
@@ -26,7 +27,7 @@ class Civilisation(object):
         self._science = 0
         self._tree = ResearchTree(self)
         self._logger = logger
-        self._vision = []
+        self._vision = {}
 
     def __repr__(self):
         """Return string representation of Civilisation."""
@@ -131,6 +132,17 @@ class Civilisation(object):
         self._science = science
 
     @property
+    def resources(self):
+        """Getter for all resources available to civ."""
+        values = {}
+        for resource in list(ResourceType):
+            values[resource] = 0
+        for key, city in self._cities.items():
+            for resource in list(ResourceType):
+                values[resource] += city.resources[resource]
+        return values
+
+    @property
     def grid(self):
         """
         Grid that game is using.
@@ -149,6 +161,15 @@ class Civilisation(object):
         return self._vision
 
     @property
+    def visions(self):
+        """
+        List of tiles that the civ can see.
+
+        :return: list of hex object
+        """
+        return self._visions
+
+    @property
     def tiles(self):
         """
         List of tiles that the civ owns.
@@ -156,6 +177,15 @@ class Civilisation(object):
         :return: list of hex object
         """
         return self._tiles
+
+    @property
+    def tree(self):
+        """
+        Research Tree of civilisation.
+
+        :return: Research tree
+        """
+        return self._tree
 
     def set_up(self, tile, worker_id):
         """
@@ -177,14 +207,14 @@ class Civilisation(object):
         cost_of_city = 25
         tile = worker.position
         if tile.civ_id is None and isinstance(worker, Worker)\
-                and self.gold >= cost_of_city:
+                and self.gold >= cost_of_city and worker.actions > 0:
             city = City(city_id, tile, self._id)
             tiles = self.grid.spiral_ring(tile, City.RANGE)
             city.tiles = tiles
             self.gold -= cost_of_city
             worker.actions -= 1
             for tile in tiles:
-                self._tiles[tile] = self._id
+                self.tiles[tile] = self._id
             self.cities[city.id] = city
         else:
             self._logger.debug("Unable to build city.")
@@ -196,11 +226,6 @@ class Civilisation(object):
         :param tile: hex object
         """
         tile = worker.position
-        print("Tile: ", tile)
-        print("building there:", tile.building is None)
-        print("Tile and worker match:", tile.civ_id == worker.civ_id)
-        print("Enough Money:", self.gold >= Building.buy_cost(building_type))
-        print("Enough Actions:", worker.actions > 0)
         if tile.building is None and isinstance(worker, Worker)\
                 and tile.civ_id == worker.civ_id\
                 and self.gold >= Building.buy_cost(building_type)\
@@ -219,7 +244,8 @@ class Civilisation(object):
         """
         Unlock node on research tree.
 
-        branches = 'worker', 'archer', 'swordsman', 'win'.
+        Nodes ID go from 0-9.
+        :param node_id: int ID of research node
         """
         node = self._tree._nodes[node_id]
         if node.unlock_cost <= self.science and self._tree.unlockable(node_id):
@@ -229,14 +255,18 @@ class Civilisation(object):
             self._logger.debug("Unable to unlock research node.")
 
     def upgrade_unit(self, unit):
-        """Upgrade unit."""
-        if unit.level < self.tree.tier[unit.get_string()]:
+        """
+        Upgrade unit.
+
+        :param unit: Unit object that is to be levelled up
+        """
+        if unit.level < self.tree._tier[unit.get_string()]:
             cost = unit.level * 10
             if self.gold >= cost and unit.actions > 0:
                 unit.level_up()
                 unit.actions -= 1
             else:
-                self._logger.debug("Not enough gold.")
+                self._logger.debug("Unable to upgrade unit.")
         else:
             self._logger.debug("Unable to upgrade unit.")
 
@@ -259,10 +289,27 @@ class Civilisation(object):
                 tile.unit = unit
                 pos.unit = None
                 unit.actions -= 1
+                if tile.city_id is not None and isinstance(unit, Soldier)\
+                        and tile.civ_id != self._id:
+                    return self.destroy_city(tile)
             else:
                 self._logger.debug("Unable to move unit.")
         else:
             self._logger.debug("Tile already has unit.")
+
+    def destroy_building(self, tile):
+        """Remove references for buildings."""
+        tile._building = None
+        tile._city_id = None
+        tile._civ_id = None
+
+    def destroy_city(self, tile):
+        """Remove all references for the city and its buildings."""
+        city_tiles = self._grid.spiral_ring(tile, 4)
+        for city_tile in city_tiles:
+            self.destroy_building(city_tile)
+        self.destroy_building(tile)
+        return city_tiles
 
     def movement_cost_of_path(self, path):
         """Calculate movement cost of list of hex tiles."""
@@ -293,7 +340,7 @@ class Civilisation(object):
         """Check if unit is dead and remove references if True."""
         if unit.health == 0:
             unit.position.unit = None
-            del unit.civilisation.units[unit.id]
+            del unit._civilisation.units[unit.id]
 
     def buy_unit(self, city, unit_type, level, unit_id):
         """
@@ -353,7 +400,7 @@ class Civilisation(object):
 
     def currency_of_buildings(self):
         """
-        Currency generated by buildings eac turn.
+        Currency generated by buildings each turn.
 
         :return: dict of currency
         """
@@ -372,18 +419,22 @@ class Civilisation(object):
     def calculate_vision(self):
         """Determine the tiles visible to the civilisation."""
         vision = set()
+        self._vision = {}
         for unit_id in self._units:
             unit = self._units[unit_id]
-            vision_range = 2  # TODO: Replace with unit vision range
+            vision_range = 3  # TODO: Replace with unit vision range
             tile = unit.position
             unit_vision = self._grid.vision(tile, vision_range)
             vision |= set(unit_vision)
 
         for city_id in self.cities:
-            buildings = self.cities[city_id].buildings
+            city = self.cities[city_id]
+            buildings = city.buildings
+            vision |= set(self._grid.vision(city.position, 3))
             for building in buildings:
                 vision_range = 2
                 tile = buildings[building].position
                 building_vision = self._grid.vision(tile, vision_range)
                 vision |= set(building_vision)
-        self._vision = vision
+        for tile in vision:
+            self._vision[tile] = tile

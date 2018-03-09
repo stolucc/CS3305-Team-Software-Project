@@ -83,23 +83,18 @@ class Building():
         return values[type]
 
     @staticmethod
-    def get_type(type):
+    def get_type(btype):
         """Return int corresponding to Building type."""
-        if type == BuildingType.FARM:
-            return 0
-        elif type == BuildingType.TRADE_POST:
-            return 1
-        elif type == BuildingType.UNIVERSITY:
-            return 2
-        elif type == BuildingType.CITY:
-            return 3
-        elif type == BuildingType.RESOURCE_IMPROVEMENT:
-            return 4
+        return btype.value
 
     @property
     def position(self):
         """Location of the building."""
         return self._location
+
+    @position.setter
+    def position(self, location):
+        self._location = location
 
     @property
     def building_type(self):

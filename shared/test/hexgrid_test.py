@@ -218,9 +218,7 @@ class HexGridTest(unittest.TestCase):
         grid.get_hextile((-1, 1, 0)).terrain = Terrain(TerrainType.MOUNTAIN,
                                                        BiomeType.GRASSLAND)
         result = [Hex(-1, 1, 0),
-                  Hex(-1, -1, 2),
                   Hex(0, 2, -2),
-                  Hex(1, 1, -2),
                   Hex(-2, 0, 2),
                   Hex(-2, 1, 1),
                   Hex(-2, 2, 0),

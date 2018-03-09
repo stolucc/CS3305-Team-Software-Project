@@ -10,7 +10,7 @@ class UnitTest(unittest.TestCase):
         """Test that unit's attributes are initialised correctly."""
         hextile = Hex(0, 0, 0)
 
-        unit = Unit(100, 1, 5, {'food': 2, 'gold': 1, 'science': 0}, hextile)
+        unit = Unit("unit", 100, 1, 5, {'food': 2, 'gold': 1, 'science': 0}, 5, hextile, 1)
         self.assertEqual(unit._health, 100)
         self.assertEqual(unit._max_health, 100)
         self.assertEqual(unit._level, 1)
@@ -22,7 +22,7 @@ class UnitTest(unittest.TestCase):
         """Test that the resource costs are increased by the correct amount."""
         hextile = Hex(0, 0, 0)
 
-        unit = Unit(100, 1, 5, {'food': 2, 'gold': 1, 'science': 0}, hextile)
+        unit = Unit("unit", 100, 1, 5, {'food': 2, 'gold': 1, 'science': 0}, 5, hextile, 1)
         unit.cost_increase(-1, 0, 2)
 
         self.assertEqual(unit._cost['food'], 1)
@@ -33,7 +33,7 @@ class UnitTest(unittest.TestCase):
         """Test that the units attributes are increased correctly."""
         hextile = Hex(0, 0, 0)
 
-        unit = Unit(100, 1, 5, {'food': 2, 'gold': 1, 'science': 0}, hextile)
+        unit = Unit("unit", 100, 1, 5, {'food': 2, 'gold': 1, 'science': 0}, 5, hextile, 1)
         unit.level_up(20, 2)
 
         self.assertEqual(unit._health, 120)
@@ -54,7 +54,7 @@ class UnitTest(unittest.TestCase):
         """Test that the right amount of health is restored."""
         hextile = Hex(0, 0, 0)
 
-        unit = Unit(100, 1, 5, {'food': 2, 'gold': 1, 'science': 0}, hextile)
+        unit = Unit("unit", 100, 1, 5, {'food': 2, 'gold': 1, 'science': 0}, 5, hextile, 1)
 
         unit.receive_damage(40)
         unit.restore_health(25)
@@ -69,7 +69,7 @@ class UnitTest(unittest.TestCase):
         """Test that worker's attributes are initialised correctly."""
         hextile = Hex(0, 0, 0)
 
-        worker = Worker(2, hextile)
+        worker = Worker("worker", 2, hextile, 1)
 
         self.assertEqual(worker._health, 110)
         self.assertEqual(worker._movement_range, 5)
@@ -81,8 +81,8 @@ class UnitTest(unittest.TestCase):
         hextile = Hex(0, 0, 0)
         hextile2 = Hex(1, 0, -1)
 
-        worker1 = Worker(1, hextile)
-        worker2 = Worker(3, hextile2)
+        worker1 = Worker("worker", 1, hextile, 1)
+        worker2 = Worker("worker", 3, hextile2, 1)
 
         worker1.level_up()
         worker2.level_up()
@@ -101,15 +101,15 @@ class UnitTest(unittest.TestCase):
         """Test that soldier's attributes are initialised correctly."""
         hextile = Hex(0, 0, 0)
 
-        soldier = Soldier(120, 1, 5, 6, 4,
-                          {'food': 2, 'gold': 1, 'science': 0}, hextile)
+        soldier = Soldier("soldier", 120, 1, 5, 6, 4,
+                          {'food': 2, 'gold': 1, 'science': 0}, 10, hextile, 1)
         self.assertEqual(soldier._strength, 6)
         self.assertEqual(soldier._attack_range, 4)
 
     def test_swordsman_attributes(self):
         """Test that swordsman's attributes are initialised correctly."""
         hextile = Hex(0, 0, 0)
-        swordsman = Swordsman(1, hextile)
+        swordsman = Swordsman("soldier", 1, hextile, 1)
 
         self.assertEqual(swordsman._health, 130)
         self.assertEqual(swordsman._movement_range, 4)
@@ -121,8 +121,8 @@ class UnitTest(unittest.TestCase):
         hextile = Hex(0, 0, 0)
         hextile2 = Hex(1, 0, -1)
 
-        sword1 = Swordsman(1, hextile)
-        sword2 = Swordsman(3, hextile2)
+        sword1 = Swordsman("sword", 1, hextile, 1)
+        sword2 = Swordsman("sword", 3, hextile2, 1)
 
         sword1.level_up()
         sword2.level_up()
@@ -140,7 +140,7 @@ class UnitTest(unittest.TestCase):
     def test_archer_attributes(self):
         """Test that archer's attributes are initialised correctly."""
         hextile = Hex(0, 0, 0)
-        archer = Archer(1, hextile)
+        archer = Archer("archer", 1, hextile, 1)
 
         self.assertEqual(archer._health, 110)
         self.assertEqual(archer._movement_range, 5)
@@ -153,8 +153,8 @@ class UnitTest(unittest.TestCase):
         hextile = Hex(0, 0, 0)
         hextile2 = Hex(1, 0, -1)
 
-        archer1 = Archer(1, hextile)
-        archer2 = Archer(3, hextile2)
+        archer1 = Archer("archer", 1, hextile, 1)
+        archer2 = Archer("archer", 3, hextile2, 1)
 
         archer1.level_up()
         archer2.level_up()
