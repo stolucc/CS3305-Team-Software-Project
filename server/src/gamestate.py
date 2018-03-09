@@ -420,7 +420,7 @@ class GameState:
             del self._civs[removed]
             self._num_players -= 1
             for queue in self._queues:
-                queue.put()
+                self._queues[queue].put()
 
     def civ_has_workers(self, civ):
         """Check if a civ still has any workers."""
