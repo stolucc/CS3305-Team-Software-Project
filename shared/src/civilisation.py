@@ -242,10 +242,8 @@ class Civilisation(object):
             for tile in tiles:
                 self.tiles[tile] = self._id
             self.cities[city.id] = city
-            return True
         else:
             self._logger.debug("Unable to build city.")
-        return False
 
     def build_structure(self, worker, building_type, building_id):
         """
@@ -284,10 +282,8 @@ class Civilisation(object):
         if node is not None and node.unlock_cost <= self.science:
             self.science -= node.unlock_cost
             self._tree.unlock_node(branch, node)
-            return True
         else:
             self._logger.debug("Unable to unlock research node.")
-        return False
 
     def upgrade_unit(self, unit):
         """
@@ -300,12 +296,10 @@ class Civilisation(object):
             if self.gold >= cost and unit.actions > 0:
                 unit.level_up()
                 unit.actions -= 1
-                return True
             else:
                 self._logger.debug("Unable to upgrade unit.")
         else:
             self._logger.debug("Unable to upgrade unit.")
-        return False
 
     def move_unit_to_hex(self, unit, tile):
         """
@@ -384,8 +378,6 @@ class Civilisation(object):
                 damage = enemy.attack_power()
                 soldier.receive_damage(damage)
                 self.is_dead(soldier)
-            return True
-        return False
 
     def is_dead(self, unit):
         """Check if unit is dead and remove references if True."""
@@ -413,7 +405,6 @@ class Civilisation(object):
             return unit
         else:
             self._logger.debug("Unable to purchase unit.")
-        return False
 
     def per_turn(self):
         """Amount of actions to be taken per turn."""
