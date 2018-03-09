@@ -313,7 +313,8 @@ class Civilisation(object):
                 pos.unit = None
                 unit.actions -= 1
                 if tile.city_id is not None and isinstance(unit, Soldier)\
-                        and tile.civ_id != unit._civ_id:
+                        and tile.civ_id != unit._civ_id and\
+                        isinstance(tile.building, City):
                     return self.destroy_city(tile)
             else:
                 self._logger.debug("Unable to move unit.")
