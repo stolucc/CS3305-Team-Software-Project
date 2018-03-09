@@ -345,8 +345,20 @@ class Civilisation(object):
         city_tiles = self._grid.spiral_ring(tile, 4)
         for city_tile in city_tiles:
             self.destroy_building(city_tile)
+            if city_tile.terrain.resource is not None:
+                city_tile.terrain.resource.stop_work()
         self.destroy_building(tile)
         return city_tiles
+
+    def destroy_civilisation(self):
+        """Remove all references for this civilisation."""
+        for unit_id in self._units:
+            unit = self._units[unit_id]
+            unit.tile.unit = None
+            unit.tile = None
+        for city_id in self._cities:
+            city_tile = self._cities[city_id].position
+            self.destroy_city(city_tile)
 
     def movement_cost_of_path(self, path):
         """Calculate movement cost of list of hex tiles."""
