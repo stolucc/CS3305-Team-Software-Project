@@ -323,7 +323,7 @@ class GameState:
             return ([], ServerError(4))
         level = action.level
         unit_type = action.unit_type
-        action.building = self.validate_city(civ, action.building)
+        city = self.validate_city(civ, action.building)
         position = self.validate_tile(action.building.position)
         unit_id = database_API.Unit.insert(self._session,
                                            self._civs[civ]._id, level,
@@ -331,8 +331,8 @@ class GameState:
                                            unit_type.get_health(level),
                                            position.x, position.y,
                                            position.z)
-        return ([self._civs[civ].buy_unit(unit_id, action.building,
-                                          action.unit_type, action.level)],
+        return ([self._civs[civ].buy_unit(city,
+                                          unit_type, action.level, unit_id)],
                 unit_id)
 
     def handle_build_city_action(self, civ, action):
