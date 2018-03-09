@@ -188,6 +188,7 @@ class GameState:
             self._queues[user_id].put(UnitUpdate(
                 self._civs[user_id].units[unit_id]))
             if(len(self._civs) == self._num_players):
+                print(self._civs)
                 self._game_started = True
                 self._turn_count += 1
                 player_ids = [x for x in self._civs]
@@ -241,6 +242,7 @@ class GameState:
         :param message: The message object sent from the client.
         """
         civs = list(self._civs.keys())
+        print(civs)
         current_civ_index = civs.index(self._current_player)
         next_civ_index = (current_civ_index + 1) % self._num_players
         next_civ = civs[next_civ_index]
@@ -414,8 +416,6 @@ class GameState:
         to_be_removed = []
         for civ_id in self._civs:
             civ = self._civs[civ_id]
-            print(self.civ_has_workers(civ))
-            print(self.civ_has_cities(civ))
             if not (self.civ_has_workers(civ) and self.civ_has_cities(civ)):
                 to_be_removed += [civ_id]
         for removed in to_be_removed:
@@ -427,12 +427,10 @@ class GameState:
 
     def civ_has_workers(self, civ):
         """Check if a civ still has any workers."""
-        result = False
         for unit in civ.units:
             if isinstance(unit, Worker):
-                result = True
-                break
-        return result
+                return True
+        return False
 
     def civ_has_cities(self, civ):
         """Check if a civ still has any cities."""
