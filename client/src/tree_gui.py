@@ -110,6 +110,7 @@ class TreeGUI(Menu):
                     return True
         return False
 
+
 if __name__ == "__main__":
     screen = pygame.display.set_mode((1280, 720))
     pygame.font.init()
