@@ -44,6 +44,11 @@ class City():
                 tile.city_id = self._id
                 tile.civ_id = self._civ_id
 
+    @property
+    def civ_id(self):
+        """Return civilisation of id."""
+        return self._civ_id
+
     def no_unit_tile(self):
         """Return first tile with no unit on it, None otherwise."""
         for tile in self.tiles:
