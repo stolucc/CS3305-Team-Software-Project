@@ -11,7 +11,7 @@ from layout import Layout
 import server_API
 from hexgrid import Grid, Hex
 from load_resources import LoadImages
-from unit import Worker, Soldier
+from unit import Worker, Soldier, Archer, Swordsman
 from hud_overlay import HudOverlay
 from client_gamestate import GameState
 from civilisation import Civilisation
@@ -260,7 +260,7 @@ class Game:
                 if hexagon.building.building_type == BuildingType.CITY \
                         and hexagon.building.civ_id == self._game_state.my_id:
                     self._currently_selected_object = hexagon.building
-                    self.unit_menu(layout)
+                    self.city_menu()
 
     def highlight_selected_movement(self, layout):
         """
@@ -339,6 +339,45 @@ class Game:
             else:
                 self._select_menu.set_options(click, [
                     ("Move", move_unit)])
+
+    def city_menu(self):
+        """
+        Create a menu pertaining to city actions.
+
+        :param layout: Layout object being drawn on.
+
+        """
+        city = self._currently_selected_object
+        click = pygame.mouse.get_pos()
+        self._current_available_moves = {}
+
+        def buy_archer():
+            """Buy an archer and redraw the map."""
+            self._server_api.purchase(city, Archer, 1)
+            self._currently_selected_object = None
+            self._currently_selected_tile = None
+            self.draw_map()
+
+        def buy_worker():
+            """Buy an worker and redraw the map."""
+            self._server_api.purchase(city, Worker, 1)
+            self._currently_selected_object = None
+            self._currently_selected_tile = None
+            self.draw_map()
+
+        def buy_swordsman():
+            """Buy an swordsman and redraw the map."""
+            self._server_api.purchase(city, Swordsman, 1)
+            self._currently_selected_object = None
+            self._currently_selected_tile = None
+            self.draw_map()
+
+        if self._menu_displayed is False:
+            self._menu_displayed = True
+            self._select_menu.set_options(click, [
+                ("Buy Archer", buy_archer()),
+                ("Buy Swordsman", buy_swordsman()),
+                ("Buy Worker", buy_worker())])
 
     def scale_images_to_hex_size(self):
         """
