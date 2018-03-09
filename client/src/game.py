@@ -10,6 +10,7 @@ import threading
 from layout import Layout
 import server_API
 from hexgrid import Grid, Hex
+from menu import Menu
 from load_resources import LoadImages
 from unit import Worker, Soldier, Archer, Swordsman
 from hud_overlay import HudOverlay
@@ -61,6 +62,11 @@ class Game:
         self._hex_size = lambda x: (self.infoObject.current_w // x)
         self._select_menu = SelectMenu(self._screen)
         self._menu_displayed = False
+        self._main_menu_options = [("Resume", self.close_main_menu),
+                                   ("Music", self.close_main_menu),
+                                   ("Exit", self.quit)]
+        self._main_menu = Menu(self._screen, self._main_menu_options)
+        self._main_menu_displayed = False
         self._grid = self._game_state.grid
         self._layout = Layout(self._hex_size(self._zoom),
                               (self._window_size[0] / 2,
@@ -115,14 +121,12 @@ class Game:
                 self.quit()
             elif event.type == pygame.KEYDOWN:
                 pressed = pygame.key.get_pressed()
+                if pressed[pygame.K_ESCAPE]:
+                    self._main_menu_displayed = True
                 if pressed[306] == 1 and pressed[99] == 1:  # 306 CTRL,99 C
                     self.quit()
                 elif pressed[32] == 1:
                     self._server_api.end_turn()
-                    # elif pressed[98] == 1:
-                    #     self.build_structure(self._layout, BuildingType.CITY)
-                    # elif pressed[102] == 1:
-                    #     self.build_structure(self._layout, BuildingType.FARM)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.mouse_button_down(event)
             if event.type == pygame.MOUSEBUTTONUP:
@@ -134,6 +138,12 @@ class Game:
             self._shutdown = True
             thread.join()
         sys.exit()
+
+    def close_main_menu(self):
+        """
+        Close the main menu
+        """
+        self._main_menu_displayed = False
 
     def mouse_button_down(self, event):
         """
@@ -163,6 +173,9 @@ class Game:
         elif event.button == 2:  # Middle click
             pass
         elif event.button == 3:  # Right click
+            if self._main_menu_displayed:
+                click = pygame.mouse.get_pos()
+                self._main_menu.menu_click(click)
             self.select_object(self._layout)
 
     def panning(self):
@@ -548,7 +561,6 @@ class Game:
                         image_key = resource.resource_type
                     self.draw_sprite(hexagon_coords,
                                      self._scaled_resource_images[image_key])
-
                 if hexagon.unit is not None and hexagon in my_vision:
                     unit = hexagon.unit
                     unit_level = unit.level
@@ -592,20 +604,23 @@ class Game:
 
         Also draws the hexgrid mirrors.
         """
-        self._screen.fill((0, 0, 0))
-        self.draw_hex_grid(self._layout)
-        layouts = self.get_mirrors()
-        for layout in layouts:
-            self.draw_hex_grid(layout)
-        self.highlight_selected_movement(self._layout)
-        for layout in layouts:
-            self.highlight_selected_movement(layout)
-        self._screen.blit(self._hud_surface, (0, 0))
-        self._hud.draw_quick_surface(layouts)
-        self._screen.blit(self._hud_quick_surface, (0, 0))
-        pygame.display.flip()
-        if self._menu_displayed:
-            self._select_menu.display_menu()
+        if not self._main_menu_displayed:
+            self._screen.fill((0, 0, 0))
+            self.draw_hex_grid(self._layout)
+            layouts = self.get_mirrors()
+            for layout in layouts:
+                self.draw_hex_grid(layout)
+            self.highlight_selected_movement(self._layout)
+            for layout in layouts:
+                self.highlight_selected_movement(layout)
+            self._screen.blit(self._hud_surface, (0, 0))
+            self._hud.draw_quick_surface(layouts)
+            self._screen.blit(self._hud_quick_surface, (0, 0))
+            pygame.display.flip()
+            if self._menu_displayed:
+                self._select_menu.display_menu()
+        else:
+            self._main_menu.display_menu()
 
     def render_hud(self):
         """Render heads up display."""
