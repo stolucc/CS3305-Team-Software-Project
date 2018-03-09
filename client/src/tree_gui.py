@@ -41,7 +41,6 @@ class TreeGUI(Menu):
         unlocked = self._tree.unlocked_nodes()
         branch_order = ["Worker", "Archer", "Swordsman", "Win"]
         for branch in branch_order:
-            print branch
             if branch == "Win":
                 x_coordinate = 275 + wrapper_x
                 y_coordinate = 400 + wrapper_y
@@ -128,6 +127,5 @@ if __name__ == "__main__":
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONUP:
                 pos = pygame.mouse.get_pos()
-                print(pos)
                 menu.menu_click(pos)
                 menu.display_menu()
