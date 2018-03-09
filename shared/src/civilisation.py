@@ -146,9 +146,11 @@ class Civilisation(object):
         values = {}
         for resource in list(ResourceType):
             values[resource] = 0
+        unit_cost = self.unit_resource_cost()
         for key, city in self._cities.items():
             for resource in list(ResourceType):
                 values[resource] += city.resources[resource]
+                values[resource] -= unit_cost[resource]
         return values
 
     @property
@@ -206,6 +208,13 @@ class Civilisation(object):
         worker.actions = 2
         tile.unit = worker
         self.units[worker_id] = worker
+
+    def get_building(self, bld_id):
+        """Get building from building ID."""
+        for city_id in self._cities:
+            city = self._cities[city_id]
+            if bld_id in city._buildings:
+                return city._buildings[bld_id]
 
     def build_city_on_tile(self, worker, city_id):
         """
@@ -271,7 +280,7 @@ class Civilisation(object):
         """
         if unit.level < self.tree._tier[unit.get_string()]:
             cost = unit.level * 10
-            if self.gold >= cost and unit.actions > 0:
+            if self.gold >= cost and unit.actions > 0 :
                 unit.level_up()
                 unit.actions -= 1
             else:
@@ -384,6 +393,16 @@ class Civilisation(object):
             unit = self._units[unit]
             unit.actions = actions_per_turn
             unit.movement = unit.movement_range
+
+    def unit_resource_cost(self):
+        """Calculate resource cost of higher level units."""
+        cost = {}
+        for resource in list(ResourceType):
+            cost[resource] = 0
+        for unit in self._units:
+            if unit.level > 1:
+                cost[unit.resource_cost()] += 1
+        return cost
 
     def currency_per_turn(self):
         """Update Gold, Food, and Science per turn."""
