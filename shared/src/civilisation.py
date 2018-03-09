@@ -399,7 +399,7 @@ class Civilisation(object):
         position = city.no_unit_tile()
         if issubclass(unit_type, Unit) and self.gold >= \
                 unit_type.gold_cost(level) and position is not None:
-            unit = unit_type(unit_id, level, position, self)
+            unit = unit_type(unit_id, level, position, self._id)
             self.gold -= unit.gold_cost(level)
             position.unit = unit
             self.units[unit_id] = unit
