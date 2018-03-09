@@ -163,7 +163,6 @@ if __name__ == "__main__":
     pygame.mixer.init()
     music.Music(song)
 
-
     while True:
         for event in pygame.event.get():   # User did something
             if event.type == pygame.QUIT:
