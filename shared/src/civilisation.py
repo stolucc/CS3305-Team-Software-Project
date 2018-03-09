@@ -242,6 +242,7 @@ class Civilisation(object):
             for tile in tiles:
                 self.tiles[tile] = self._id
             self.cities[city.id] = city
+            return tiles
         else:
             self._logger.debug("Unable to build city.")
 
