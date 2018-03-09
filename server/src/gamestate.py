@@ -7,7 +7,8 @@ from unit import Unit
 from action import ServerError, GAME_FULL_ERROR, UNKNOWN_ACTION, \
     StartTurnUpdate, TileUpdates, UnitUpdate, MovementAction, \
     CombatAction, UpgradeAction, BuildAction, PurchaseAction, \
-    PlayerJoinedUpdate, ResearchAction, BuildCityAction, WorkResourceAction
+    PlayerJoinedUpdate, ResearchAction, BuildCityAction, WinUpdate,\
+    WorkResourceAction
 from unit import Worker
 import random
 from queue import Queue
@@ -15,8 +16,6 @@ from queue import Queue
 
 class GameState:
     """Game state class."""
-
-    NUM_PLAYERS = 2
 
     def __init__(self, game_id, seed, grid, logger, session):
         """
@@ -37,6 +36,8 @@ class GameState:
         self._current_player = None
         self._game_started = False
         self._queues = {}
+        self._num_players = 1
+        self._game_won = False
         self._start_locations = [(4, -2, -2), (-3, -2, 5),
                                  (-2, 4, -2), (4, -5, 1)]
 
@@ -166,7 +167,7 @@ class GameState:
         :param message: The message object sent from the client.
         :return: The id of the new player
         """
-        if len(self._civs) < GameState.NUM_PLAYERS:
+        if len(self._civs) < self._num_players:
             user_id = database_API.User.insert(self._session,
                                                self._game_id,
                                                active=True, gold=100,
@@ -186,7 +187,7 @@ class GameState:
             self._queues[user_id] = Queue()
             self._queues[user_id].put(UnitUpdate(
                 self._civs[user_id].units[unit_id]))
-            if(len(self._civs) == GameState.NUM_PLAYERS):
+            if(len(self._civs) == self._num_players):
                 self._game_started = True
                 self._turn_count += 1
                 player_ids = [x for x in self._civs]
@@ -241,7 +242,7 @@ class GameState:
         """
         civs = list(self._civs.keys())
         current_civ_index = civs.index(self._current_player)
-        next_civ_index = (current_civ_index + 1) % GameState.NUM_PLAYERS
+        next_civ_index = (current_civ_index + 1) % self._num_players
         next_civ = civs[next_civ_index]
         self._current_player = next_civ
         self._civs[self._current_player].reset_unit_actions_and_movement()
@@ -296,7 +297,7 @@ class GameState:
         unit = self.validate_unit(civ, action.unit)
         database_API.Unit.update(self._session, unit._id,
                                  level=unit.level, health=unit.health)
-        return [unit]
+        return ([unit], True)
 
     def handle_build_action(self, civ, action):
         """Handle incoming build actions and update game state."""
@@ -368,6 +369,72 @@ class GameState:
         """Return valid tile."""
         return self._grid.get_hextile(tile.coords)
 
+    def check_win_conditions(self):
+        """
+        Check if any win condition has been reached.
+
+        :return: The id of the civ which has won, or None
+        """
+        mil = self.check_military_victory()
+        eco = self.check_economic_victory()
+        sci = self.check_science_victory()
+        if (mil or eco or sci):
+            return mil
+        return None
+
+    def check_military_victory(self):
+        """
+        Check if military win condition has been reached.
+
+        :return: The id of the civ which has won, or None
+        """
+        self.check_civ_removed()
+        if len(self._civs) == 1:
+            return self._civs.keys()[0]
+        return None
+
+    def check_science_victory(self):
+        """
+        Check if science win condition has been reached.
+
+        :return: The id of the civ which has won, or None
+        """
+        return None
+
+    def check_economic_victory(self):
+        """
+        Check if economic win condition has been reached.
+
+        :return: The id of the civ which has won, or None
+        """
+        return None
+
+    def check_civ_removed(self):
+        """Determine if any civs should be removed and remove them."""
+        to_be_removed = []
+        for civ_id in self._civs:
+            civ = self._civs[civ_id]
+            if not (self.civ_has_workers(civ) or self.civ_has_cities(civ)):
+                to_be_removed += [civ_id]
+        for removed in to_be_removed:
+            del self._civs[removed]
+            self._num_players -= 1
+            for queue in self._queues:
+                queue.put()
+
+    def civ_has_workers(self, civ):
+        """Check if a civ still has any workers."""
+        result = False
+        for unit in civ.units:
+            if isinstance(unit, Worker):
+                result = True
+                break
+        return result
+
+    def civ_has_cities(self, civ):
+        """Check if a civ still has any cities."""
+        return len(civ.cities) == 0
+
     def handle_action(self, civ, action):
         """
         Handle incoming client-actions and update game state accordingly.
@@ -375,19 +442,26 @@ class GameState:
         :param action: The action to be processed.
         """
         # NOTE: Assume validation has already ocurred
+        result = None
         if isinstance(action, MovementAction):
-            return self.handle_movement_action(civ, action)
+            result = self.handle_movement_action(civ, action)
         elif isinstance(action, CombatAction):
-            return self.handle_combat_action(civ, action)
+            result = self.handle_combat_action(civ, action)
         elif isinstance(action, UpgradeAction):
-            return self.handle_upgrade_action(civ, action)
+            result = self.handle_upgrade_action(civ, action)
         elif isinstance(action, BuildAction):
-            return self.handle_build_action(civ, action)
+            result = self.handle_build_action(civ, action)
         elif isinstance(action, PurchaseAction):
-            return self.handle_purchase_action(civ, action)
+            result = self.handle_purchase_action(civ, action)
         elif isinstance(action, BuildCityAction):
-            return self.handle_build_city_action(civ, action)
+            result = self.handle_build_city_action(civ, action)
         elif isinstance(action, ResearchAction):
-            return self.handle_research_action(civ, action)
+            result = self.handle_research_action(civ, action)
         elif isinstance(action, WorkResourceAction):
-            return self.handle_work_resource_action(civ, action)
+            result = self.handle_work_resource_action(civ, action)
+        winner = self.check_win_conditions()
+        if winner:
+            for queue in self._queues:
+                queue.put(WinUpdate(winner))
+            self._game_won = True
+        return result

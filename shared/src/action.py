@@ -253,3 +253,15 @@ class PlayerJoinedUpdate():
     def __str__(self):
         """Return a String representation of a PlayerJoinedUpdate object."""
         return "<PlayerJoinedUpdate>"
+
+
+class WinUpdate():
+    """An update to inform players if someone has won."""
+
+    def __init__(self, player_id):
+        """Initialise a new win update object."""
+        self._winner_id = player_id
+
+    def __str__(self):
+        """Return a String representation of a WinUpdate object."""
+        return "<WinUpdate>"
