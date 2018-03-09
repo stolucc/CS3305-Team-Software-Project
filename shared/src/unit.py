@@ -342,7 +342,6 @@ class Worker(Unit):
         """
         string = "Worker: "
         string += super().__repr__()
-        string += "Build Speed: %i" % (self._build_speed)
         return string
 
 
