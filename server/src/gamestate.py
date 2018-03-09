@@ -282,7 +282,7 @@ class GameState:
                 or self._civs[civ].id == action.defender._civ_id:
             return ([], ServerError(4))
         attacker = self.validate_unit(civ, action.attacker)
-        defender = self.validate_unit(self._civs[action.defender._civ_id],
+        defender = self.validate_unit(action.defender._civ_id,
                                       action.defender)
         self._civs[civ].attack_unit(attacker, defender)
         enemy = action.defender
@@ -468,6 +468,10 @@ class GameState:
             result = self.handle_research_action(civ, action)
         elif isinstance(action, WorkResourceAction):
             result = self.handle_work_resource_action(civ, action)
+        return self.return_result(result)
+
+    def return_result(self, result):
+        """Return the resulting value of an action."""
         winner = self.check_win_conditions()
         if winner:
             for queue in self._queues:

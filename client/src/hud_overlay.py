@@ -152,7 +152,6 @@ class HudOverlay:
                        (offset, 20),
                        self._color2)
         offset += 80
-        current_player = self._game_state.current_player
         my_turn = self._game_state.my_turn
         if my_turn:
             color = self._color3
