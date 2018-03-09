@@ -181,6 +181,19 @@ class PurchaseAction():
                 (str(self.building), str(self.unit_type), str(self.level)))
 
 
+class WorkResourceAction():
+    """An action which works a resource."""
+
+    def __init__(self, unit):
+        """Initialise a new work resource action."""
+        self.unit = unit
+
+    def __str__(self):
+        """Return a String representation of a WorkResourceAction object."""
+        return ("<WorkResourceAction unit: '%s'>" %
+                (str(self.unit)))
+
+
 class StartTurnUpdate():
     """An update to start a turn."""
 

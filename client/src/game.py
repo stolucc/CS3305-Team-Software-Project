@@ -19,6 +19,7 @@ from building import BuildingType
 from math import floor
 from file_logger import Logger
 from object_select import SelectMenu
+from mapresource import ResourceType
 
 
 class Game:
@@ -326,15 +327,34 @@ class Game:
             self._currently_selected_tile = None
             self.draw_map()
 
+        def work_resource():
+            self._server_api.work_resource(unit)
+            self._game_state.get_civ(self._game_state.my_id).calculate_vision()
+            self._currently_selected_object = None
+            self._currently_selected_tile = None
+            self.draw_map()
+
         if self._menu_displayed is False:
             self._menu_displayed = True
             if unit.__class__.__name__ == "Worker":
-                self._select_menu.set_options(click, [
-                    ("Move", move_unit),
-                    ("Build City", build_city),
-                    ("Build Farm", build_farm),
-                    ("Build Trade Post", build_trade_post),
-                    ("Build Uni", build_uni)])
+                if unit.position.building is not None:
+                    self._select_menu.set_options(click, [
+                        ("Move", move_unit)])
+                elif unit.position.terrain.resource is None:
+                    self._select_menu.set_options(click, [
+                        ("Move", move_unit),
+                        ("Build City", build_city),
+                        ("Build Farm", build_farm),
+                        ("Build Trade Post", build_trade_post),
+                        ("Build Uni", build_uni)])
+                elif unit.position.terrain.resource is not None and \
+                        unit.position.terrain.resource._is_worked is False:
+                    self._select_menu.set_options(click, [
+                        ("Move", move_unit),
+                        ("Work Resource", work_resource)])
+                else:
+                    self._select_menu.set_options(click, [
+                        ("Move", move_unit)])
             else:
                 self._select_menu.set_options(click, [
                     ("Move", move_unit)])
@@ -514,9 +534,19 @@ class Game:
                 if hexagon.terrain.resource is not None:
                     resource = hexagon.terrain.resource
                     hexagon_coords = layout.hex_to_pixel(hexagon)
+                    if resource._is_worked is True:
+                        if resource.resource_type is ResourceType.COAL:
+                            image_key = "W_COAL"
+                        elif resource.resource_type is ResourceType.IRON:
+                            image_key = "W_IRON"
+                        elif resource.resource_type is ResourceType.LOGS:
+                            image_key = "W_LOGS"
+                        elif resource.resource_type is ResourceType.GEMS:
+                            image_key = "W_GEMS"
+                    else:
+                        image_key = resource.resource_type
                     self.draw_sprite(hexagon_coords,
-                                     self._scaled_resource_images[
-                                         resource.resource_type])
+                                     self._scaled_resource_images[image_key])
 
                 if hexagon.unit is not None and hexagon in my_vision:
                     unit = hexagon.unit

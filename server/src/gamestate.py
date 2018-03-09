@@ -7,7 +7,7 @@ from unit import Unit
 from action import ServerError, GAME_FULL_ERROR, UNKNOWN_ACTION, \
     StartTurnUpdate, TileUpdates, UnitUpdate, MovementAction, \
     CombatAction, UpgradeAction, BuildAction, PurchaseAction, \
-    PlayerJoinedUpdate, ResearchAction, BuildCityAction
+    PlayerJoinedUpdate, ResearchAction, BuildCityAction, WorkResourceAction
 from unit import Worker
 import random
 from queue import Queue
@@ -115,7 +115,8 @@ class GameState:
         :return: The value to be sent back to the client
         """
         civ_actions = ["MovementAction", "CombatAction", "UpgradeAction",
-                       "BuildAction", "PurchaseAction", "BuildCityAction"]
+                       "BuildAction", "PurchaseAction", "BuildCityAction",
+                       "WorkResourceAction"]
 
         if message.type == "CheckForUpdates":
             return self.update_player(message)
@@ -352,6 +353,13 @@ class GameState:
                                        node_id)
         return [self._civs[civ].unlock_research(node_id)]
 
+    def handle_work_resource_action(self, civ, action):
+        """Handle incoming work resource actions and update game state."""
+        unit = self.validate_unit(civ, action.unit)
+        tile = self.validate_tile(unit.position)
+        tile.terrain.resource.work()
+        return ([tile], True)
+
     def validate_unit(self, civ, unit):
         """Return valid unit."""
         return self._civs[civ].units[unit.id]
@@ -381,3 +389,5 @@ class GameState:
             return self.handle_build_city_action(civ, action)
         elif isinstance(action, ResearchAction):
             return self.handle_research_action(civ, action)
+        elif isinstance(action, WorkResourceAction):
+            return self.handle_work_resource_action(civ, action)
