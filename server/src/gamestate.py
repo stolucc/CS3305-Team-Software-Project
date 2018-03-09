@@ -148,11 +148,11 @@ class GameState:
             is_tile = False
         for civ in self._civs:
             self._civs[civ].calculate_vision()
-            # vision = self._civs[civ].vision - this is never used
+            vision = self._civs[civ].vision
             relevant = []
             for tile in range(len(impacted_tiles)):
-                # if impacted_tiles[tile] in vision:
-                relevant += [tile]
+                if impacted_tiles[tile] in vision:
+                    relevant += [tile]
             if is_tile:
                 self._queues[civ].put(
                     TileUpdates([result_set[x] for x in relevant]))
@@ -188,7 +188,6 @@ class GameState:
             self._queues[user_id].put(UnitUpdate(
                 self._civs[user_id].units[unit_id]))
             if(len(self._civs) == self._num_players):
-                print(self._civs)
                 self._game_started = True
                 self._turn_count += 1
                 player_ids = [x for x in self._civs]
@@ -242,7 +241,6 @@ class GameState:
         :param message: The message object sent from the client.
         """
         civs = list(self._civs.keys())
-        print(civs)
         current_civ_index = civs.index(self._current_player)
         next_civ_index = (current_civ_index + 1) % self._num_players
         next_civ = civs[next_civ_index]
@@ -265,13 +263,14 @@ class GameState:
             return ([], ServerError(4))
 
         unit = self.validate_unit(civ, action.unit)
+        pos = unit.position
         tile = self.validate_tile(action.destination)
 
         city_destroyed_update = self._civs[civ].move_unit_to_hex(unit, tile)
         database_API.Unit.update(self._session, unit.id, x=tile.x,
                                  y=tile.y, z=tile.z)
         result_tiles = self._grid.vision(unit.position, 3)
-        results = [action.unit.position, unit.position] + \
+        results = [pos, unit.position] + \
             (city_destroyed_update if
              city_destroyed_update is not None else [])
         return (results,
@@ -346,8 +345,9 @@ class GameState:
                                                self._civs[civ]._id,
                                                True, 3, tile.x, tile.y,
                                                tile.z)
-        self._civs[civ].build_city_on_tile(unit, city_id)
-        return ([tile], city_id)
+        result_tiles = self._civs[civ].build_city_on_tile(unit, city_id)
+        updated_tiles = [tile] + (result_tiles if result_tiles else [])
+        return (updated_tiles, city_id)
 
     def handle_research_action(self, civ, action):
         """Handle incoming research actions and update game state."""
@@ -427,7 +427,6 @@ class GameState:
 
     def civ_has_workers(self, civ):
         """Check if a civ still has any workers."""
-        print(civ.units)
         for unit in civ.units:
             if isinstance(civ.units[unit], Worker):
                 return True
