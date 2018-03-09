@@ -541,8 +541,8 @@ class Game:
         for hex_point in self._grid.get_hextiles():
             hexagon = self._grid.get_hextile(hex_point)
             hexagon_coords = layout.hex_to_pixel(hexagon)
-            if size[0] + 100 > hexagon_coords[0] > -100 \
-                    and size[1] + 100 > hexagon_coords[1] > -100:
+            if size[0] + 100 > hexagon_coords[0] > -100 and\
+               size[1] + 100 > hexagon_coords[1] > -100:
                 terrain = hexagon.terrain
                 terrain_image = self._scaled_terrain_images[
                     (terrain.terrain_type.value, terrain.biome.value)]
@@ -553,8 +553,8 @@ class Game:
                      hexagon_coords[1] - self._layout.size))
                 if hexagon.civ_id is not None:
                     self._screen.blit(
-                        self._scaled_terrain_images[self._civ_colours
-                                                    [hexagon.civ_id]],
+                        self._scaled_terrain_images
+                        [self._civ_colours[hexagon.civ_id]],
                         (hexagon_coords[0]
                          - math.ceil(self._layout.size * (math.sqrt(3) / 2)),
                          hexagon_coords[1] - self._layout.size))
