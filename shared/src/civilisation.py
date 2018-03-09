@@ -396,7 +396,7 @@ class Civilisation(object):
         :param city: city to spawn worker at
         :param unit_type: Worker, Archer, or Swordsman class
         """
-        position = self.cities[city].no_unit_tile()
+        position = city.no_unit_tile()
         if issubclass(unit_type, Unit) and self.gold >= \
                 unit_type.gold_cost(level) and position is not None:
             unit = unit_type(unit_id, level, position, self)
