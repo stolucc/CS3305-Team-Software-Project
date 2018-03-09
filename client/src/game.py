@@ -21,6 +21,7 @@ from math import floor
 from file_logger import Logger
 from object_select import SelectMenu
 from mapresource import ResourceType
+from music import Music
 
 
 class Game:
@@ -62,8 +63,11 @@ class Game:
         self._hex_size = lambda x: (self.infoObject.current_w // x)
         self._select_menu = SelectMenu(self._screen)
         self._menu_displayed = False
+        self._music_player = Music(
+            "../resources/music/Egmont_Overture_Op_84.mp3")
+        self._music_playing = True
         self._main_menu_options = [("Resume", self.close_main_menu),
-                                   ("Music", self.close_main_menu),
+                                   ("Toggle Music", self.toggle_music),
                                    ("Exit", self.quit)]
         self._main_menu = Menu(self._screen, self._main_menu_options)
         self._main_menu_displayed = False
@@ -97,6 +101,7 @@ class Game:
         self.scale_sprites_to_hex_size()
         self.scale_buildings_to_hex_size()
         self.scale_resources_to_hex_size()
+        self._music_player.play()
         self.draw_map()
         count = 0
         t = threading.Thread(group=None,
@@ -144,6 +149,17 @@ class Game:
         Close the main menu
         """
         self._main_menu_displayed = False
+
+    def toggle_music(self):
+        """
+        Pause the background music.
+        """
+        if self._music_playing:
+            self._music_player.pause()
+            self._music_playing = False
+        else:
+            self._music_player.unpause()
+            self._music_playing = True
 
     def mouse_button_down(self, event):
         """
