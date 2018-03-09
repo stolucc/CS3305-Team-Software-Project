@@ -265,3 +265,15 @@ class WinUpdate():
     def __str__(self):
         """Return a String representation of a WinUpdate object."""
         return "<WinUpdate>"
+
+
+class CivDestroyedUpdate():
+    """An update to inform players if  a civ was destroyed."""
+
+    def __init__(self, player_id):
+        """Initialise a new civ destroyed update object."""
+        self._civ_id = player_id
+
+    def __str__(self):
+        """Return a String representation of a CivDestroyedUpdate object."""
+        return "<CivDestroyedUpdate>"
