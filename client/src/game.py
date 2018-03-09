@@ -343,6 +343,7 @@ class Game:
             self.draw_map()
 
         def build_trade_post():
+            """Build a trade post and redraw the map."""
             self._server_api.build(unit, BuildingType.TRADE_POST)
             self._game_state.get_civ(self._game_state.my_id).calculate_vision()
             self._currently_selected_object = None
@@ -350,6 +351,7 @@ class Game:
             self.draw_map()
 
         def build_uni():
+            """Build a university and redraw the map."""
             self._server_api.build(unit, BuildingType.UNIVERSITY)
             self._game_state.get_civ(self._game_state.my_id).calculate_vision()
             self._currently_selected_object = None
@@ -357,6 +359,7 @@ class Game:
             self.draw_map()
 
         def work_resource():
+            """Work a resource and redraw the map."""
             self._server_api.work_resource(unit)
             self._game_state.get_civ(self._game_state.my_id).calculate_vision()
             self._currently_selected_object = None
