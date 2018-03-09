@@ -21,6 +21,7 @@ class GameState:
         self._turn_count = 1
         self._current_player = None
         self._game_started = False
+        self._orphaned_buildings = []
 
     @property
     def game_id(self):
@@ -111,3 +112,9 @@ class GameState:
     def my_turn(self):
         """Getter True if this is my turn."""
         return self._my_id == self._current_player
+
+    def removed_orphaned_buildings(self, civ):
+        """Remove orphaned buildings."""
+        for building in self._orphaned_buildings:
+            if building._civ_id == civ:
+                building._hex._building = None

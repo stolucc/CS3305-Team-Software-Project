@@ -213,6 +213,9 @@ class ServerAPI:
             for tile in update._tiles:
                 self.handle_tile_update(tile)
             self._game_state.get_civ(self._game_state.my_id).calculate_vision()
+        elif update.__class__.__name__ == "CivDestroyedUpdate":
+            self.handle_civ_destroyed_update(update)
+            self._game_state.removed_orphaned_buildings(update._civ_id)
 
     def handle_start_turn_update(self, update):
         """Handle start turn update."""
@@ -299,6 +302,8 @@ class ServerAPI:
                     coords = building._hex.coords
                     hex_tile = self._game_state._grid.get_hextile(coords)
                     old_tile._building._hex = hex_tile
+                    self._game_state._orphaned_buildings += \
+                        [old_tile._building]
 
         else:
             old_tile._building = None
@@ -307,3 +312,7 @@ class ServerAPI:
         if tile.terrain.resource is not None:
             old_tile.terrain.resource._is_worked = \
                 tile.terrain.resource._is_worked
+
+    def handle_civ_destroyed_update(self, update):
+        """Handle player destroyed update."""
+        self._game_state._civs[update._civ_id].destroy_civilisation()
