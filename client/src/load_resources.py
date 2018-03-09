@@ -87,9 +87,13 @@ class LoadImages:
         }
         self._resource_images = {
             ResourceType.COAL: LoadImages.load_image("map_resources/coal.png"),
+            "W_COAL": LoadImages.load_image("map_resources/coal_worked.png"),
             ResourceType.IRON: LoadImages.load_image("map_resources/iron.png"),
+            "W_IRON": LoadImages.load_image("map_resources/iron_worked.png"),
             ResourceType.GEMS: LoadImages.load_image("map_resources/gems.png"),
-            ResourceType.LOGS: LoadImages.load_image("map_resources/logs.png")
+            "W_GEMS": LoadImages.load_image("map_resources/gems_worked.png"),
+            ResourceType.LOGS: LoadImages.load_image("map_resources/logs.png"),
+            "W_LOGS": LoadImages.load_image("map_resources/logs_worked.png")
         }
 
     def load_terrain_images(self):

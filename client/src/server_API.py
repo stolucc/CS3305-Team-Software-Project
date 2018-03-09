@@ -179,6 +179,16 @@ class ServerAPI:
             self._game_state._civs[self.id].buy_unit(city, unit_type, level,
                                                      unit_id)
 
+    def work_resource(self, unit):
+        """Crate an action to indicate a resource is now being worked."""
+        work_resource_action = action.WorkResourceAction(unit)
+        reply = self.send_action(work_resource_action, self.con)
+        if reply.type == "ServerError":
+            self._log.error(reply.obj)
+            # raise action.ServerError(reply.obj)
+        else:
+            unit.position.terrain.resource.work()
+
     def check_for_updates(self):
         """Ask the server to update the game for a client."""
         check_for_updates_action = action.CheckForUpdates()
@@ -294,3 +304,6 @@ class ServerAPI:
             old_tile._building = None
         old_tile._civ_id = tile._civ_id
         old_tile._city_id = tile._city_id
+        if tile.terrain.resource is not None:
+            old_tile.terrain.resource._is_worked = \
+                tile.terrain.resource._is_worked

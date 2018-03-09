@@ -70,7 +70,8 @@ class SelectMenu(Menu):
         self._options = []
         self._pos = pos
         for i in options:
-            self._options += [MenuOption(i[0], i[1])]
+            if i is not None:
+                self._options += [MenuOption(i[0], i[1])]
 
 
 if __name__ == "__main__":
