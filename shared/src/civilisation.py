@@ -333,7 +333,6 @@ class Civilisation(object):
                 self._logger.debug("Unable to move unit.")
         else:
             self._logger.debug("Tile already has unit.")
-        return False
 
     def destroy_building(self, tile):
         """Remove references for buildings."""
