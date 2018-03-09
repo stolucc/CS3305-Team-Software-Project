@@ -36,7 +36,7 @@ class GameState:
         self._current_player = None
         self._game_started = False
         self._queues = {}
-        self._num_players = 1
+        self._num_players = 2
         self._game_won = False
         self._start_locations = [(4, -2, -2), (-3, -2, 5),
                                  (-2, 4, -2), (4, -5, 1)]
