@@ -422,8 +422,8 @@ class Civilisation(object):
         for resource in list(ResourceType):
             cost[resource] = 0
         for unit in self._units:
-            if unit.level > 1:
-                cost[unit.resource_cost()] += 1
+            if self._units[unit].level > 1:
+                cost[self._units[unit].resource_cost()] += 1
         return cost
 
     def currency_per_turn(self):
