@@ -332,7 +332,7 @@ class GameState:
                                            position.x, position.y,
                                            position.z)
         return ([self._civs[civ].buy_unit(city,
-                                          unit_type, level, unit_id)],
+                 unit_type, level, unit_id).position],
                 unit_id)
 
     def handle_build_city_action(self, civ, action):

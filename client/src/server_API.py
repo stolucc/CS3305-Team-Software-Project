@@ -236,6 +236,8 @@ class ServerAPI:
         """Handle unit update."""
         civ = self._game_state._civs[update._unit._civ_id]
         unit = update._unit
+        print(unit)
+        print(unit._id in civ._units)
         if unit._id in civ._units:
             if unit._health <= 0:
                 del civ._units[unit._id]
