@@ -313,7 +313,7 @@ class Civilisation(object):
                 pos.unit = None
                 unit.actions -= 1
                 if tile.city_id is not None and isinstance(unit, Soldier)\
-                        and tile.civ_id != self._id:
+                        and tile.civ_id != unit._civ_id:
                     return self.destroy_city(tile)
             else:
                 self._logger.debug("Unable to move unit.")
@@ -376,7 +376,8 @@ class Civilisation(object):
         """Check if unit is dead and remove references if True."""
         if unit.health == 0:
             unit.position.unit = None
-            del self.units[unit.id]
+            if unit.id in self.units:
+                del self.units[unit.id]
 
     def buy_unit(self, city, unit_type, level, unit_id):
         """
