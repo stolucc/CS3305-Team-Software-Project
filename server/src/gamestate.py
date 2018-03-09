@@ -427,8 +427,9 @@ class GameState:
 
     def civ_has_workers(self, civ):
         """Check if a civ still has any workers."""
+        print(civ.units)
         for unit in civ.units:
-            if isinstance(unit, Worker):
+            if isinstance(civ.units[unit], Worker):
                 return True
         return False
 
