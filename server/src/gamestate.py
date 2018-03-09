@@ -414,7 +414,9 @@ class GameState:
         to_be_removed = []
         for civ_id in self._civs:
             civ = self._civs[civ_id]
-            if not (self.civ_has_workers(civ) or self.civ_has_cities(civ)):
+            print(self.civ_has_workers(civ))
+            print(self.civ_has_cities(civ))
+            if not (self.civ_has_workers(civ) and self.civ_has_cities(civ)):
                 to_be_removed += [civ_id]
         for removed in to_be_removed:
             self._civs[removed].destroy_civilisation()
