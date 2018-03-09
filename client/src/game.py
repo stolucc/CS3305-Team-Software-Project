@@ -80,7 +80,6 @@ class Game:
             self._load_images.load_health_bar_images().copy()
         self._scaled_resource_images = \
             self._load_images.load_resource_images().copy()
-        self._currently_selected_unit = None
         self._currently_selected_object = None
         self._currently_selected_tile = None
         self._current_available_moves = {}
@@ -247,10 +246,10 @@ class Game:
                 self._currently_selected_object = None
                 self._current_available_moves = {}
                 self._currently_selected_tile = None
-            elif isinstance(self._currently_selected_unit, Soldier) \
-                    and hexagon.unit != self._currently_selected_unit \
+            elif isinstance(self._currently_selected_object, Soldier) \
+                    and hexagon.unit != self._currently_selected_object \
                     and hexagon.unit is not None:
-                self._server_api.attack(self._currently_selected_unit,
+                self._server_api.attack(self._currently_selected_object,
                                         hexagon.unit)
             elif hexagon.unit not in [None, self._currently_selected_object] \
                     and hexagon.unit.civ_id == self._game_state.my_id:
@@ -375,9 +374,9 @@ class Game:
         if self._menu_displayed is False:
             self._menu_displayed = True
             self._select_menu.set_options(click, [
-                ("Buy Archer", buy_archer()),
-                ("Buy Swordsman", buy_swordsman()),
-                ("Buy Worker", buy_worker())])
+                ("Buy Archer", buy_archer),
+                ("Buy Swordsman", buy_swordsman),
+                ("Buy Worker", buy_worker)])
 
     def scale_images_to_hex_size(self):
         """
